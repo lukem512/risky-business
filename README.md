@@ -21,4 +21,4 @@ BZ r1 im1
 NOP
 ````
 
-The instruction set also includes a ````PRNT``` psuedo-instruction that will output the contents of a register operand.
+The instruction set also includes a ```PRNT``` psuedo-instruction that will output the contents of a register operand.
