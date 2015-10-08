@@ -11,8 +11,11 @@
 
 std::string source = 
 	"LDC r1 14\n" \
+	"PRNT r1\n" \
 	"LDC r2 6\n" \
-	"ADD r1 r1 r2";
+	"PRNT r2\n" \
+	"ADD r1 r1 r2\n" \
+	"PRNT r1";
 
 int main(int argc, char** argv){
 	// Seed the random function

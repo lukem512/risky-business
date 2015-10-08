@@ -16,26 +16,33 @@ void DecodeUnit::decode(Register *ir, ExecutionUnit* eu) {
 		#ifdef DEBUG
 			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << rtos(data.r2) << " " << rtos(data.r3) << std::endl;
 		#endif
-		eu->issue(instr.opcode, data.r1, data.r2, data.r3);
+		eu->issue(data.opcode, data.r1, data.r2, data.r3);
 	} else
 	if (instr.opcode & OP_MASK_ORI) { // All register, immediate operand instructions are 01xx
 		instruction_ori_t data = *(instruction_ori_t *) &ir->contents;
 		#ifdef DEBUG
 			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << hexify(data.im1) << std::endl;
 		#endif
-		eu->issue(instr.opcode, data.r1, data.im1);
+		eu->issue(data.opcode, data.r1, data.im1);
+	} else
+	if (instr.opcode == OP_PRNT) { // PRNT is 0001
+		instruction_or_t data = *(instruction_or_t *) &ir->contents;
+		#ifdef DEBUG
+			std::cout << optos(data.opcode) << " " << rtos(data.r1) << std::endl;
+		#endif
+		eu->issue(data.opcode, (uint8_t) data.r1);
 	} else
 	if (instr.opcode == OP_NOP) { // NOP is 0000
 		#ifdef DEBUG
 			std::cout << optos(instr.opcode) << std::endl;
 		#endif
 		eu->issue(instr.opcode);
-	} else // B is 0011
-	{
+	} else
+	{ // B is 0011
 		instruction_oi_t data = *(instruction_oi_t *) &ir->contents;
 		#ifdef DEBUG
 			std::cout << optos(data.opcode) << " " << hexify(data.im1) << std::endl;
 		#endif
-		eu->issue(instr.opcode, data.im1);
+		eu->issue(data.opcode, (int16_t) data.im1);
 	}
 }

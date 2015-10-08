@@ -67,6 +67,9 @@ std::string optos(uint8_t opcode) {
 		case OP_BZ:
 		return "BZ";
 
+		case OP_PRNT:
+		return "PRNT";
+
 		case OP_UNKNOWN:
 		return "???";
 
@@ -79,16 +82,17 @@ std::string optos(uint8_t opcode) {
 
 uint8_t stoop(std::string opcode) {
 	// TODO: there must be a pre-processor macro that I can use for this...
-	if (opcode == "NOP") return OP_NOP;
-	if (opcode == "ADD") return OP_ADD;
-	if (opcode == "SUB") return OP_SUB;
-	if (opcode == "MUL") return OP_MUL;
-	if (opcode == "CMP") return OP_CMP;
-	if (opcode == "LD")  return OP_LD;
-	if (opcode == "STR") return OP_STR;
-	if (opcode == "LDC") return OP_LDC;
-	if (opcode == "B")   return OP_B;
-	if (opcode == "BZ")  return OP_BZ;
+	if (opcode == "NOP")  return OP_NOP;
+	if (opcode == "ADD")  return OP_ADD;
+	if (opcode == "SUB")  return OP_SUB;
+	if (opcode == "MUL")  return OP_MUL;
+	if (opcode == "CMP")  return OP_CMP;
+	if (opcode == "LD")   return OP_LD;
+	if (opcode == "STR")  return OP_STR;
+	if (opcode == "LDC")  return OP_LDC;
+	if (opcode == "B")    return OP_B;
+	if (opcode == "BZ")   return OP_BZ;
+	if (opcode == "PRNT") return OP_PRNT;
 	return OP_UNKNOWN;
 }
 

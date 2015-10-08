@@ -30,7 +30,7 @@ typedef struct {
 	uint8_t opcode : 4;
 	uint8_t r1     : 4;
 	uint8_t r2     : 4;
-	uint16_t im1   : 16;
+	int16_t im1   : 16;
 	uint8_t        : 4;
 } instruction_orri_t;
 
@@ -38,14 +38,21 @@ typedef struct {
 typedef struct {
 	uint8_t opcode : 4;
 	uint8_t r1     : 4;
-	uint16_t im1   : 16;
+	int16_t im1   : 16;
 	uint8_t        : 8;
 } instruction_ori_t;
+
+// A single register operand
+typedef struct {
+	uint8_t opcode : 4;
+	uint8_t r1     : 4;
+	uint32_t       : 24;
+} instruction_or_t;
 
 // A single immediate operand
 typedef struct {
 	uint8_t opcode : 4;
-	uint16_t im1   : 16;
+	int16_t im1   : 16;
 	uint16_t       : 12;
 } instruction_oi_t;
 

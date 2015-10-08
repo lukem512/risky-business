@@ -11,6 +11,10 @@
 // No operation
 #define OP_NOP	0
 
+// Print a register
+// Psuedo-operation
+#define OP_PRNT 1
+
 // Arithmetic
 // Dst, r1, r2
 #define OP_ADD	8

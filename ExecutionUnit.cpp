@@ -66,6 +66,12 @@ void ExecutionUnit::issue(uint8_t opcode, uint8_t r1, int16_t im1) {
 	this->im1 = im1;
 }
 
+void ExecutionUnit::issue(uint8_t opcode, uint8_t r1) {
+	type = EU_ISSUE_OR;
+	this->opcode = opcode;
+	this->r1 = r1;
+}
+
 void ExecutionUnit::issue(uint8_t opcode, int16_t im1) {
 	type = EU_ISSUE_OI;
 	this->opcode = opcode;
@@ -122,6 +128,10 @@ void ExecutionUnit::execute(Register* pc, std::vector<Register>* r, std::vector<
 			}
 		break;
 
+		case OP_PRNT:
+			std::cout << rtos(r1) << " contains " << hexify(r->at(r1).contents) << std::endl;
+		break;
+
 		case OP_NOP:
 		#ifdef DEBUG
 			std::cout << "No operation" << std::endl;
@@ -129,7 +139,9 @@ void ExecutionUnit::execute(Register* pc, std::vector<Register>* r, std::vector<
 		break;
 
 		default:
-			std::cerr << "Unknown opcode encountered" << std::endl;
+		#ifdef DEBUG
+			std::cerr << "Unknown opcode encountered (" << hexify(opcode) << ")" << std::endl;
+		#endif
 		break;
 	}
 }
