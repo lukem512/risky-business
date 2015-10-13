@@ -59,6 +59,13 @@ void ExecutionUnit::issue(uint8_t opcode, uint8_t r1, uint8_t r2, int16_t im1) {
 	this->im1 = im1;
 }
 
+void ExecutionUnit::issue(uint8_t opcode, uint8_t r1, uint8_t r2) {
+	type = EU_ISSUE_ORR;
+	this->opcode = opcode;
+	this->r1 = r1;
+	this->r2 = r2;
+}
+
 void ExecutionUnit::issue(uint8_t opcode, uint8_t r1, int16_t im1) {
 	type = EU_ISSUE_ORI;
 	this->opcode = opcode;
@@ -83,7 +90,7 @@ void ExecutionUnit::issue(uint8_t opcode) {
 	this->opcode = opcode;
 }
 
-void ExecutionUnit::execute(Register* pc, std::vector<Register>* r, std::vector<MemoryLocation>* m) {
+void ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<MemoryLocation>* m) {
 	switch (opcode) {
 		case OP_ADD:
 			r->at(r1).contents = r->at(r2).contents + r->at(r3).contents;
@@ -104,11 +111,13 @@ void ExecutionUnit::execute(Register* pc, std::vector<Register>* r, std::vector<
 		break;
 
 		case OP_LD:
+			// TODO: use a LoadStoreUnit
 			r->at(r1).contents = m->at(im1).contents;
 		break;
 
 		case OP_STR:
-			m->at(im1).contents = r->at(r1).contents;
+			// TODO: use a LoadStoreUnit
+			m->at(r->at(r1).contents).contents = r->at(r2).contents;
 		break;
 
 		case OP_LDC:
@@ -124,6 +133,12 @@ void ExecutionUnit::execute(Register* pc, std::vector<Register>* r, std::vector<
 
 		case OP_BZ:
 			if (r->at(r1).contents == 0) {
+				pc->contents = pc->contents + im1;
+			}
+		break;
+		
+		case OP_BLTZ:
+			if (r->at(r1).contents < 0) {
 				pc->contents = pc->contents + im1;
 			}
 		break;

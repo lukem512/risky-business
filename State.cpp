@@ -53,13 +53,13 @@ void State::tick() {
 		case STATE_DECODE:
 			// Decode the instruction from the PC
 			// and feed it into the EU
-			du.decode(&ir, &eu);
+			du.tick(&ir, &eu);
 			state = STATE_EXECUTE;
 		break;
 
 		case STATE_EXECUTE:
 			// Poke the EU into life
-			eu.execute(&pc, &registerFile, &memory);
+			eu.tick(&pc, &registerFile, &memory);
 			state = STATE_FETCH;
 		break;
 

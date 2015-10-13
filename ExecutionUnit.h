@@ -11,9 +11,10 @@
 
 #define EU_ISSUE_ORRR 1
 #define EU_ISSUE_ORRI 2
-#define EU_ISSUE_ORI  3
-#define EU_ISSUE_OR   4
-#define EU_ISSUE_OI   5
+#define EU_ISSUE_ORR  3
+#define EU_ISSUE_ORI  4
+#define EU_ISSUE_OR   5
+#define EU_ISSUE_OI   6
 #define EU_ISSUE_O    0
 
 class ExecutionUnit {
@@ -27,11 +28,12 @@ public:
 	std::string toString();
 	void issue(uint8_t opcode, uint8_t r1, uint8_t r2, uint8_t r3);
 	void issue(uint8_t opcode, uint8_t r1, uint8_t r2, int16_t im1);
+	void issue(uint8_t opcode, uint8_t r1, uint8_t r2);
 	void issue(uint8_t opcode, uint8_t r1, int16_t im1);
 	void issue(uint8_t opcode, uint8_t r1);
 	void issue(uint8_t opcode, int16_t im1);
 	void issue(uint8_t opcode);
-	void execute(Register* pc, std::vector<Register>* r,
+	void tick(Register* pc, std::vector<Register>* r,
 	  std::vector<MemoryLocation>* m);
 };
 

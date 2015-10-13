@@ -6,22 +6,32 @@
 
 #include "DecodeUnit.h"
 
-void DecodeUnit::decode(Register *ir, ExecutionUnit* eu) {
+#define DEBUG 1
+
+void DecodeUnit::tick(Register *ir, ExecutionUnit* eu) {
 	// Cast to struct to decode bits
 	instruction_t instr = *(instruction_t*) &ir->contents;
 
 	// Decode operands
+	// TODO - everything is now being decoded as ORR
+	if (instr.opcode & OP_MASK_ORR) { // All 2-register operand instruction are 11xx
+		instruction_orr_t data = *(instruction_orr_t *) &ir->contents;
+		#ifdef DEBUG
+			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << rtos(data.r2) << " (ORR)" << std::endl;
+		#endif
+		eu->issue(data.opcode, data.r1, data.r2);
+	} else 
 	if (instr.opcode & OP_MASK_ORRR) { // All 3-register operand instructions are 10xx
 		instruction_orrr_t data = *(instruction_orrr_t *) &ir->contents;
 		#ifdef DEBUG
-			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << rtos(data.r2) << " " << rtos(data.r3) << std::endl;
+			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << rtos(data.r2) << " " << rtos(data.r3) << " (ORRR)" << std::endl;
 		#endif
 		eu->issue(data.opcode, data.r1, data.r2, data.r3);
 	} else
 	if (instr.opcode & OP_MASK_ORI) { // All register, immediate operand instructions are 01xx
 		instruction_ori_t data = *(instruction_ori_t *) &ir->contents;
 		#ifdef DEBUG
-			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << hexify(data.im1) << std::endl;
+			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << hexify(data.im1) << " (ORI)" << std::endl;
 		#endif
 		eu->issue(data.opcode, data.r1, data.im1);
 	} else
