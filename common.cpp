@@ -67,6 +67,9 @@ std::string optos(uint8_t opcode) {
 		case OP_BZ:
 		return "BZ";
 
+		case OP_BLTZ:
+		return "BLTZ";
+
 		case OP_PRNT:
 		return "PRNT";
 
@@ -95,6 +98,7 @@ uint8_t stoop(std::string opcode) {
 	if (opcode == "LDC")  return OP_LDC;
 	if (opcode == "B")    return OP_B;
 	if (opcode == "BZ")   return OP_BZ;
+	if (opcode == "BLTZ")   return OP_BLTZ;
 	if (opcode == "PRNT") return OP_PRNT;
 	if (opcode == "HLT") return OP_HLT;
 	return OP_UNKNOWN;

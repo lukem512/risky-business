@@ -12,8 +12,8 @@ void printUnhandledTypeError(int type) {
 	std::cerr << "Unhandled instruction type encountered: " << type << std::endl;
 }
 
-void printInvalidArgumentCountError(std::string instr, int got, int expected) {
-	std::cerr << "Incorrect number of arguments specified for opcode " << instr << ". Expected " << expected << " and got " << got << "." << std::endl;
+void printInvalidArgumentCountError(std::string instr, int got, int expected, int type) {
+	std::cerr << "Incorrect number of arguments specified for opcode " << instr << ", decoded as type " << type << ". Expected " << expected << " and got " << got << "." << std::endl;
 }
 
 int determineArguments(instruction_t instr) {
@@ -36,7 +36,7 @@ int determineArguments(instruction_t instr) {
 		return EU_ISSUE_OR;
 	} else // B is 0011
 	{
-		EU_ISSUE_OI;
+		return EU_ISSUE_OI;
 	}
 }
 
@@ -50,9 +50,8 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 		// Store args, temporarily, as strings
 		std::string opcode, arg1, arg2, arg3;
 
-		// TODO - if the line begins with a '%', discard it as a comment
+		// If the line begins with a '%', discard it as a comment
 		if (line.at(0) == '%') {
-			std::cout << "Skipping commented line: " << line << std::endl;
 			continue;
 		}
 
@@ -135,7 +134,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 		switch(type) {
 			case EU_ISSUE_ORRR:
 				if (numArgs != 3) {
-					printInvalidArgumentCountError(opcode, numArgs, 3);
+					printInvalidArgumentCountError(opcode, numArgs, 3, EU_ISSUE_ORRR);
 					break;
 				}
 				instruction_orrr_t instr_orrr;
@@ -149,7 +148,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 
 			case EU_ISSUE_ORI:
 				if (numArgs != 2) {
-					printInvalidArgumentCountError(opcode, numArgs, 2);
+					printInvalidArgumentCountError(opcode, numArgs, 2, EU_ISSUE_ORI);
 					break;
 				}
 				instruction_ori_t instr_ori;
@@ -162,7 +161,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 
 			case EU_ISSUE_ORR:
 				if (numArgs != 2) {
-					printInvalidArgumentCountError(opcode, numArgs, 2);
+					printInvalidArgumentCountError(opcode, numArgs, 2, EU_ISSUE_ORR);
 					break;
 				}
 				instruction_orr_t instr_orr;
@@ -175,7 +174,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 
 			case EU_ISSUE_OR:
 				if (numArgs != 1) {
-					printInvalidArgumentCountError(opcode, numArgs, 1);
+					printInvalidArgumentCountError(opcode, numArgs, 1, EU_ISSUE_OR);
 					break;
 				}
 				instruction_or_t instr_or;
@@ -187,7 +186,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 
 			case EU_ISSUE_OI:
 				if (numArgs != 1) {
-					printInvalidArgumentCountError(opcode, numArgs, 1);
+					printInvalidArgumentCountError(opcode, numArgs, 1, EU_ISSUE_OI);
 					break;
 				}
 				instruction_oi_t instr_oi;
@@ -199,7 +198,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 
 			case EU_ISSUE_O:
 				if (numArgs != 0) {
-					printInvalidArgumentCountError(opcode, numArgs, 0);
+					printInvalidArgumentCountError(opcode, numArgs, 0, EU_ISSUE_O);
 					break;
 				}
 				instruction_o_t instr_o;
