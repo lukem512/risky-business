@@ -4,6 +4,8 @@
 LDC r0 0
 % max = 10
 LDC r1 10
+% incr = 1
+LDC r2 1
 % cur = 1
 LDC r10 1
 % prev = 1
@@ -13,10 +15,11 @@ PRNT r0
 % while (i < 10)
 CMP r2 r0 r10
 BLTZ r2 1
-B 4
+B 5
 PRNT r10
 ADD r10 r10 r11
 % MOV r11 r10
 ADD r11 r10 0
-B -7
+ADD r0 r0 r2
+B -8
 HLT
