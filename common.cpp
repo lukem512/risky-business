@@ -34,6 +34,18 @@ std::string hexify(uint32_t data) {
   	return out.str();
 }
 
+std::string hexify(int16_t data) {
+	std::ostringstream out;  
+  	out << std::hex << std::setw(sizeof(data)*2) << std::setfill('0') << data;
+  	return out.str();
+}
+
+std::string hexify(uint8_t data) {
+	std::ostringstream out;  
+  	out << std::hex << std::setw(sizeof(data)*2) << std::setfill('0') << data;
+  	return out.str();
+}
+
 std::string optos(uint8_t opcode) {
 	// TODO: there must be a pre-processor macro that I can use for this...
 	switch (opcode) {
