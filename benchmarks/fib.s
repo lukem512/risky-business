@@ -16,10 +16,14 @@ PRNT r0
 CMP r2 r0 r10
 BLTZ r2 1
 B 5
+% print(cur)
 PRNT r10
+% cur = cur + prev
 ADD r10 r10 r11
+% prev = cur
 % MOV r11 r10
 ADD r11 r10 0
+% i = i + incr
 ADD r0 r0 r2
 B -8
 HLT
