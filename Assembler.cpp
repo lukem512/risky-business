@@ -192,7 +192,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				instruction_oi_t instr_oi;
 				memset(&instr_oi, 0, sizeof(instruction_oi_t));
 				instr_oi.opcode = stoop(opcode);
-				instr_oi.im1 = stor(arg1);
+				instr_oi.im1 = strtoi(arg1);
 				memcpy(&packedInstr, &instr_oi, sizeof(packedInstr));
 			break;
 
