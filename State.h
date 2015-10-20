@@ -14,7 +14,7 @@
 
 using namespace std;
 
-#define DEFAULT_MEMORY_SIZE 32
+#define DEFAULT_MEMORY_SIZE 256
 #define DEFAULT_REGISTER_COUNT 16
 
 #define STATE_FETCH 1

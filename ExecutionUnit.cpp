@@ -121,7 +121,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 
 		case OP_STR:
 			// TODO: use a LoadStoreUnit
-			// For now, the memory access is i
+			// For now, the memory access is instant
 			m->at(r->at(r1).contents).contents = r->at(r2).contents;
 		break;
 

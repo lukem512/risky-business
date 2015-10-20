@@ -50,6 +50,12 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 		// Store args, temporarily, as strings
 		std::string opcode, arg1, arg2, arg3;
 
+		// TODO - if the line begins with a '%', discard it as a comment
+		if (line.at(0) == '%') {
+			std::cout << "Skipping commented line: " << line << std::endl;
+			continue;
+		}
+
 		// Extract the opcode and count operands
 		std::string operand;
 		int numArgs = 0;
