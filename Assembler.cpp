@@ -17,10 +17,16 @@ void printInvalidArgumentCountError(std::string instr, int got, int expected) {
 }
 
 int determineArguments(instruction_t instr) {
-	if (instr.opcode & OP_MASK_ORRR) { // All 3-register operand instructions are 10xx
+	if (instr.opcode == OP_HLT) {
+		return EU_ISSUE_O;
+	} else
+	if (IS_ORR(instr.opcode)) { // All 2-register operand instruction are 11xx
+		return EU_ISSUE_ORR;
+	} else
+	if (IS_ORRR(instr.opcode)) { // All 3-register operand instructions are 10xx
 		return EU_ISSUE_ORRR;
 	} else
-	if (instr.opcode & OP_MASK_ORI) { // All register, immediate operand instructions are 01xx
+	if (IS_ORI(instr.opcode)) { // All register, immediate operand instructions are 01xx
 		return EU_ISSUE_ORI;
 	} else
 	if (instr.opcode == OP_NOP) { // NOP is 0000
@@ -70,6 +76,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 						switch (type) {
 							case EU_ISSUE_ORRR:
 							case EU_ISSUE_ORI:
+							case EU_ISSUE_ORR:
 							case EU_ISSUE_OR:
 								arg1 = operand;
 							break;
@@ -88,6 +95,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 						switch (type) {
 							case EU_ISSUE_ORRR:
 							case EU_ISSUE_ORI:
+							case EU_ISSUE_ORR:
 								arg2 = operand;
 							break;
 
@@ -144,6 +152,19 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				instr_ori.r1 = stor(arg1);
 				instr_ori.im1 = strtoi(arg2);
 				memcpy(&packedInstr, &instr_ori, sizeof(packedInstr));
+			break;
+
+			case EU_ISSUE_ORR:
+				if (numArgs != 2) {
+					printInvalidArgumentCountError(opcode, numArgs, 2);
+					break;
+				}
+				instruction_orr_t instr_orr;
+				memset(&instr_orr, 0, sizeof(instruction_orr_t));
+				instr_orr.opcode = stoop(opcode);
+				instr_orr.r1 = stor(arg1);
+				instr_orr.r2 = stor(arg2);
+				memcpy(&packedInstr, &instr_orr, sizeof(packedInstr));
 			break;
 
 			case EU_ISSUE_OR:

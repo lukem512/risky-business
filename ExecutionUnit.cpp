@@ -90,7 +90,10 @@ void ExecutionUnit::issue(uint8_t opcode) {
 	this->opcode = opcode;
 }
 
-void ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<MemoryLocation>* m) {
+// Returns true when state should be halted
+bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<MemoryLocation>* m) {
+	bool halted = false;
+
 	switch (opcode) {
 		case OP_ADD:
 			r->at(r1).contents = r->at(r2).contents + r->at(r3).contents;
@@ -112,11 +115,13 @@ void ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 
 		case OP_LD:
 			// TODO: use a LoadStoreUnit
+			// For now, the memory access is instant
 			r->at(r1).contents = m->at(im1).contents;
 		break;
 
 		case OP_STR:
 			// TODO: use a LoadStoreUnit
+			// For now, the memory access is i
 			m->at(r->at(r1).contents).contents = r->at(r2).contents;
 		break;
 
@@ -147,6 +152,13 @@ void ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 			std::cout << rtos(r1) << " contains " << hexify(r->at(r1).contents) << std::endl;
 		break;
 
+		case OP_HLT:
+		#ifdef DEBUG
+			std::cout << "Halting execution" << std::endl;
+		#endif
+			halted = true;
+		break;
+
 		case OP_NOP:
 		#ifdef DEBUG
 			std::cout << "No operation" << std::endl;
@@ -159,4 +171,6 @@ void ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 		#endif
 		break;
 	}
+
+	return halted;
 }

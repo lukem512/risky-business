@@ -33,7 +33,7 @@ public:
 	void issue(uint8_t opcode, uint8_t r1);
 	void issue(uint8_t opcode, int16_t im1);
 	void issue(uint8_t opcode);
-	void tick(Register* pc, std::vector<Register>* r,
+	bool tick(Register* pc, std::vector<Register>* r,
 	  std::vector<MemoryLocation>* m);
 };
 

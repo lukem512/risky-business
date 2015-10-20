@@ -70,6 +70,9 @@ std::string optos(uint8_t opcode) {
 		case OP_PRNT:
 		return "PRNT";
 
+		case OP_HLT:
+		return "HLT";
+
 		case OP_UNKNOWN:
 		return "???";
 
@@ -93,12 +96,13 @@ uint8_t stoop(std::string opcode) {
 	if (opcode == "B")    return OP_B;
 	if (opcode == "BZ")   return OP_BZ;
 	if (opcode == "PRNT") return OP_PRNT;
+	if (opcode == "HLT") return OP_HLT;
 	return OP_UNKNOWN;
 }
 
 std::string rtos(uint8_t reg) {
 	std::ostringstream out;
-	out << "r" << std::to_string(reg);
+	out << "r" << std::to_string((long long unsigned int) reg);
 	return out.str();
 }
 

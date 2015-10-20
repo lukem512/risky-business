@@ -53,7 +53,7 @@ public:
 	State();
 	State(uint32_t memorySize, uint8_t registerCount);
 	void print();
-	void tick();
+	bool tick();
 };
 
 #endif

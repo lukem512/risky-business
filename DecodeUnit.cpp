@@ -6,13 +6,19 @@
 
 #include "DecodeUnit.h"
 
-#define DEBUG 1
+#define DEBUG
 
 void DecodeUnit::tick(Register *ir, ExecutionUnit* eu) {
 	// Cast to struct to decode bits
 	instruction_t instr = *(instruction_t*) &ir->contents;
 
 	// Decode operands
+	if (instr.opcode == OP_HLT) { // HLT is 1110
+		#ifdef DEBUG
+			std::cout << optos(instr.opcode) << std::endl;
+		#endif
+		eu->issue(instr.opcode);
+	} else
 	if (IS_ORR(instr.opcode)) { // All 2-register operand instruction are 11xx
 		instruction_orr_t data = *(instruction_orr_t *) &ir->contents;
 		#ifdef DEBUG

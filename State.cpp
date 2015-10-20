@@ -42,7 +42,9 @@ void State::print() {
 	cout << endl;
 }
 
-void State::tick() {
+bool State::tick() {
+	bool halted = false;
+	
 	switch (state) {
 		case STATE_FETCH:
 			ir.contents = memory.at(pc.contents).contents;
@@ -59,13 +61,19 @@ void State::tick() {
 
 		case STATE_EXECUTE:
 			// Poke the EU into life
-			eu.tick(&pc, &registerFile, &memory);
+			if (eu.tick(&pc, &registerFile, &memory)) {
+				// Execution is halted
+				halted = true;
+			}
 			state = STATE_FETCH;
 		break;
 
 		default:
 			// How has this happened?
 			cerr << "Something strange has happened. State has reached an unknown location." << endl;
+			halted = true;
 		break;
 	}
+
+	return halted;
 }

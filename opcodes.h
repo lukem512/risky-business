@@ -56,6 +56,9 @@
 // BGTZ = !(BZ || BLTZ)
 // BGTEZ = !BLTZ
 
+// Halt processing
+#define OP_HLT 14
+
 // Unknown operation
 #define OP_UNKNOWN 15
 

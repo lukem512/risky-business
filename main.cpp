@@ -15,7 +15,8 @@ std::string source =
 	"LDC r2 6\n" \
 	"PRNT r2\n" \
 	"ADD r1 r1 r2\n" \
-	"PRNT r1";
+	"PRNT r1\n" \
+	"HLT";
 
 int main(int argc, char** argv){
 	// Seed the random function
@@ -38,7 +39,10 @@ int main(int argc, char** argv){
     }
 
 	while (1) {
-		s.tick();
+		if (s.tick()) {
+			// Execution halted
+			break;
+		}
 	}
 
 	return 0;
