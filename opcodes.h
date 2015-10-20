@@ -7,7 +7,11 @@
 // Operand type masks
 #define OP_MASK_ORRR 	8
 #define OP_MASK_ORI		4
-#define OP_MASK_ORR 	12
+
+// Macros for determining operand types
+#define IS_ORRR(x) (x & OP_MASK_ORRR)
+#define IS_ORI(x) (x & OP_MASK_ORI)
+#define IS_ORR(x) (x & OP_MASK_ORRR && x & OP_MASK_ORI)
 
 // No operation
 #define OP_NOP	0
