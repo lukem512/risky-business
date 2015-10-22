@@ -31,7 +31,7 @@
 #define OP_CMP	11
 
 // Memory load
-// im1, r1
+// r1, im1
 #define OP_LD	4
 
 // Memory store
@@ -50,11 +50,6 @@
 // Supplied with register to test and immediate offset
 #define OP_BZ	6
 #define OP_BLTZ 7
-
-// BNZ = !BZ
-// BLTEZ = BZ || BLTZ
-// BGTZ = !(BZ || BLTZ)
-// BGTEZ = !BLTZ
 
 // Halt processing
 #define OP_HLT 14

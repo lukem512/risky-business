@@ -17,8 +17,10 @@ STR im1 r1
 
 B im1
 BZ r1 im1
+BLTZ r1 im1
 
 NOP
+HLT
 ````
 
 The instruction set also includes a ```PRNT``` psuedo-instruction that will output the contents of a register operand.
