@@ -13,6 +13,14 @@
 
 using namespace std;
 
+ExecutionUnit::ExecutionUnit() {
+	// Initialise arguments to 0
+	r1 = 0;
+	r2 = 0;
+	r3 = 0;
+	im1 = 0;
+}
+
 std::string ExecutionUnit::toString() {
 
 	ostringstream ss;
@@ -95,22 +103,33 @@ void ExecutionUnit::issue(uint8_t opcode) {
 // Returns true when state should be halted
 bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<MemoryLocation>* m) {
 	bool halted = false;
-	int32_t rval;
+
+	// Signed value representations
+	int32_t r1val_s, r2val_s, r3val_s;
+	r1val_s = r->at(r1).contents;
+	r2val_s = r->at(r2).contents;
+	r3val_s = r->at(r3).contents;
 
 	switch (opcode) {
 		case OP_ADD:
 		#ifdef DEBUG
-			std::cout << "Adding " << r->at(r2).contents << " and " << r->at(r3).contents << std::endl;
+			std::cout << "Adding " << r2val_s << " and " << r3val_s << std::endl;
 		#endif
-			r->at(r1).contents = r->at(r2).contents + r->at(r3).contents;
+			r->at(r1).contents = (uint32_t) (r2val_s + r3val_s);
 		break;
 
 		case OP_SUB:
-			r->at(r1).contents = r->at(r2).contents - r->at(r3).contents;
+		#ifdef DEBUG
+			std::cout << "Subtracting " << r2val_s << " and " << r3val_s << std::endl;
+		#endif
+			r->at(r1).contents = (uint32_t) (r2val_s - r3val_s);
 		break;
 
 		case OP_MUL:
-			r->at(r1).contents = r->at(r2).contents * r->at(r3).contents;
+		#ifdef DEBUG
+			std::cout << "Multiplying " << r2val_s << " and " << r3val_s << std::endl;
+		#endif
+			r->at(r1).contents = (uint32_t) (r2val_s * r3val_s);
 		break;
 
 		case OP_CMP:
@@ -152,11 +171,10 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 		break;
 		
 		case OP_BLTZ:
-			rval = r->at(r1).contents;
 			#ifdef DEBUG
-				std::cout << "BLTZ " << std::to_string((long long int)rval) << " " << std::to_string((long long int)im1) << std::endl;
+				std::cout << "BLTZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
 			#endif
-			if (rval < 0) {
+			if (r1val_s < 0) {
 				#ifdef DEBUG
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				#endif
@@ -166,10 +184,11 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 
 		case OP_PRNT:
 		#ifdef DEBUG
-			std::cout << "Printing register " << rtos(r1) << std::endl;
+			std::cout << "Printing register " << rtos(r1) << " (unsigned: " <<
+				std::to_string((long long unsigned int) r->at(r1).contents) <<
+				", signed: " << std::to_string((long long int) r1val_s) << ")" << std::endl;
 		#endif
-			std::cout << std::to_string((long long unsigned int)r->at(r1).contents) << std::endl;
-			// std::cout << hexify(r->at(r1).contents) << std::endl;
+			std::cout << hexify(r->at(r1).contents) << std::endl;
 		break;
 
 		case OP_HLT:
