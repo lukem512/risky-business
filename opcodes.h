@@ -31,8 +31,8 @@
 #define OP_CMP	11
 
 // Memory load
-// r1, im1
-#define OP_LD	4
+// r1, r2
+#define OP_LD	13
 
 // Memory store
 // r1, r2
