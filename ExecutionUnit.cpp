@@ -141,12 +141,18 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 		case OP_LD:
 			// TODO: use a LoadStoreUnit
 			// For now, the memory access is instant
-			r->at(r1).contents = m->at(im1).contents;
+		#ifdef DEBUG
+			std::cout << rtos(r1) << " = " << "M[" << std::to_string((long long unsigned int)r->at(r2).contents) << "] (" << std::to_string((long long unsigned int)m->at(r->at(r2).contents).contents) << ")" << std::endl;
+		#endif
+			r->at(r1).contents = m->at(r->at(r2).contents).contents;
 		break;
 
 		case OP_STR:
 			// TODO: use a LoadStoreUnit
 			// For now, the memory access is instant
+		#ifdef DEBUG
+			std::cout << "M[" << std::to_string((long long unsigned int)r->at(r1).contents) << "] = " << std::to_string((long long unsigned int)r->at(r2).contents) << std::endl;
+		#endif
 			m->at(r->at(r1).contents).contents = r->at(r2).contents;
 		break;
 
