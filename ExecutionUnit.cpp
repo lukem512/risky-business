@@ -9,7 +9,7 @@
 #include "opcodes.h"
 #include "common.h"
 
-#define DEBUG
+//#define DEBUG
 
 using namespace std;
 
@@ -99,6 +99,9 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 
 	switch (opcode) {
 		case OP_ADD:
+		#ifdef DEBUG
+			std::cout << "Adding " << r->at(r2).contents << " and " << r->at(r3).contents << std::endl;
+		#endif
 			r->at(r1).contents = r->at(r2).contents + r->at(r3).contents;
 		break;
 
@@ -162,7 +165,11 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 		break;
 
 		case OP_PRNT:
-			std::cout << rtos(r1) << " contains " << hexify(r->at(r1).contents) << std::endl;
+		#ifdef DEBUG
+			std::cout << "Printing register " << rtos(r1) << std::endl;
+		#endif
+			std::cout << std::to_string((long long unsigned int)r->at(r1).contents) << std::endl;
+			// std::cout << hexify(r->at(r1).contents) << std::endl;
 		break;
 
 		case OP_HLT:

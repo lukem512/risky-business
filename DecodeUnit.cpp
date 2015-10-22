@@ -6,7 +6,7 @@
 
 #include "DecodeUnit.h"
 
-#define DEBUG
+//#define DEBUG
 
 void DecodeUnit::tick(Register *ir, ExecutionUnit* eu) {
 	// Cast to struct to decode bits
