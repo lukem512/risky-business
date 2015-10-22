@@ -22,21 +22,21 @@ void DecodeUnit::tick(Register *ir, ExecutionUnit* eu) {
 	if (IS_ORR(instr.opcode)) { // All 2-register operand instruction are 11xx
 		instruction_orr_t data = *(instruction_orr_t *) &ir->contents;
 		#ifdef DEBUG
-			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << rtos(data.r2) << " (ORR)" << std::endl;
+			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << rtos(data.r2) << std::endl;
 		#endif
 		eu->issue(data.opcode, data.r1, data.r2);
 	} else 
 	if (IS_ORRR(instr.opcode)) { // All 3-register operand instructions are 10xx
 		instruction_orrr_t data = *(instruction_orrr_t *) &ir->contents;
 		#ifdef DEBUG
-			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << rtos(data.r2) << " " << rtos(data.r3) << " (ORRR)" << std::endl;
+			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << rtos(data.r2) << " " << rtos(data.r3) << std::endl;
 		#endif
 		eu->issue(data.opcode, data.r1, data.r2, data.r3);
 	} else
 	if (IS_ORI(instr.opcode)) { // All register, immediate operand instructions are 01xx
 		instruction_ori_t data = *(instruction_ori_t *) &ir->contents;
 		#ifdef DEBUG
-			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << hexify(data.im1) << " (ORI)" << std::endl;
+			std::cout << optos(data.opcode) << " " << rtos(data.r1) << " " << hexify(data.im1) << std::endl;
 		#endif
 		eu->issue(data.opcode, data.r1, data.im1);
 	} else

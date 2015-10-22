@@ -9,6 +9,8 @@
 #include "opcodes.h"
 #include "common.h"
 
+#define DEBUG
+
 using namespace std;
 
 std::string ExecutionUnit::toString() {
@@ -93,6 +95,7 @@ void ExecutionUnit::issue(uint8_t opcode) {
 // Returns true when state should be halted
 bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<MemoryLocation>* m) {
 	bool halted = false;
+	int32_t rval;
 
 	switch (opcode) {
 		case OP_ADD:
@@ -133,6 +136,9 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 		break;
 
 		case OP_B:
+		#ifdef DEBUG
+			std::cout << "B with a jump of " << std::to_string((long long int)im1) << std::endl;
+		#endif
 			pc->contents = pc->contents + im1;
 		break;
 
@@ -143,7 +149,14 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 		break;
 		
 		case OP_BLTZ:
-			if (r->at(r1).contents < 0) {
+			rval = r->at(r1).contents;
+			#ifdef DEBUG
+				std::cout << "BLTZ " << std::to_string((long long int)rval) << " " << std::to_string((long long int)im1) << std::endl;
+			#endif
+			if (rval < 0) {
+				#ifdef DEBUG
+					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
+				#endif
 				pc->contents = pc->contents + im1;
 			}
 		break;
