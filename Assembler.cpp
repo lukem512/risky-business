@@ -2,11 +2,14 @@
 #include <iostream>
 #include <sstream>
 #include <cstring>
+#include <regex>
 
 #include "Assembler.h"
 #include "DecodeUnit.h"
 #include "ExecutionUnit.h"
 #include "common.h"
+
+#define DEBUG
 
 void printUnhandledTypeError(int type) {
 	std::cerr << "Unhandled instruction type encountered: " << type << std::endl;
@@ -40,9 +43,22 @@ int determineArguments(instruction_t instr) {
 	}
 }
 
+bool isLabelLine(std::string line) {
+	std::regex labelExpression("\\w\\:");
+	return std::regex_match(line, labelExpression);
+}
+
+bool isLabelArg(std::string arg) {
+	std::regex labelExpression("\\w");
+	return std::regex_match(arg, labelExpression);
+}
+
 void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 	// Create stream object
 	std::istringstream f(program);
+
+	// Initialise the position to 0
+	currentPosition = 0;
 
 	// Read the program, line by line
 	std::string line;
@@ -52,6 +68,17 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 
 		// If the line begins with a '%', discard it as a comment
 		if (line.at(0) == '%') {
+			continue;
+		}
+
+		// Is the line a label?
+		if (isLabelLine(line)) {
+			// Remove the ':'
+#ifdef DEBUG
+std::cout << "Found a label: " << line << std::endl;
+#endif
+			std::string label = line.substr(0, line.size()-1);
+			labels[label] = currentPosition;
 			continue;
 		}
 
@@ -155,7 +182,18 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				memset(&instr_ori, 0, sizeof(instruction_ori_t));
 				instr_ori.opcode = stoop(opcode);
 				instr_ori.r1 = stor(arg1);
-				instr_ori.im1 = strtoi(arg2);
+				if (isLabelArg(arg2)) {
+					std::map<std::string, unsigned int>::iterator i = labels.find(arg2);
+					if (i == labels.end()) {
+						std::cerr << "Unable to find label \"" << arg2 << "\"" << std::endl;
+					} else {
+						unsigned int labelPosition = i->second;
+						int16_t offset = (int16_t) (currentPosition - labelPosition);
+						instr_ori.im1 = offset;
+					}
+				} else {
+					instr_ori.im1 = strtoi(arg2);
+				}
 				memcpy(&packedInstr, &instr_ori, sizeof(packedInstr));
 			break;
 
@@ -192,7 +230,18 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				instruction_oi_t instr_oi;
 				memset(&instr_oi, 0, sizeof(instruction_oi_t));
 				instr_oi.opcode = stoop(opcode);
-				instr_oi.im1 = strtoi(arg1);
+				if (isLabelArg(arg1)) {
+                                        std::map<std::string, unsigned int>::iterator i = labels.find(arg2);
+                                        if (i == labels.end()) {
+                                                std::cerr << "Unable to find label \"" << arg1 << "\"" << std::endl;
+                                        } else {
+                                                unsigned int labelPosition = i->second;
+                                                int16_t offset = (int16_t) (currentPosition - labelPosition);
+                                                instr_oi.im1 = offset;
+                                        }
+                                } else {
+                                        instr_oi.im1 = strtoi(arg1);
+                                }
 				memcpy(&packedInstr, &instr_oi, sizeof(packedInstr));
 			break;
 
@@ -212,6 +261,9 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 			break;
 		}
 		out->push_back(packedInstr);
+
+		// Increment the counter
+		currentPosition++;
 	}
 
 	// Add a marker so we can easily identify the finish in memory
