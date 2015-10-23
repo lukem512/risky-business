@@ -34,6 +34,18 @@ std::string hexify(uint32_t data) {
   	return out.str();
 }
 
+std::string hexify(int16_t data) {
+	std::ostringstream out;  
+  	out << std::hex << std::setw(sizeof(data)*2) << std::setfill('0') << data;
+  	return out.str();
+}
+
+std::string hexify(uint8_t data) {
+	std::ostringstream out;  
+  	out << std::hex << std::setw(sizeof(data)*2) << std::setfill('0') << data;
+  	return out.str();
+}
+
 std::string optos(uint8_t opcode) {
 	// TODO: there must be a pre-processor macro that I can use for this...
 	switch (opcode) {
@@ -67,8 +79,14 @@ std::string optos(uint8_t opcode) {
 		case OP_BZ:
 		return "BZ";
 
+		case OP_BLTZ:
+		return "BLTZ";
+
 		case OP_PRNT:
 		return "PRNT";
+
+		case OP_HLT:
+		return "HLT";
 
 		case OP_UNKNOWN:
 		return "???";
@@ -92,13 +110,15 @@ uint8_t stoop(std::string opcode) {
 	if (opcode == "LDC")  return OP_LDC;
 	if (opcode == "B")    return OP_B;
 	if (opcode == "BZ")   return OP_BZ;
+	if (opcode == "BLTZ")   return OP_BLTZ;
 	if (opcode == "PRNT") return OP_PRNT;
+	if (opcode == "HLT") return OP_HLT;
 	return OP_UNKNOWN;
 }
 
 std::string rtos(uint8_t reg) {
 	std::ostringstream out;
-	out << "r" << std::to_string(reg);
+	out << "r" << std::to_string((long long unsigned int) reg);
 	return out.str();
 }
 

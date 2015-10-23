@@ -34,6 +34,15 @@ typedef struct {
 	uint8_t        : 4;
 } instruction_orri_t;
 
+
+// Two register operands
+typedef struct {
+	uint8_t opcode : 4;
+	uint8_t r1     : 4;
+	uint8_t r2     : 4;
+	uint32_t       : 20;
+} instruction_orr_t;
+
 // A register and an immediate operand
 typedef struct {
 	uint8_t opcode : 4;
@@ -63,7 +72,7 @@ typedef struct {
 
 class DecodeUnit {
 public:
-	void decode(Register* ir, ExecutionUnit* eu);
+	void tick(Register* ir, ExecutionUnit* eu);
 };
 
 #endif

@@ -9,7 +9,17 @@
 #include "opcodes.h"
 #include "common.h"
 
+//#define DEBUG
+
 using namespace std;
+
+ExecutionUnit::ExecutionUnit() {
+	// Initialise arguments to 0
+	r1 = 0;
+	r2 = 0;
+	r3 = 0;
+	im1 = 0;
+}
 
 std::string ExecutionUnit::toString() {
 
@@ -59,6 +69,13 @@ void ExecutionUnit::issue(uint8_t opcode, uint8_t r1, uint8_t r2, int16_t im1) {
 	this->im1 = im1;
 }
 
+void ExecutionUnit::issue(uint8_t opcode, uint8_t r1, uint8_t r2) {
+	type = EU_ISSUE_ORR;
+	this->opcode = opcode;
+	this->r1 = r1;
+	this->r2 = r2;
+}
+
 void ExecutionUnit::issue(uint8_t opcode, uint8_t r1, int16_t im1) {
 	type = EU_ISSUE_ORI;
 	this->opcode = opcode;
@@ -83,18 +100,36 @@ void ExecutionUnit::issue(uint8_t opcode) {
 	this->opcode = opcode;
 }
 
-void ExecutionUnit::execute(Register* pc, std::vector<Register>* r, std::vector<MemoryLocation>* m) {
+// Returns true when state should be halted
+bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<MemoryLocation>* m) {
+	bool halted = false;
+
+	// Signed value representations
+	int32_t r1val_s, r2val_s, r3val_s;
+	r1val_s = r->at(r1).contents;
+	r2val_s = r->at(r2).contents;
+	r3val_s = r->at(r3).contents;
+
 	switch (opcode) {
 		case OP_ADD:
-			r->at(r1).contents = r->at(r2).contents + r->at(r3).contents;
+		#ifdef DEBUG
+			std::cout << "Adding " << r2val_s << " and " << r3val_s << std::endl;
+		#endif
+			r->at(r1).contents = (uint32_t) (r2val_s + r3val_s);
 		break;
 
 		case OP_SUB:
-			r->at(r1).contents = r->at(r2).contents - r->at(r3).contents;
+		#ifdef DEBUG
+			std::cout << "Subtracting " << r2val_s << " and " << r3val_s << std::endl;
+		#endif
+			r->at(r1).contents = (uint32_t) (r2val_s - r3val_s);
 		break;
 
 		case OP_MUL:
-			r->at(r1).contents = r->at(r2).contents * r->at(r3).contents;
+		#ifdef DEBUG
+			std::cout << "Multiplying " << r2val_s << " and " << r3val_s << std::endl;
+		#endif
+			r->at(r1).contents = (uint32_t) (r2val_s * r3val_s);
 		break;
 
 		case OP_CMP:
@@ -104,11 +139,21 @@ void ExecutionUnit::execute(Register* pc, std::vector<Register>* r, std::vector<
 		break;
 
 		case OP_LD:
-			r->at(r1).contents = m->at(im1).contents;
+			// TODO: use a LoadStoreUnit
+			// For now, the memory access is instant
+		#ifdef DEBUG
+			std::cout << rtos(r1) << " = " << "M[" << std::to_string((long long unsigned int)r->at(r2).contents) << "] (" << std::to_string((long long unsigned int)m->at(r->at(r2).contents).contents) << ")" << std::endl;
+		#endif
+			r->at(r1).contents = m->at(r->at(r2).contents).contents;
 		break;
 
 		case OP_STR:
-			m->at(im1).contents = r->at(r1).contents;
+			// TODO: use a LoadStoreUnit
+			// For now, the memory access is instant
+		#ifdef DEBUG
+			std::cout << "M[" << std::to_string((long long unsigned int)r->at(r1).contents) << "] = " << std::to_string((long long unsigned int)r->at(r2).contents) << std::endl;
+		#endif
+			m->at(r->at(r1).contents).contents = r->at(r2).contents;
 		break;
 
 		case OP_LDC:
@@ -119,6 +164,9 @@ void ExecutionUnit::execute(Register* pc, std::vector<Register>* r, std::vector<
 		break;
 
 		case OP_B:
+		#ifdef DEBUG
+			std::cout << "B with a jump of " << std::to_string((long long int)im1) << std::endl;
+		#endif
 			pc->contents = pc->contents + im1;
 		break;
 
@@ -127,9 +175,33 @@ void ExecutionUnit::execute(Register* pc, std::vector<Register>* r, std::vector<
 				pc->contents = pc->contents + im1;
 			}
 		break;
+		
+		case OP_BLTZ:
+			#ifdef DEBUG
+				std::cout << "BLTZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
+			#endif
+			if (r1val_s < 0) {
+				#ifdef DEBUG
+					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
+				#endif
+				pc->contents = pc->contents + im1;
+			}
+		break;
 
 		case OP_PRNT:
-			std::cout << rtos(r1) << " contains " << hexify(r->at(r1).contents) << std::endl;
+		#ifdef DEBUG
+			std::cout << "Printing register " << rtos(r1) << " (unsigned: " <<
+				std::to_string((long long unsigned int) r->at(r1).contents) <<
+				", signed: " << std::to_string((long long int) r1val_s) << ")" << std::endl;
+		#endif
+			std::cout << hexify(r->at(r1).contents) << std::endl;
+		break;
+
+		case OP_HLT:
+		#ifdef DEBUG
+			std::cout << "Halting execution" << std::endl;
+		#endif
+			halted = true;
 		break;
 
 		case OP_NOP:
@@ -144,4 +216,6 @@ void ExecutionUnit::execute(Register* pc, std::vector<Register>* r, std::vector<
 		#endif
 		break;
 	}
+
+	return halted;
 }

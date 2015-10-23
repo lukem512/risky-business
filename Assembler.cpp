@@ -12,15 +12,21 @@ void printUnhandledTypeError(int type) {
 	std::cerr << "Unhandled instruction type encountered: " << type << std::endl;
 }
 
-void printInvalidArgumentCountError(std::string instr, int got, int expected) {
-	std::cerr << "Incorrect number of arguments specified for opcode " << instr << ". Expected " << expected << " and got " << got << "." << std::endl;
+void printInvalidArgumentCountError(std::string instr, int got, int expected, int type) {
+	std::cerr << "Incorrect number of arguments specified for opcode " << instr << ", decoded as type " << type << ". Expected " << expected << " and got " << got << "." << std::endl;
 }
 
 int determineArguments(instruction_t instr) {
-	if (instr.opcode & OP_MASK_ORRR) { // All 3-register operand instructions are 10xx
+	if (instr.opcode == OP_HLT) {
+		return EU_ISSUE_O;
+	} else
+	if (IS_ORR(instr.opcode)) { // All 2-register operand instruction are 11xx
+		return EU_ISSUE_ORR;
+	} else
+	if (IS_ORRR(instr.opcode)) { // All 3-register operand instructions are 10xx
 		return EU_ISSUE_ORRR;
 	} else
-	if (instr.opcode & OP_MASK_ORI) { // All register, immediate operand instructions are 01xx
+	if (IS_ORI(instr.opcode)) { // All register, immediate operand instructions are 01xx
 		return EU_ISSUE_ORI;
 	} else
 	if (instr.opcode == OP_NOP) { // NOP is 0000
@@ -30,7 +36,7 @@ int determineArguments(instruction_t instr) {
 		return EU_ISSUE_OR;
 	} else // B is 0011
 	{
-		EU_ISSUE_OI;
+		return EU_ISSUE_OI;
 	}
 }
 
@@ -43,6 +49,11 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 	while (std::getline(f, line)) {
 		// Store args, temporarily, as strings
 		std::string opcode, arg1, arg2, arg3;
+
+		// If the line begins with a '%', discard it as a comment
+		if (line.at(0) == '%') {
+			continue;
+		}
 
 		// Extract the opcode and count operands
 		std::string operand;
@@ -70,6 +81,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 						switch (type) {
 							case EU_ISSUE_ORRR:
 							case EU_ISSUE_ORI:
+							case EU_ISSUE_ORR:
 							case EU_ISSUE_OR:
 								arg1 = operand;
 							break;
@@ -88,6 +100,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 						switch (type) {
 							case EU_ISSUE_ORRR:
 							case EU_ISSUE_ORI:
+							case EU_ISSUE_ORR:
 								arg2 = operand;
 							break;
 
@@ -121,7 +134,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 		switch(type) {
 			case EU_ISSUE_ORRR:
 				if (numArgs != 3) {
-					printInvalidArgumentCountError(opcode, numArgs, 3);
+					printInvalidArgumentCountError(opcode, numArgs, 3, EU_ISSUE_ORRR);
 					break;
 				}
 				instruction_orrr_t instr_orrr;
@@ -135,7 +148,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 
 			case EU_ISSUE_ORI:
 				if (numArgs != 2) {
-					printInvalidArgumentCountError(opcode, numArgs, 2);
+					printInvalidArgumentCountError(opcode, numArgs, 2, EU_ISSUE_ORI);
 					break;
 				}
 				instruction_ori_t instr_ori;
@@ -146,9 +159,22 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				memcpy(&packedInstr, &instr_ori, sizeof(packedInstr));
 			break;
 
+			case EU_ISSUE_ORR:
+				if (numArgs != 2) {
+					printInvalidArgumentCountError(opcode, numArgs, 2, EU_ISSUE_ORR);
+					break;
+				}
+				instruction_orr_t instr_orr;
+				memset(&instr_orr, 0, sizeof(instruction_orr_t));
+				instr_orr.opcode = stoop(opcode);
+				instr_orr.r1 = stor(arg1);
+				instr_orr.r2 = stor(arg2);
+				memcpy(&packedInstr, &instr_orr, sizeof(packedInstr));
+			break;
+
 			case EU_ISSUE_OR:
 				if (numArgs != 1) {
-					printInvalidArgumentCountError(opcode, numArgs, 1);
+					printInvalidArgumentCountError(opcode, numArgs, 1, EU_ISSUE_OR);
 					break;
 				}
 				instruction_or_t instr_or;
@@ -160,19 +186,19 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 
 			case EU_ISSUE_OI:
 				if (numArgs != 1) {
-					printInvalidArgumentCountError(opcode, numArgs, 1);
+					printInvalidArgumentCountError(opcode, numArgs, 1, EU_ISSUE_OI);
 					break;
 				}
 				instruction_oi_t instr_oi;
 				memset(&instr_oi, 0, sizeof(instruction_oi_t));
 				instr_oi.opcode = stoop(opcode);
-				instr_oi.im1 = stor(arg1);
+				instr_oi.im1 = strtoi(arg1);
 				memcpy(&packedInstr, &instr_oi, sizeof(packedInstr));
 			break;
 
 			case EU_ISSUE_O:
 				if (numArgs != 0) {
-					printInvalidArgumentCountError(opcode, numArgs, 0);
+					printInvalidArgumentCountError(opcode, numArgs, 0, EU_ISSUE_O);
 					break;
 				}
 				instruction_o_t instr_o;

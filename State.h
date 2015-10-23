@@ -14,7 +14,7 @@
 
 using namespace std;
 
-#define DEFAULT_MEMORY_SIZE 32
+#define DEFAULT_MEMORY_SIZE 256
 #define DEFAULT_REGISTER_COUNT 16
 
 #define STATE_FETCH 1
@@ -53,7 +53,7 @@ public:
 	State();
 	State(uint32_t memorySize, uint8_t registerCount);
 	void print();
-	void tick();
+	bool tick();
 };
 
 #endif

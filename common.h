@@ -15,6 +15,8 @@ std::string removeWhitespace(std::string str);
 std::string removeCharacter(std::string str, char chr);
 
 std::string hexify(uint32_t data);
+std::string hexify(int16_t data);
+std::string hexify(uint8_t data);
 
 std::string optos(uint8_t opcode);
 uint8_t stoop(std::string opcode);

@@ -5,17 +5,19 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include "State.h"
 #include "Assembler.h"
 
-std::string source = 
-	"LDC r1 14\n" \
-	"PRNT r1\n" \
-	"LDC r2 6\n" \
-	"PRNT r2\n" \
-	"ADD r1 r1 r2\n" \
-	"PRNT r1";
+// Load a file into a std::string
+std::string load_from_file(std::string filename) {
+    std::ifstream fs(filename);
+	std::stringstream ss;
+	ss << fs.rdbuf();
+	return ss.str();
+}
 
 int main(int argc, char** argv){
 	// Seed the random function
@@ -24,6 +26,10 @@ int main(int argc, char** argv){
 	// Initialise the machine state
 	State s;
     s = State();
+
+    // Load the source into a string
+    // TODO: pass as parameter
+    std::string source = load_from_file("benchmarks/fib.s");
 
     // Assemble the simple program
 	Assembler a;
@@ -38,8 +44,14 @@ int main(int argc, char** argv){
     }
 
 	while (1) {
-		s.tick();
+		if (s.tick()) {
+			// Execution halted
+			break;
+		}
 	}
+
+	std::cout << std::endl;
+	s.print();
 
 	return 0;
 }
