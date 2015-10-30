@@ -257,7 +257,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				if (isOperandLabel(arg1)) {
 					int16_t offset = determineBranchAmount(lineNumber, getLabelLocation(arg1));
 					#ifdef DEBUG
-						std::cout << "Branching by " << std::to_string(offset) << " to label " << arg2 << std::endl;
+						std::cout << "Branching by " << std::to_string(offset) << " to label " << arg1 << std::endl;
 					#endif
 					instr_ori.im1 = offset;
 				} else {
