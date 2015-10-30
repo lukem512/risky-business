@@ -17,8 +17,9 @@ PRNT r0
 % while (i < 10)
 loop:
 CMP r6 r0 r1
-BLTZ r6 1
+BLTZ r6 body
 B end
+body:
 % print(cur)
 PRNT r10
 % PRNT r12
