@@ -61,9 +61,10 @@ LDC r2 1
 % i = 0
 LDC r3 0
 % while (i < len(A))
+loop:
 CMP r4 r3 r1
 BLTZ r4 1
-B 9
+B print
 % Address of A[i]
 ADD r5 r0 r3
 % Address of B[i]
@@ -79,27 +80,30 @@ STR r5 r7
 ADD r9 r9 r7
 % i = i + incr
 ADD r3 r3 r2
-B -12
+B loop
 %%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%
+print:
 % Print sum
 PRNT r9
 % Print product array
 LDC r3 0
 LDC r4 1
+printloop:
 % while (i < len)
 CMP r5 r3 r1
 BLTZ r5 1
-B 5
+B halt
 %
 ADD r13 r0 r3
 LD r9 r13
 PRNT r9
 ADD r3 r3 r4
 %
-B -8
+B printloop
 %%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%
+halt:
 HLT

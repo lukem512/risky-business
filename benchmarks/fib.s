@@ -15,9 +15,10 @@ LDC r11 0
 % Print the first character, 0
 PRNT r0
 % while (i < 10)
+loop:
 CMP r6 r0 r1
 BLTZ r6 1
-B 6
+B end
 % print(cur)
 PRNT r10
 % PRNT r12
@@ -30,5 +31,6 @@ ADD r10 r10 r11
 ADD r11 r12 r3
 % i = i + incr
 ADD r0 r0 r2
-B -9
+B loop
+end:
 HLT
