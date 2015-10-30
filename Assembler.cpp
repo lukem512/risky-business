@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstring>
+#include <regex>
 
 #include "Assembler.h"
 #include "DecodeUnit.h"
@@ -16,7 +17,20 @@ void printInvalidArgumentCountError(std::string instr, int got, int expected, in
 	std::cerr << "Incorrect number of arguments specified for opcode " << instr << ", decoded as type " << type << ". Expected " << expected << " and got " << got << "." << std::endl;
 }
 
-int determineArguments(instruction_t instr) {
+Assembler::Assembler() {
+	lineLabelRegex = std::regex("[a-zA-Z]+:");
+	operandLabelRegex = std::regex("[a-zA-Z]+");
+}
+
+bool Assembler::isLineLabel(std::string line) {
+	return std::regex_match(line, lineLabelRegex);
+}
+
+bool Assembler::isOperandLabel(std::string operand) {
+	return std::regex_match(operand, operandLabelRegex);
+}
+
+int Assembler::determineArguments(instruction_t instr) {
 	if (instr.opcode == OP_HLT) {
 		return EU_ISSUE_O;
 	} else
@@ -40,9 +54,13 @@ int determineArguments(instruction_t instr) {
 	}
 }
 
+
+
 void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 	// Create stream object
 	std::istringstream f(program);
+
+	unsigned int lineNumber = 1;
 
 	// Read the program, line by line
 	std::string line;
@@ -52,6 +70,16 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 
 		// If the line begins with a '%', discard it as a comment
 		if (line.at(0) == '%') {
+			continue;
+		}
+
+		// Is the line a label?
+		if (isLineLabel(line)) {
+			// Remove ':'
+			std::string label = line.substr(0, line.size() - 1);
+			// Add the location to hashmap
+			labels[label] = lineNumber;
+			std::cout << "Found a label (" << label << ") at line " << lineNumber << std::endl;
 			continue;
 		}
 
@@ -155,7 +183,11 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				memset(&instr_ori, 0, sizeof(instruction_ori_t));
 				instr_ori.opcode = stoop(opcode);
 				instr_ori.r1 = stor(arg1);
-				instr_ori.im1 = strtoi(arg2);
+				if (isOperandLabel(arg2)) {
+					instr_ori.im1 = getLabelLocation(arg2);
+				} else {
+					instr_ori.im1 = strtoi(arg2);
+				}
 				memcpy(&packedInstr, &instr_ori, sizeof(packedInstr));
 			break;
 
@@ -192,7 +224,11 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				instruction_oi_t instr_oi;
 				memset(&instr_oi, 0, sizeof(instruction_oi_t));
 				instr_oi.opcode = stoop(opcode);
-				instr_oi.im1 = strtoi(arg1);
+				if (isOperandLabel(arg1)) {
+					instr_ori.im1 = getLabelLocation(arg1);
+				} else {
+					instr_ori.im1 = strtoi(arg1);
+				}
 				memcpy(&packedInstr, &instr_oi, sizeof(packedInstr));
 			break;
 
@@ -212,6 +248,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 			break;
 		}
 		out->push_back(packedInstr);
+		lineNumber++;
 	}
 
 	// Add a marker so we can easily identify the finish in memory
@@ -223,4 +260,14 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 	for (int i = 0; i < 4; i++) {
 		out->push_back(0);
 	}
+}
+
+unsigned int Assembler::getLabelLocation(std::string label) {
+	if (labels.find(label) != labels.end()) {
+		return labels[label];
+	} else {
+		std::cerr << "Label " << label << " was not found" << std::endl;
+	}
+
+	return UINT16_MAX;
 }
