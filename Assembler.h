@@ -19,6 +19,7 @@ private:
 	bool isLineLabel(std::string line);
 	bool isOperandLabel(std::string operand);
 	int determineArguments(instruction_t instr);
+	int determineBranchAmount(unsigned int src, unsigned int dst);
 public:
 	void assemble(std::string program, std::vector<uint32_t>* out);
 	unsigned int getLabelLocation(std::string label);

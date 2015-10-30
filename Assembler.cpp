@@ -54,7 +54,13 @@ int Assembler::determineArguments(instruction_t instr) {
 	}
 }
 
-
+int Assembler::determineBranchAmount(unsigned int src, unsigned int dst) {
+	if (src < dst) {
+		return dst - src;
+	} else { 
+		return (dst - src) - 1;
+	}
+}
 
 void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 	// Create stream object
@@ -184,7 +190,9 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				instr_ori.opcode = stoop(opcode);
 				instr_ori.r1 = stor(arg1);
 				if (isOperandLabel(arg2)) {
-					instr_ori.im1 = getLabelLocation(arg2);
+					int offset = determineBranchAmount(lineNumber, getLabelLocation(arg2));
+					std::cout << "Branching by " << std::to_string(offset) << " for label " << arg2 << std::endl;
+					instr_ori.im1 = offset;
 				} else {
 					instr_ori.im1 = strtoi(arg2);
 				}
@@ -225,7 +233,9 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				memset(&instr_oi, 0, sizeof(instruction_oi_t));
 				instr_oi.opcode = stoop(opcode);
 				if (isOperandLabel(arg1)) {
-					instr_ori.im1 = getLabelLocation(arg1);
+					int offset = determineBranchAmount(lineNumber, getLabelLocation(arg1));
+					std::cout << "Branching by " << std::to_string(offset) << " for label " << arg1 << std::endl;
+					instr_ori.im1 = offset;
 				} else {
 					instr_ori.im1 = strtoi(arg1);
 				}
