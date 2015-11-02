@@ -20,7 +20,7 @@ private:
 	bool isOperandLabel(std::string operand);
 	bool isLineComment(std::string line);
 	int determineArguments(instruction_t instr);
-	int16_t determineBranchAmount(unsigned int src, unsigned int dst);
+	int determineBranchAmount(unsigned int src, unsigned int dst);
 	void extractLabels(std::string program);
 public:
 	void assemble(std::string program, std::vector<uint32_t>* out);

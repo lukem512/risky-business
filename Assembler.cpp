@@ -20,8 +20,8 @@ void printInvalidArgumentCountError(std::string instr, int got, int expected, in
 }
 
 Assembler::Assembler() {
-	lineLabelRegex = std::regex("[a-zA-Z]+:");
-	operandLabelRegex = std::regex("[a-zA-Z]+");
+	lineLabelRegex = std::regex("[a-zA-Z][a-zA-Z0-9]*:",std::regex_constants::basic);
+	operandLabelRegex = std::regex("[a-zA-Z][a-zA-Z0-9]*", std::regex_constants::basic);
 }
 
 bool Assembler::isLineLabel(std::string line) {
@@ -60,7 +60,7 @@ int Assembler::determineArguments(instruction_t instr) {
 	}
 }
 
-int16_t Assembler::determineBranchAmount(unsigned int src, unsigned int dst) {
+int Assembler::determineBranchAmount(unsigned int src, unsigned int dst) {
 	return dst - src - 1;
 }
 
@@ -210,6 +210,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				instr_ori.opcode = stoop(opcode);
 				instr_ori.r1 = stor(arg1);
 				if (isOperandLabel(arg2)) {
+					std::cout << "ORI (Line " << lineNumber << ": " << line << ") Looking for label " << arg2 << std::endl;
 					int16_t offset = determineBranchAmount(lineNumber, getLabelLocation(arg2));
 					#ifdef DEBUG
 						std::cout << "Branching by " << std::to_string(offset) << " to label " << arg2 << std::endl;
@@ -255,7 +256,8 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				memset(&instr_oi, 0, sizeof(instruction_oi_t));
 				instr_oi.opcode = stoop(opcode);
 				if (isOperandLabel(arg1)) {
-					int16_t offset = determineBranchAmount(lineNumber, getLabelLocation(arg1));
+					std::cout << "(Line " << lineNumber << ") Looking for label " << arg1 << std::endl;
+					int offset = determineBranchAmount(lineNumber, getLabelLocation(arg1));
 					#ifdef DEBUG
 						std::cout << "Branching by " << std::to_string(offset) << " to label " << arg1 << std::endl;
 					#endif
