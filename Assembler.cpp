@@ -20,8 +20,9 @@ void printInvalidArgumentCountError(std::string instr, int got, int expected, in
 }
 
 Assembler::Assembler() {
-	lineLabelRegex = std::regex("[a-zA-Z][a-zA-Z0-9]*:", std::regex_constants::basic);
-	operandLabelRegex = std::regex("[a-zA-Z][a-zA-Z0-9]*", std::regex_constants::basic);
+	std::string base = "[a-zA-Z][a-zA-Z0-9]*";
+	lineLabelRegex = std::regex(base + ":", std::regex_constants::basic);
+	operandLabelRegex = std::regex(base, std::regex_constants::basic);
 }
 
 bool Assembler::isLineLabel(std::string line) {
