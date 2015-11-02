@@ -19,6 +19,23 @@ std::string load_from_file(std::string filename) {
 	return ss.str();
 }
 
+// iain at StackOverflow.com
+char* get_option(char** begin, char** end, const std::string& option)
+{
+    char** itr = std::find(begin, end, option);
+    if (itr != end && ++itr != end)
+    {
+        return *itr;
+    }
+    return 0;
+}
+
+// iain at StackOverflow.com
+bool option_exists(char** begin, char** end, const std::string& option)
+{
+    return std::find(begin, end, option) != end;
+}
+
 int main(int argc, char** argv){
 	// Seed the random function
 	srand(time(NULL));
@@ -28,10 +45,28 @@ int main(int argc, char** argv){
     s = State();
 
     // Load the source into a string
-    // TODO: pass as parameter
-    std::string source = load_from_file("benchmarks/fib.s");
+    std::string source;
+	if (option_exists(argv, argv+argc, "-f")) {
+		char* filename = get_option(argv, argv+argc, "-f");
+		if (filename) {
+			std::cout << "Loading file " << filename << std::endl;
+			source = load_from_file(filename);
+		} else {
+			std::cerr << "No filename was specified." << std::endl;
+			return 1;
+		}
+	} else {
+		// Default behaviour, just halt
+		source = "HLT";
+	}
+	
+	// Use debug?
+	if (option_exists(argv, argv+argc, "-d")) {
+		// TODO: turn on debugging
+		// this currently uses a #define
+	}
 
-    // Assemble the simple program
+    // Assemble the program
 	Assembler a;
 	std::vector<uint32_t> program;
 	a.assemble(source, &program);
