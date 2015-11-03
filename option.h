@@ -9,4 +9,6 @@
 char* get_option(char** begin, char** end, const std::string& option);
 bool option_exists(char** begin, char** end, const std::string& option);
 
+std::string load_from_file(std::string filename);
+
 #endif

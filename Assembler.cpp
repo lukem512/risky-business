@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <cstring>
 #include <regex>
@@ -7,9 +8,8 @@
 #include "Assembler.h"
 #include "DecodeUnit.h"
 #include "ExecutionUnit.h"
+#include "option.h"
 #include "common.h"
-
-#define DEBUG
 
 void printUnhandledTypeError(int type) {
 	std::cerr << "Unhandled instruction type encountered: " << type << std::endl;
@@ -23,6 +23,16 @@ Assembler::Assembler() {
 	std::string base = "[a-zA-Z][a-zA-Z0-9]*";
 	lineLabelRegex = std::regex(base + ":", std::regex_constants::basic);
 	operandLabelRegex = std::regex(base, std::regex_constants::basic);
+	debug = false;
+}
+
+bool Assembler::setDebug(bool set) {
+	debug = set;
+	return debug;
+}
+
+bool Assembler::getDebug() {
+	return debug;
 }
 
 bool Assembler::isLineLabel(std::string line) {
@@ -80,9 +90,9 @@ void Assembler::extractLabels(std::string program) {
 			std::string label = line.substr(0, line.size() - 1);
 			labels[label] = lineNumber;
 
-			#ifdef DEBUG
+			if (debug) {
 				std::cout << "Found a label (" << label << ") at line " << lineNumber << std::endl;
-			#endif
+			}
 
 			continue;
 		}
@@ -212,9 +222,9 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				instr_ori.r1 = stor(arg1);
 				if (isOperandLabel(arg2)) {
 					int16_t offset = determineBranchAmount(lineNumber, getLabelLocation(arg2));
-					#ifdef DEBUG
+					if (debug) {
 						std::cout << "Branching by " << std::to_string(offset) << " to label " << arg2 << std::endl;
-					#endif
+					}
 					instr_ori.im1 = offset;
 				} else {
 					instr_ori.im1 = strtoi(arg2);
@@ -257,9 +267,9 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				instr_oi.opcode = stoop(opcode);
 				if (isOperandLabel(arg1)) {
 					int offset = determineBranchAmount(lineNumber, getLabelLocation(arg1));
-					#ifdef DEBUG
+					if (debug) {
 						std::cout << "Branching by " << std::to_string(offset) << " to label " << arg1 << std::endl;
-					#endif
+					}
 					instr_ori.im1 = offset;
 				} else {
 					instr_ori.im1 = strtoi(arg1);
@@ -305,4 +315,64 @@ unsigned int Assembler::getLabelLocation(std::string label) {
 	}
 
 	return UINT16_MAX;
+}
+
+int main (int argc, char** argv) {
+	std::string input, output;
+
+	// Was an input name specified?
+	if (option_exists(argv, argv+argc, "-f")) {
+		char* filename = get_option(argv, argv+argc, "-f");
+		if (filename) {
+			input = load_from_file(filename);
+		} else {
+			std::cerr << "No input filename was specified." << std::endl;
+			return 1;
+		}
+	} else {
+		std::cerr << "No input filename was specified." << std::endl;
+		return 1;
+	}
+
+	// Was an output filename specified?
+	if (option_exists(argv, argv+argc, "-o")) {
+		char* filename = get_option(argv, argv+argc, "-o");
+		if (filename) {
+			output = filename;
+		} else {
+			std::cerr << "No output filename was specified." << std::endl;
+			return 1;
+		}
+	} else {
+		// Default behaviour
+		output = "a.out";
+	}
+
+	// Use debug?
+	bool debug = false;
+	if (option_exists(argv, argv+argc, "-d")) {
+		debug = true;
+	}
+
+    // Assemble the program
+	Assembler a;
+	std::vector<uint32_t> program;
+	a.setDebug(debug);
+	a.assemble(input, &program);
+	std::cout << "Program source was successfully assembled. The program is " << 
+	  program.size() << " bytes." << std::endl;
+
+	// Write to output file
+	std::ofstream outputFile(output, std::ofstream::binary);
+  	outputFile.open(output);
+
+  	int size = program.size();
+  	outputFile.write((const char*) &size, sizeof(int));
+  	outputFile.write((const char*) &program[0], size * sizeof(uint32_t));
+
+  	outputFile.close(); // TODO: file written is 0 bytes
+
+  	std::cout << "Successfully written to " << output << "." << std::endl;
+
+	return 0;
 }

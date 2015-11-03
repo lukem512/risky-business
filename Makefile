@@ -1,2 +1,16 @@
-all:
-	g++ -std=c++0x Location.cpp State.cpp ExecutionUnit.cpp DecodeUnit.cpp Assembler.cpp common.cpp option.cpp main.cpp
+CPP_STD = c++0x
+
+all: proc ass
+
+.PHONY: proc
+proc: 
+	g++ -o proc -std=$(CPP_STD) Location.cpp State.cpp ExecutionUnit.cpp DecodeUnit.cpp common.cpp option.cpp main.cpp
+
+.PHONY: ass
+ass:
+	g++ -o ass -std=$(CPP_STD) common.cpp option.cpp Assembler.cpp
+
+clean:
+	rm ass
+	rm proc
+	rm -rf *.o

@@ -6,19 +6,9 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <sstream>
 
 #include "State.h"
-#include "Assembler.h"
 #include "option.h"
-
-// Load a file into a std::string
-std::string load_from_file(std::string filename) {
-    std::ifstream fs(filename);
-	std::stringstream ss;
-	ss << fs.rdbuf();
-	return ss.str();
-}
 
 int main(int argc, char** argv){
 	// Seed the random function
@@ -28,20 +18,20 @@ int main(int argc, char** argv){
 	State s;
     s = State();
 
-    // Load the source into a string
+    // Load the program filename
     std::string source;
 	if (option_exists(argv, argv+argc, "-f")) {
 		char* filename = get_option(argv, argv+argc, "-f");
 		if (filename) {
-			std::cout << "Loading file " << filename << std::endl;
-			source = load_from_file(filename);
+			source = filename;
 		} else {
-			std::cerr << "No filename was specified." << std::endl;
+			std::cerr << "No input filename was specified." << std::endl;
 			return 1;
 		}
 	} else {
-		// Default behaviour, just halt
-		source = "HLT";
+		// Default behaviour
+		std::cerr << "No input filename was specified." << std::endl;
+		return 1;
 	}
 	
 	// Use debug?
@@ -50,11 +40,21 @@ int main(int argc, char** argv){
 		// this currently uses a #define
 	}
 
-    // Assemble the program
-	Assembler a;
+	// TODO: load program from file into vector
 	std::vector<uint32_t> program;
-	a.assemble(source, &program);
-	std::cout << "Program source was successfully assembled. The program is " << 
+	int size;
+
+	std::cout << "Loading file " << source << std::endl;
+
+	ifstream inputFile(source, std::ios::binary);
+    inputFile.read((char*)&size, sizeof(int));
+
+    std::cout << "File size is " << std::to_string(size) << std::endl;
+
+    program.resize(size);
+    inputFile.read((char*)&program[0], size * sizeof(uint32_t));
+
+	std::cout << "Program was successfully loaded. The program is " << 
 	  program.size() << " bytes." << std::endl << std::endl;
 
 	// Load the program into memory

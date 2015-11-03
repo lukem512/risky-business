@@ -17,6 +17,7 @@ private:
 	std::regex lineLabelRegex;
 	std::regex operandLabelRegex;
 	std::map<std::string, unsigned int> labels;
+	bool debug;
 
 	bool isLineLabel(std::string line);
 	bool isOperandLabel(std::string operand);
@@ -27,6 +28,8 @@ private:
 public:
 	void assemble(std::string program, std::vector<uint32_t>* out);
 	unsigned int getLabelLocation(std::string label);
+	bool setDebug(bool set);
+	bool getDebug();
 	Assembler();
 };
 
