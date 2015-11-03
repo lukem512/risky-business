@@ -10,6 +10,7 @@
 
 #include "State.h"
 #include "Assembler.h"
+#include "option.h"
 
 // Load a file into a std::string
 std::string load_from_file(std::string filename) {
@@ -17,23 +18,6 @@ std::string load_from_file(std::string filename) {
 	std::stringstream ss;
 	ss << fs.rdbuf();
 	return ss.str();
-}
-
-// iain at StackOverflow.com
-char* get_option(char** begin, char** end, const std::string& option)
-{
-    char** itr = std::find(begin, end, option);
-    if (itr != end && ++itr != end)
-    {
-        return *itr;
-    }
-    return 0;
-}
-
-// iain at StackOverflow.com
-bool option_exists(char** begin, char** end, const std::string& option)
-{
-    return std::find(begin, end, option) != end;
 }
 
 int main(int argc, char** argv){
