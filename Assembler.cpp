@@ -363,14 +363,16 @@ int main (int argc, char** argv) {
 	  program.size() << " bytes." << std::endl;
 
 	// Write to output file
-	std::ofstream outputFile(output, std::ofstream::binary);
-  	outputFile.open(output);
+	std::ofstream os(output, std::ios::out | std::ofstream::binary);
 
-  	int size = program.size();
-  	outputFile.write((const char*) &size, sizeof(int));
-  	outputFile.write((const char*) &program[0], size * sizeof(uint32_t));
+    if(!os)
+    {
+        std::cerr << "Cannot open output file" << std::endl;
+        return 1;
+    }
 
-  	outputFile.close(); // TODO: file written is 0 bytes
+    os.write(reinterpret_cast<const char *>(&program[0]), program.size()*sizeof(uint32_t));
+    os.close();
 
   	std::cout << "Successfully written to " << output << "." << std::endl;
 

@@ -40,19 +40,33 @@ int main(int argc, char** argv){
 		// this currently uses a #define
 	}
 
-	// TODO: load program from file into vector
+	// Load program from file into vector
 	std::vector<uint32_t> program;
 	int size;
 
 	std::cout << "Loading file " << source << std::endl;
 
-	ifstream inputFile(source, std::ios::binary);
-    inputFile.read((char*)&size, sizeof(int));
+	std::ifstream is(source, std::ios::in | std::ifstream::binary);
 
-    std::cout << "File size is " << std::to_string(size) << std::endl;
+    if(!is)
+    {
+        std::cerr << "Cannot open input file" << std::endl;
+        return 1;
+    }
 
-    program.resize(size);
-    inputFile.read((char*)&program[0], size * sizeof(uint32_t));
+    uint32_t f;
+    while(is.read(reinterpret_cast<char *>(&f), sizeof(f))) {
+        program.push_back(f);
+    }
+    is.close();
+
+	// ifstream inputFile(source, std::ifstream::binary);
+	// inputFile.seekg(0, ifstream::end);
+	// size = inputFile.tellg();
+	// inputFile.seekg(0, ifstream::beg);
+	// program.resize(size, 0);
+ //    char* begin = (char*) &*program.begin();
+	// inputFile.read(begin, size);
 
 	std::cout << "Program was successfully loaded. The program is " << 
 	  program.size() << " bytes." << std::endl << std::endl;
