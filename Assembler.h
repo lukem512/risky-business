@@ -1,3 +1,5 @@
+// Luke Mitchell, 2015
+// luke.mitchell.2011@my.bristol.ac.uk
 
 #ifndef __ASSEMBLER_H
 #define __ASSEMBLER_H
