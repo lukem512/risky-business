@@ -60,14 +60,6 @@ int main(int argc, char** argv){
     }
     is.close();
 
-	// ifstream inputFile(source, std::ifstream::binary);
-	// inputFile.seekg(0, ifstream::end);
-	// size = inputFile.tellg();
-	// inputFile.seekg(0, ifstream::beg);
-	// program.resize(size, 0);
- //    char* begin = (char*) &*program.begin();
-	// inputFile.read(begin, size);
-
 	std::cout << "Program was successfully loaded. The program is " << 
 	  program.size() << " bytes." << std::endl << std::endl;
 
