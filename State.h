@@ -24,6 +24,7 @@ using namespace std;
 class State {
 private:
 	int state;
+	bool debug;
 	DecodeUnit du;
 	ExecutionUnit eu;
 	
@@ -39,6 +40,9 @@ private:
 
 		// Initial value of program counter is set to be 0
 		pc.contents = 0;
+
+		// Set debug to false
+		debug = false;
 	};
 
 public:
@@ -52,6 +56,7 @@ public:
 
 	State();
 	State(uint32_t memorySize, uint8_t registerCount);
+	void setDebug(bool debug);
 	void print();
 	bool tick();
 };

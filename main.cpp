@@ -36,8 +36,7 @@ int main(int argc, char** argv){
 	
 	// Use debug?
 	if (option_exists(argv, argv+argc, "-d")) {
-		// TODO: turn on debugging
-		// this currently uses a #define
+		s.setDebug(true);
 	}
 
 	// Load program from file into vector

@@ -25,6 +25,8 @@ private:
 	uint8_t type;
 
 public:
+	bool debug = false;
+	
 	ExecutionUnit();
 	std::string toString();
 	void issue(uint8_t opcode, uint8_t r1, uint8_t r2, uint8_t r3);

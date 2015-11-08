@@ -14,3 +14,4 @@ clean:
 	rm ass
 	rm proc
 	rm -rf *.o
+	rm -rf a.out

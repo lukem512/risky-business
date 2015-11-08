@@ -16,6 +16,12 @@ State::State(uint32_t memorySize, uint8_t registerCount) {
 	init(memorySize, registerCount);
 }
 
+void State::setDebug(bool debug) {
+	debug = debug;
+	du.debug = debug;
+	eu.debug = debug;
+}
+
 void State::print() {
 	// Print registers
 	for (int i = 0; i < registerFile.size(); i++) {
