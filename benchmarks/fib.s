@@ -1,5 +1,24 @@
-% Simple test for branching
+% Simple benchmark #1
 % This prints the first n Fibonacci numbers
+%
+% Expected output is:
+%  00000000
+%  00000001
+%  00000001
+%  00000002
+%  00000003
+%  00000005
+%  00000008
+%  0000000d
+%  00000015
+%  00000022
+%  00000037
+%  00000059
+%  00000090
+%  000000e9
+%  00000179
+%  00000262
+%
 % i = 0
 LDC r0 0
 % max = n

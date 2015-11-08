@@ -1,5 +1,13 @@
-% Sum of Products
-% Again, completely without optimisation
+% Simple benchmark #2
+% This performs a Sum of Products
+%
+% Expected output is:
+%  0000001e
+%  00000002
+%  00000004
+%  00000006
+%  00000008
+%  0000000a
 %%%%%%%%%%%%%%%%%%%%%%
 % Address of A
 LDC r0 100
