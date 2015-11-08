@@ -223,7 +223,7 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 				if (isOperandLabel(arg2)) {
 					int16_t offset = determineBranchAmount(lineNumber, getLabelLocation(arg2));
 					if (debug) {
-						std::cout << "Branching by " << std::to_string(offset) << " to label " << arg2 << std::endl;
+						std::cout << "Conditionally branching by " << std::to_string(offset) << " to label " << arg2 << std::endl;
 					}
 					instr_ori.im1 = offset;
 				} else {
@@ -270,9 +270,9 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 					if (debug) {
 						std::cout << "Branching by " << std::to_string(offset) << " to label " << arg1 << std::endl;
 					}
-					instr_ori.im1 = offset;
+					instr_oi.im1 = offset;
 				} else {
-					instr_ori.im1 = strtoi(arg1);
+					instr_oi.im1 = strtoi(arg1);
 				}
 				memcpy(&packedInstr, &instr_oi, sizeof(packedInstr));
 			break;
