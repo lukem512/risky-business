@@ -57,6 +57,7 @@ public:
 	State();
 	State(uint32_t memorySize, uint8_t registerCount);
 	void setDebug(bool debug);
+	bool getDebug();
 	void print();
 	bool tick();
 };

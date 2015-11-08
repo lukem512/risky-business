@@ -22,6 +22,10 @@ void State::setDebug(bool debug) {
 	eu.debug = debug;
 }
 
+bool State::getDebug() {
+	return debug;
+}
+
 void State::print() {
 	// Print registers
 	for (int i = 0; i < registerFile.size(); i++) {
