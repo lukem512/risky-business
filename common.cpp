@@ -52,6 +52,9 @@ std::string optos(uint8_t opcode) {
 		case OP_NOP:
 		return "NOP";
 
+		case OP_MOV:
+		return "MOV";
+
 		case OP_ADD:
 		return "ADD";
 
@@ -61,11 +64,20 @@ std::string optos(uint8_t opcode) {
 		case OP_MUL:
 		return "MUL";
 
+		case OP_DIV:
+		return "DIV";
+
 		case OP_CMP:
 		return "CMP";
 
 		case OP_LD:
 		return "LD";
+
+		case OP_ST:
+		return "ST";
+
+		case OP_LDR:
+		return "LDR";
 
 		case OP_STR:
 		return "STR";
@@ -79,8 +91,20 @@ std::string optos(uint8_t opcode) {
 		case OP_BZ:
 		return "BZ";
 
+		case OP_BNZ:
+		return "BNZ";
+
 		case OP_BLTZ:
 		return "BLTZ";
+
+		case OP_BLTEZ:
+		return "BLTEZ";
+
+		case OP_BGTZ:
+		return "BGTZ";
+
+		case OP_BGTEZ:
+		return "BGTEZ";
 
 		case OP_PRNT:
 		return "PRNT";
@@ -100,19 +124,27 @@ std::string optos(uint8_t opcode) {
 
 uint8_t stoop(std::string opcode) {
 	// TODO: there must be a pre-processor macro that I can use for this...
-	if (opcode == "NOP")  return OP_NOP;
-	if (opcode == "ADD")  return OP_ADD;
-	if (opcode == "SUB")  return OP_SUB;
-	if (opcode == "MUL")  return OP_MUL;
-	if (opcode == "CMP")  return OP_CMP;
-	if (opcode == "LD")   return OP_LD;
-	if (opcode == "STR")  return OP_STR;
-	if (opcode == "LDC")  return OP_LDC;
-	if (opcode == "B")    return OP_B;
-	if (opcode == "BZ")   return OP_BZ;
-	if (opcode == "BLTZ")   return OP_BLTZ;
-	if (opcode == "PRNT") return OP_PRNT;
-	if (opcode == "HLT") return OP_HLT;
+	if (opcode == "NOP")  	return OP_NOP;
+	if (opcode == "MOV")  	return OP_MOV;
+	if (opcode == "ADD")  	return OP_ADD;
+	if (opcode == "SUB")  	return OP_SUB;
+	if (opcode == "MUL")  	return OP_MUL;
+	if (opcode == "DIV")  	return OP_DIV;
+	if (opcode == "CMP")  	return OP_CMP;
+	if (opcode == "LD")   	return OP_LD;
+	if (opcode == "ST")   	return OP_ST;
+	if (opcode == "LDR")  	return OP_LDR;
+	if (opcode == "STR")  	return OP_STR;
+	if (opcode == "LDC")  	return OP_LDC;
+	if (opcode == "B")    	return OP_B;
+	if (opcode == "BZ")   	return OP_BZ;
+	if (opcode == "BNZ")  	return OP_BNZ;
+	if (opcode == "BLTZ") 	return OP_BLTZ;
+	if (opcode == "BLTEZ")	return OP_BLTEZ;
+	if (opcode == "BGTZ") 	return OP_BGTZ;
+	if (opcode == "BGTEZ")	return OP_BGTEZ;
+	if (opcode == "PRNT") 	return OP_PRNT;
+	if (opcode == "HLT")  	return OP_HLT;
 	return OP_UNKNOWN;
 }
 

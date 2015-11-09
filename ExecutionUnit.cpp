@@ -109,25 +109,39 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 	r3val_s = r->at(r3).contents;
 
 	switch (opcode) {
+		case OP_MOV:
+			if (debug) {
+				std::cout << "MOV " rtos(r2) << " to " rtos(r1) << std::endl;
+			}
+			r->at(r1).contents = r->at(r2).contents;
+		break;
+
 		case OP_ADD:
-		if (debug) {
-			std::cout << "Adding " << r2val_s << " and " << r3val_s << std::endl;
-		}
+			if (debug) {
+				std::cout << "Adding " << r2val_s << " and " << r3val_s << std::endl;
+			}
 			r->at(r1).contents = (uint32_t) (r2val_s + r3val_s);
 		break;
 
 		case OP_SUB:
-		if (debug) {
-			std::cout << "Subtracting " << r2val_s << " and " << r3val_s << std::endl;
-		}
+			if (debug) {
+				std::cout << "Subtracting " << r2val_s << " and " << r3val_s << std::endl;
+			}
 			r->at(r1).contents = (uint32_t) (r2val_s - r3val_s);
 		break;
 
 		case OP_MUL:
-		if (debug) {
-			std::cout << "Multiplying " << r2val_s << " and " << r3val_s << std::endl;
-		}
+			if (debug) {
+				std::cout << "Multiplying " << r2val_s << " and " << r3val_s << std::endl;
+			}
 			r->at(r1).contents = (uint32_t) (r2val_s * r3val_s);
+		break;
+
+		case OP_DIV:
+			if (debug) {
+				std::cout << "Dividing " << r2val_s << " and " << r3val_s << std::endl;
+			}
+			r->at(r1).contents = (uint32_t) (r2val_s / r3val_s);
 		break;
 
 		case OP_CMP:
@@ -139,37 +153,75 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 		case OP_LD:
 			// TODO: use a LoadStoreUnit
 			// For now, the memory access is instant
-		if (debug) {
-			std::cout << rtos(r1) << " = " << "M[" << std::to_string((long long unsigned int)r->at(r2).contents) << "] (" << std::to_string((long long unsigned int)m->at(r->at(r2).contents).contents) << ")" << std::endl;
-		}
+			if (debug) {
+				std::cout << "OP_LD: test me!" << std::endl;
+				std::cout << rtos(r1) << " = " << "M[" << std::to_string((long long unsigned int)r->at(r2).contents) << "] (" << std::to_string((long long unsigned int)m->at(im1) << ")" << std::endl;
+			}
+			r->at(r1).contents = m->at(im1).contents;
+		break;
+
+		case OP_ST:
+			// TODO: use a LoadStoreUnit
+			// For now, the memory access is instant
+			if (debug) {
+				std::cout << "OP_ST: test me!" << std::endl;
+				std::cout << "M[" << std::to_string((long long unsigned int)im1) << "] = " << std::to_string((long long unsigned int)r->at(r1.contents) << std::endl;
+			}
+			m->at(im1).contents = r->at(r1).contents;
+		break;
+
+		case OP_LDR:
+			// TODO: use a LoadStoreUnit
+			// For now, the memory access is instant
+			if (debug) {
+				std::cout << rtos(r1) << " = " << "M[" << std::to_string((long long unsigned int)r->at(r2).contents) << "] (" << std::to_string((long long unsigned int)m->at(r->at(r2).contents).contents) << ")" << std::endl;
+			}
 			r->at(r1).contents = m->at(r->at(r2).contents).contents;
 		break;
 
 		case OP_STR:
 			// TODO: use a LoadStoreUnit
 			// For now, the memory access is instant
-		if (debug) {
-			std::cout << "M[" << std::to_string((long long unsigned int)r->at(r1).contents) << "] = " << std::to_string((long long unsigned int)r->at(r2).contents) << std::endl;
-		}
+			if (debug) {
+				std::cout << "M[" << std::to_string((long long unsigned int)r->at(r1).contents) << "] = " << std::to_string((long long unsigned int)r->at(r2).contents) << std::endl;
+			}
 			m->at(r->at(r1).contents).contents = r->at(r2).contents;
 		break;
 
 		case OP_LDC:
-		if (debug) {
-			std::cout << "Perfoming load of constant " << hexify(im1) << " into register " << rtos(r1) << std::endl;
-		}
+			if (debug) {
+				std::cout << "Perfoming load of constant " << hexify(im1) << " into register " << rtos(r1) << std::endl;
+			}
 			r->at(r1).contents = im1;
 		break;
 
 		case OP_B:
-		if (debug) {
-			std::cout << "B with a jump of " << std::to_string((long long int)im1) << std::endl;
-		}
+			if (debug) {
+				std::cout << "B " << " " << std::to_string((long long int)im1);
+			}
 			pc->contents = pc->contents + im1;
 		break;
 
 		case OP_BZ:
+			if (debug) {
+				std::cout << "BZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
+			}
 			if (r->at(r1).contents == 0) {
+				if (debug) {
+					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
+				}
+				pc->contents = pc->contents + im1;
+			}
+		break;
+
+		case OP_BNZ:
+			if (debug) {
+				std::cout << "BNZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
+			}
+			if (r->at(r1).contents != 0) {
+				if (debug) {
+					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
+				}
 				pc->contents = pc->contents + im1;
 			}
 		break;
@@ -186,32 +238,68 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 			}
 		break;
 
+		case OP_BLTEZ:
+			if (debug) {
+				std::cout << "BLTEZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
+			}
+			if (r1val_s <= 0) {
+				if (debug) {
+					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
+				}
+				pc->contents = pc->contents + im1;
+			}
+		break;
+
+		case OP_BGTZ:
+			if (debug) {
+				std::cout << "BGTZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
+			}
+			if (r1val_s > 0) {
+				if (debug) {
+					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
+				}
+				pc->contents = pc->contents + im1;
+			}
+		break;
+
+		case OP_BGTEZ:
+			if (debug) {
+				std::cout << "BGTEZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
+			}
+			if (r1val_s >= 0) {
+				if (debug) {
+					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
+				}
+				pc->contents = pc->contents + im1;
+			}
+		break;
+
 		case OP_PRNT:
-		if (debug) {
-			std::cout << "Printing register " << rtos(r1) << " (unsigned: " <<
-				std::to_string((long long unsigned int) r->at(r1).contents) <<
-				", signed: " << std::to_string((long long int) r1val_s) << ")" << std::endl;
-		}
+			if (debug) {
+				std::cout << "Printing register " << rtos(r1) << " (unsigned: " <<
+					std::to_string((long long unsigned int) r->at(r1).contents) <<
+					", signed: " << std::to_string((long long int) r1val_s) << ")" << std::endl;
+			}
 			std::cout << hexify(r->at(r1).contents) << std::endl;
 		break;
 
 		case OP_HLT:
-		if (debug) {
-			std::cout << "Halting execution" << std::endl;
-		}
+			if (debug) {
+				std::cout << "Halting execution" << std::endl;
+			}
 			halted = true;
 		break;
 
 		case OP_NOP:
-		if (debug) {
-			std::cout << "No operation" << std::endl;
-		}
+			if (debug) {
+				std::cout << "No operation" << std::endl;
+			}
 		break;
 
 		default:
-		if (debug) {
-			std::cerr << "Unknown opcode encountered (" << hexify(opcode) << ")" << std::endl;
-		}
+			if (debug) {
+				std::cerr << "Unknown opcode encountered (" << hexify(opcode) << ")" << std::endl;
+			}
 		break;
 	}
 
