@@ -29,23 +29,6 @@ STR r12 r13
 %%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%
-% Print unsorted array
-LDC r3 0
-LDC r4 1
-% while (i < len)
-CMP r5 r3 r1
-BLTZ r5 1
-B 5
-%
-ADD r13 r0 r3
-LD r9 r13
-PRNT r9
-ADD r3 r3 r4
-%
-B -8
-%%%%%%%%%%%%%%%%%%%%%%
-%
-%%%%%%%%%%%%%%%%%%%%%%
 %
 % procedure bubbleSort( A : list of sortable items )
 %   n = length(A)
@@ -62,7 +45,7 @@ B -8
 %   until not swapped
 % end procedure
 %
-%
+repeat:
 % swapped = false
 LDC r3 0
 % i = 1
@@ -70,62 +53,55 @@ LDC r4 1
 % incr = 1
 LDC r5 1
 % while (i < len) {
+while:
 CMP r6 r4 r1
-BLTZ r6 1
-B 15
-% if (A[i-1] > A[i]) {
+BGTEZ r6 endwhile
 % Address of A[i-1]
 SUB r7 r4 r5
 ADD r8 r0 r7
 % Address of A[i]
 ADD r9 r0 r4
 % A[i-1]
-LD r10 r8
+LDR r10 r8
 % A[i]
-LD r11 r9
-% if (A[i] < A[i-1]) {
-CMP r12 r11 r10
-BLTZ r12 1
-B 4
+LDR r11 r9
+% if (A[i-1] > A[i]) {
+CMP r12 r10 r11
+BLTEZ r12 endif
 % SWAP THEM
 STR r8 r11
 STR r9 r10
 % swapped = true
 LDC r3 1
+endif:
 % i = i + incr
 ADD r4 r4 r5
 PRNT r4
-B -9
-% }
-% }
-B -18
-% }
+B while
+endwhile:
 % r13 = false
 LDC r13 0
 % if (swapped == false)
 CMP r14 r3 r13
-BZ r14 1
-% else jump to "swapped = false"
-B -28
-%
+BNZ r14 repeat
 %%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%
+print:
 % Print SORTED array
 LDC r3 0
 LDC r4 1
 % while (i < len)
+printloop:
 CMP r5 r3 r1
-BLTZ r5 1
-B 5
-%
+BGTEZ r5 end
 ADD r13 r0 r3
 LD r9 r13
 PRNT r9
 ADD r3 r3 r4
-%
-B -8
+B printloop
 %%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%
+end:
 HLT
