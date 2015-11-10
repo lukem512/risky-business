@@ -72,7 +72,8 @@ typedef struct {
 
 class DecodeUnit {
 public:
-	bool debug = false;
+	bool debug;
+	DecodeUnit();
 	void tick(Register* ir, ExecutionUnit* eu);
 };
 

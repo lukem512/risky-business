@@ -25,7 +25,7 @@ private:
 	uint8_t type;
 
 public:
-	bool debug = false;
+	bool debug;
 	
 	ExecutionUnit();
 	std::string toString();

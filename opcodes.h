@@ -104,15 +104,15 @@
 
 // Subtraction
 // SUB  r1 r2 r3
-#define OP_ADD 21
+#define OP_SUB 21
 
 // Multiplication
 // MUL r1 r2 r3
-#define OP_ADD 22
+#define OP_MUL 22
 
 // Division
 // DIV r1 r2 r3
-#define OP_ADD 23
+#define OP_DIV 23
 
 // Compare two values
 // CMP r1 r2 r3

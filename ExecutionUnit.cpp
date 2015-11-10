@@ -17,6 +17,9 @@ ExecutionUnit::ExecutionUnit() {
 	r2 = 0;
 	r3 = 0;
 	im1 = 0;
+
+	// No debugging by default
+	debug = false;
 }
 
 std::string ExecutionUnit::toString() {
@@ -111,7 +114,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 	switch (opcode) {
 		case OP_MOV:
 			if (debug) {
-				std::cout << "MOV " rtos(r2) << " to " rtos(r1) << std::endl;
+				std::cout << "MOV " << rtos(r2) << " to " << rtos(r1) << std::endl;
 			}
 			r->at(r1).contents = r->at(r2).contents;
 		break;
@@ -155,7 +158,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 			// For now, the memory access is instant
 			if (debug) {
 				std::cout << "OP_LD: test me!" << std::endl;
-				std::cout << rtos(r1) << " = " << "M[" << std::to_string((long long unsigned int)r->at(r2).contents) << "] (" << std::to_string((long long unsigned int)m->at(im1) << ")" << std::endl;
+				std::cout << rtos(r1) << " = " << "M[" << std::to_string((long long unsigned int)r->at(r2).contents) << "] (" << std::to_string((long long unsigned int)m->at(im1).contents) << ")" << std::endl;
 			}
 			r->at(r1).contents = m->at(im1).contents;
 		break;
@@ -165,7 +168,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 			// For now, the memory access is instant
 			if (debug) {
 				std::cout << "OP_ST: test me!" << std::endl;
-				std::cout << "M[" << std::to_string((long long unsigned int)im1) << "] = " << std::to_string((long long unsigned int)r->at(r1.contents) << std::endl;
+				std::cout << "x`[" << std::to_string((long long unsigned int)im1) << "] = " << std::to_string((long long unsigned int)r->at(r1).contents) << std::endl;
 			}
 			m->at(im1).contents = r->at(r1).contents;
 		break;

@@ -6,6 +6,11 @@
 
 #include "DecodeUnit.h"
 
+DecodeUnit::DecodeUnit() {
+	// No debugging by default
+	debug = false;
+}
+
 void DecodeUnit::tick(Register *ir, ExecutionUnit* eu) {
 	// Cast to struct to decode bits
 	instruction_t instr = *(instruction_t*) &ir->contents;
@@ -67,7 +72,7 @@ void DecodeUnit::tick(Register *ir, ExecutionUnit* eu) {
 
 	// Issue with the instruction anyway!
 	if (debug) {
-		std::cout << "Unknown instruction encountered: " << optos(data.opcode) << std::endl;
+		std::cout << "Unknown instruction encountered: " << optos(instr.opcode) << std::endl;
 	}
-	eu->issue(data.opcode);
+	eu->issue(instr.opcode);
 }
