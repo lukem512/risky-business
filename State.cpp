@@ -52,6 +52,10 @@ void State::print() {
 	cout << endl;
 }
 
+unsigned int State::getTicks() {
+	return ticks;
+}
+
 bool State::tick() {
 	bool halted = false;
 	
@@ -85,5 +89,6 @@ bool State::tick() {
 		break;
 	}
 
+	ticks++;
 	return halted;
 }

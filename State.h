@@ -23,6 +23,7 @@ using namespace std;
 
 class State {
 private:
+	unsigned int ticks;
 	int state;
 	bool debug;
 	DecodeUnit du;
@@ -40,6 +41,9 @@ private:
 
 		// Initial value of program counter is set to be 0
 		pc.contents = 0;
+
+		// Clear ticks
+		ticks = 0;
 
 		// Set debug to false
 		debug = false;
@@ -59,6 +63,7 @@ public:
 	void setDebug(bool debug);
 	bool getDebug();
 	void print();
+	unsigned int getTicks();
 	bool tick();
 };
 
