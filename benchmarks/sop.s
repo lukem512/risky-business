@@ -18,21 +18,16 @@ LDC r1 5
 %
 %%%%%%%%%%%%%%%%%%%%%%
 % Define A
-LDC r2 100
 LDC r3 1
-STR r2 r3
-LDC r2 101
+ST r3 100
 LDC r3 2
-STR r2 r3
-LDC r2 102
+ST r3 101
 LDC r3 3
-STR r2 r3
-LDC r2 103
+ST r3 102
 LDC r3 4
-STR r2 r3
-LDC r2 104
+ST r3 103
 LDC r3 5
-STR r2 r3
+ST r3 104
 %
 %%%%%%%%%%%%%%%%%%%%%%
 % Address of B (B)
