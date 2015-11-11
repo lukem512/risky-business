@@ -24,6 +24,22 @@ ST r13 104
 %%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%
+printu:
+% Print UNSORTED array
+LDC r3 0
+LDC r4 1
+% while (i < len)
+printuloop:
+CMP r5 r3 r1
+BGTEZ r5 repeat
+ADD r13 r0 r3
+LDR r9 r13
+PRNT r9
+ADD r3 r3 r4
+B printuloop
+%%%%%%%%%%%%%%%%%%%%%%
+%
+%%%%%%%%%%%%%%%%%%%%%%
 %
 % procedure bubbleSort( A : list of sortable items )
 %   n = length(A)
