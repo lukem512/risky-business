@@ -48,27 +48,28 @@ bool Assembler::isLineComment(std::string line) {
 }
 
 int Assembler::determineArguments(instruction_t instr) {
-	if (instr.opcode == OP_HLT) {
-		return EU_ISSUE_O;
-	} else
-	if (IS_ORR(instr.opcode)) { // All 2-register operand instruction are 11xx
-		return EU_ISSUE_ORR;
-	} else
-	if (IS_ORRR(instr.opcode)) { // All 3-register operand instructions are 10xx
-		return EU_ISSUE_ORRR;
-	} else
-	if (IS_ORI(instr.opcode)) { // All register, immediate operand instructions are 01xx
-		return EU_ISSUE_ORI;
-	} else
-	if (instr.opcode == OP_NOP) { // NOP is 0000
-		return EU_ISSUE_O;
-	} else
-	if (instr.opcode == OP_PRNT) { // PRNT is 0001
-		return EU_ISSUE_OR;
-	} else // B is 0011
-	{
+	if (IS_OI(instr.opcode)) {
 		return EU_ISSUE_OI;
 	}
+	if (IS_ORI(instr.opcode)) {
+		return EU_ISSUE_ORI;
+	}
+	if (IS_ORR(instr.opcode)) {
+		return EU_ISSUE_ORR;
+	}
+	if (IS_ORRR(instr.opcode)) {
+		return EU_ISSUE_ORRR;
+	}
+	if (IS_O(instr.opcode)) {
+		return EU_ISSUE_O;
+	}
+	
+	// Special case for PRNT psuedo-instruction
+	if (instr.opcode == OP_PRNT) {
+		return EU_ISSUE_OR;
+	}
+
+	return EU_ISSUE_UNKNOWN;
 }
 
 int Assembler::determineBranchAmount(unsigned int src, unsigned int dst) {
@@ -133,14 +134,23 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 			operand = removeWhitespace(operand);
 
 			if (!gotType) {
+				if (debug) {
+					std::cout << operand << std::endl;
+				}
 
 				instruction_t instr;
 				instr.opcode = stoop(operand);
-				type = determineArguments(instr);
-				opcode = operand;
 
+				type = determineArguments(instr);
+				if (type == EU_ISSUE_UNKNOWN) {
+					std::cerr << "Cannot assembled unknown instruction: " << operand << std::endl;
+					continue;
+				}
+
+				opcode = operand;
 				gotType = true;
 			} else {
+				bool error = false;
 				switch(numArgs) {
 					case 1:
 						switch (type) {
@@ -156,7 +166,10 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 							break;
 
 							default:
-								printUnhandledTypeError(type);
+								if (!error) {
+									printUnhandledTypeError(type);
+									error = true;
+								}
 							break;
 						}
 					break;
@@ -166,11 +179,15 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 							case EU_ISSUE_ORRR:
 							case EU_ISSUE_ORI:
 							case EU_ISSUE_ORR:
+							case EU_ISSUE_OI:
 								arg2 = operand;
 							break;
 
 							default:
-								printUnhandledTypeError(type);
+								if (!error) {
+									printUnhandledTypeError(type);
+									error = true;
+								}
 							break;
 						}
 					break;
@@ -182,7 +199,10 @@ void Assembler::assemble(std::string program, std::vector<uint32_t>* out) {
 							break;
 
 							default:
-								printUnhandledTypeError(type);
+								if (!error) {
+									printUnhandledTypeError(type);
+									error = true;
+								}
 							break;
 						}
 					break;

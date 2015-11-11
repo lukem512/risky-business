@@ -12,61 +12,61 @@
 
 // Instruction and unknown operands
 typedef struct {
-	uint8_t opcode : 4;
+	uint8_t opcode : 5;
 	uint32_t data  : 28;
 } instruction_t;
 
 // Three register operands
 typedef struct {
-	uint8_t opcode : 4;
+	uint8_t opcode : 5;
 	uint8_t r1     : 4;
 	uint8_t r2     : 4;
 	uint8_t r3     : 4;
-	uint16_t       : 16;
+	uint16_t       : 15;
 } instruction_orrr_t;
 
 // Two register and an immediate
 typedef struct {
-	uint8_t opcode : 4;
+	uint8_t opcode : 5;
 	uint8_t r1     : 4;
 	uint8_t r2     : 4;
 	int16_t im1   : 16;
-	uint8_t        : 4;
+	uint8_t        : 3;
 } instruction_orri_t;
 
 
 // Two register operands
 typedef struct {
-	uint8_t opcode : 4;
+	uint8_t opcode : 5;
 	uint8_t r1     : 4;
 	uint8_t r2     : 4;
-	uint32_t       : 20;
+	uint32_t       : 19;
 } instruction_orr_t;
 
 // A register and an immediate operand
 typedef struct {
-	uint8_t opcode : 4;
+	uint8_t opcode : 5;
 	uint8_t r1     : 4;
 	int16_t im1   : 16;
-	uint8_t        : 8;
+	uint8_t        : 7;
 } instruction_ori_t;
 
 // A single register operand
 typedef struct {
-	uint8_t opcode : 4;
+	uint8_t opcode : 5;
 	uint8_t r1     : 4;
-	uint32_t       : 24;
+	uint32_t       : 23;
 } instruction_or_t;
 
 // A single immediate operand
 typedef struct {
-	uint8_t opcode : 4;
+	uint8_t opcode : 5;
 	int16_t im1   : 16;
-	uint16_t       : 12;
+	uint16_t       : 11;
 } instruction_oi_t;
 
 typedef struct {
-	uint8_t opcode : 4;
+	uint8_t opcode : 5;
 	uint32_t       : 28;
 } instruction_o_t;
 

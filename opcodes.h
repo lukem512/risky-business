@@ -23,7 +23,7 @@
 // OI instructions
 // 00011 - 00100
 //
-#define IS_OI(x) (3 <= x <= 4)
+#define IS_OI(x) (3 <= x && x <= 4)
 
 // Branch to relative address
 // B im1
@@ -34,7 +34,7 @@
 // ORI instructions
 // 00101 - 01111
 //
-#define IS_ORI(x) (5 <= x <= 15)
+#define IS_ORI(x) (5 <= x && x <= 15)
 
 // Load from memory location
 // LD r1 im1
@@ -77,7 +77,7 @@
 // ORR instructions
 // 10000 - 10011
 //
-#define IS_ORR(x) (16 <= x <= 19)
+#define IS_ORR(x) (16 <= x && x <= 19)
 
 // Move a value between registers
 // MOV r1 r2
@@ -96,7 +96,7 @@
 // ORRR instructions
 // 10100 - 11100
 //
-#define IS_ORRR(x) (20 <= x <= 28)
+#define IS_ORRR(x) (20 <= x && x <= 28)
 
 // Addition
 // ADD r1 r2 r3

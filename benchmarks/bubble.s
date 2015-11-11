@@ -11,21 +11,16 @@ LDC r1 5
 %
 %%%%%%%%%%%%%%%%%%%%%%
 % Define A
-LDC r12 100
 LDC r13 5
-STR r12 r13
-LDC r12 101
+ST r13 100
 LDC r13 4
-STR r12 r13
-LDC r12 102
+ST r13 101
 LDC r13 3
-STR r12 r13
-LDC r12 103
+ST r13 102
 LDC r13 2
-STR r12 r13
-LDC r12 104
+ST r13 103
 LDC r13 1
-STR r12 r13
+ST r13 104
 %%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%
@@ -76,7 +71,6 @@ LDC r3 1
 endif:
 % i = i + incr
 ADD r4 r4 r5
-PRNT r4
 B while
 endwhile:
 % r13 = false
@@ -87,19 +81,19 @@ BNZ r14 repeat
 %%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%
-print:
+prints:
 % Print SORTED array
 LDC r3 0
 LDC r4 1
 % while (i < len)
-printloop:
+printsloop:
 CMP r5 r3 r1
 BGTEZ r5 end
 ADD r13 r0 r3
-LD r9 r13
+LDR r9 r13
 PRNT r9
 ADD r3 r3 r4
-B printloop
+B printsloop
 %%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%

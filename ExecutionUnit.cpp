@@ -200,7 +200,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 
 		case OP_B:
 			if (debug) {
-				std::cout << "B " << " " << std::to_string((long long int)im1);
+				std::cout << "B " << " " << std::to_string((long long int)im1) << std::endl;
 			}
 			pc->contents = pc->contents + im1;
 		break;

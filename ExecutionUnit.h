@@ -16,6 +16,7 @@
 #define EU_ISSUE_OR   5
 #define EU_ISSUE_OI   6
 #define EU_ISSUE_O    0
+#define EU_ISSUE_UNKNOWN 15
 
 class ExecutionUnit {
 private:
