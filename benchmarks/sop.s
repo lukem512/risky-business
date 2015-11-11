@@ -8,6 +8,7 @@
 %  00000006
 %  00000008
 %  0000000a
+%
 %%%%%%%%%%%%%%%%%%%%%%
 % Address of A
 LDC r0 100
@@ -78,9 +79,9 @@ ADD r5 r0 r3
 % Address of B[i]
 ADD r6 r10 r3
 % Value of A[i]
-LD r7 r5
+LDR r7 r5
 % Value of B[i]
-LD r8 r6
+LDR r8 r6
 % A[i] = A[i] * B[i]
 MUL r7 r7 r8
 STR r5 r7
@@ -105,7 +106,7 @@ BLTZ r5 1
 B halt
 %
 ADD r13 r0 r3
-LD r9 r13
+LDR r9 r13
 PRNT r9
 ADD r3 r3 r4
 %
