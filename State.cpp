@@ -17,13 +17,22 @@ State::State(uint32_t memorySize, uint8_t registerCount) {
 }
 
 void State::setDebug(bool debug) {
-	debug = debug;
+	this->debug = debug;
+	fu.debug = debug;
 	du.debug = debug;
 	eu.debug = debug;
 }
 
 bool State::getDebug() {
 	return debug;
+}
+
+void State::setPipeline(bool pipeline) {
+	this->pipeline = pipeline;;
+}
+
+bool State::getPipeline() {
+	return pipeline;
 }
 
 void State::print() {
@@ -56,13 +65,13 @@ unsigned int State::getTicks() {
 	return ticks;
 }
 
-bool State::tick() {
+bool State::tickNoPipeline() {
 	bool halted = false;
-	
+
 	switch (state) {
 		case STATE_FETCH:
-			ir.contents = memory.at(pc.contents).contents;
-			pc.contents++;
+			// Grab the next instruction from memory
+			fu.tick(&ir, &pc, &memory, false);
 			state = STATE_DECODE;
 		break;
 
@@ -75,10 +84,7 @@ bool State::tick() {
 
 		case STATE_EXECUTE:
 			// Poke the EU into life
-			if (eu.tick(&pc, &registerFile, &memory)) {
-				// Execution is halted
-				halted = true;
-			}
+			halted = eu.tick(&pc, &registerFile, &memory);
 			state = STATE_FETCH;
 		break;
 
@@ -87,6 +93,46 @@ bool State::tick() {
 			cerr << "Something strange has happened. State has reached an unknown location." << endl;
 			halted = true;
 		break;
+	}
+
+	return halted;
+}
+
+bool State::tick() {
+	bool halted = false;
+
+	if (getDebug()) {
+		cout << getTicks() << endl;
+	}
+
+	if (getPipeline()) {
+		// Fetch
+		fu.tick(&memory);
+
+		// Decode
+		// TODO - this hasn't been filled yet!
+		// TODO - what about stalls?
+		if (getTicks() > 0) {
+			du.tick(&ir, &eu);
+
+			// Update registers
+			if (getDebug()) {
+				cout << "pc = " << pc.toString() << endl;
+				cout << "ir = " << ir.toString() << endl;
+				cout << "pc\' = " << fu.getPc().toString() << endl;
+				cout << "ir\' = " << fu.getIr().toString() << endl;
+			}
+			pc = fu.getPc();
+			ir = fu.getIr();
+		}
+
+		// Execute
+		// TODO - this hasn't been filled yet!
+		if (getTicks() > 1) {
+			halted = eu.tick(&pc, &registerFile, &memory);
+		}
+	} else {
+		halted = tickNoPipeline();
 	}
 
 	ticks++;

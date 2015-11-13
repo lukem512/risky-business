@@ -36,7 +36,14 @@ int main(int argc, char** argv){
 	
 	// Use debug?
 	if (option_exists(argv, argv+argc, "-d")) {
+		std::cout << "Setting debug flag to true" << std::endl;
 		s.setDebug(true);
+	}
+
+	// Use pipeline?
+	if (option_exists(argv, argv+argc, "-no-pipeline")) {
+		std::cout << "Setting pipeline flag to false" << std::endl;
+		s.setPipeline(false);
 	}
 
 	// Load program from file into vector

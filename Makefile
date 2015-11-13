@@ -4,7 +4,7 @@ all: proc ass
 
 .PHONY: proc
 proc: 
-	g++ -o proc -std=$(CPP_STD) Location.cpp State.cpp ExecutionUnit.cpp DecodeUnit.cpp common.cpp option.cpp main.cpp
+	g++ -o proc -std=$(CPP_STD) Location.cpp State.cpp FetchUnit.cpp DecodeUnit.cpp ExecutionUnit.cpp common.cpp option.cpp main.cpp
 
 .PHONY: ass
 ass:

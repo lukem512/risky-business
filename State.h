@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "FetchUnit.h"
 #include "DecodeUnit.h"
 #include "ExecutionUnit.h"
 #include "MemoryLocation.h"
@@ -26,6 +27,8 @@ private:
 	unsigned int ticks;
 	int state;
 	bool debug;
+	bool pipeline;
+	FetchUnit fu;
 	DecodeUnit du;
 	ExecutionUnit eu;
 	
@@ -41,13 +44,19 @@ private:
 
 		// Initial value of program counter is set to be 0
 		pc.contents = 0;
+		fu.setPc(pc.contents);
 
 		// Clear ticks
 		ticks = 0;
 
 		// Set debug to false
-		debug = false;
+		setDebug(false);
+
+		// Set pipeline to true
+		setPipeline(true);
 	};
+
+	bool tickNoPipeline();
 
 public:
 	// Memory
@@ -62,6 +71,8 @@ public:
 	State(uint32_t memorySize, uint8_t registerCount);
 	void setDebug(bool debug);
 	bool getDebug();
+	void setPipeline(bool pipeline);
+	bool getPipeline();
 	void print();
 	unsigned int getTicks();
 	bool tick();
