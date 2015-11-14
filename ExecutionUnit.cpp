@@ -168,7 +168,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 			// For now, the memory access is instant
 			if (debug) {
 				std::cout << "OP_ST: test me!" << std::endl;
-				std::cout << "x`[" << std::to_string((long long unsigned int)im1) << "] = " << std::to_string((long long unsigned int)r->at(r1).contents) << std::endl;
+				std::cout << "M[" << std::to_string((long long unsigned int)im1) << "] = " << std::to_string((long long unsigned int)r->at(r1).contents) << std::endl;
 			}
 			m->at(im1).contents = r->at(r1).contents;
 		break;
