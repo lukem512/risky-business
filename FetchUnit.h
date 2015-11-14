@@ -10,17 +10,15 @@
 #include "MemoryLocation.h"
 
 class FetchUnit {
-private:
+public:
 	Register pc;
 	Register ir;
 
-public:
 	bool debug;
+	bool stalled;
 	
 	FetchUnit();
-	void setPc(uint32_t contents);
-	Register getPc();
-	Register getIr();
+	std::string toString();
 	bool tick(std::vector<MemoryLocation>* m);
 	bool tick(Register* ir, Register* pc, std::vector<MemoryLocation>* m);
 	bool tick(Register* ir, Register* pc, std::vector<MemoryLocation>* m,

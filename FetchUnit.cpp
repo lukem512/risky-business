@@ -13,20 +13,21 @@ FetchUnit::FetchUnit() {
 	// Initialise the local program counter
 	pc.contents = 0;
 
+	// Not stalled!
+	stalled = false;
+
 	// No debugging by default
 	debug = false;
 }
 
-void FetchUnit::setPc(uint32_t contents) {
-	pc.contents = contents;
-}
-
-Register FetchUnit::getPc() {
-	return pc;
-}
-
-Register FetchUnit::getIr() { 
-	return ir;
+std::string FetchUnit::toString() {
+	std::ostringstream ss;
+	ss << "fu.ir = " << ir.toString() << std::endl;
+	ss << "fu.pc = " << pc.toString() << std::endl;
+	if (stalled) {
+		ss << "Currently stalled." << std::endl;
+	}
+	return ss.str();
 }
 
 // Use local registers, for pipelining
@@ -44,18 +45,21 @@ bool FetchUnit::tick(Register* ir, Register* pc, std::vector<MemoryLocation>* m,
 	// Fill the instruction register
 	ir->contents = m->at(pc->contents).contents;
 
-	if (debug) {
-		std::cout << "fu.ir = " << ir->toString() << std::endl;
-	}
+	// Not stalled
+	stalled = false;
 
 	if (pipeline) {
 		// Decode the instruction and check for a branch
 		// if the branch is conditional, stall
 		instruction_t instr = *(instruction_t*) &ir->contents;
 		instruction_oi_t data = *(instruction_oi_t *) &ir->contents; // B
+		instruction_ori_t dataCond = *(instruction_ori_t *) &ir->contents; // Conditional
 		switch (instr.opcode) {
 			case OP_B:
-				// Jump!
+				if (debug) {
+					std::cout << "Found a branch at location " << std::to_string(pc->contents);
+					std::cout <<  ". Jumping by " << data.im1 << "." << std::endl;
+				}
 				pc->contents += data.im1;
 			break;
 
@@ -67,21 +71,25 @@ bool FetchUnit::tick(Register* ir, Register* pc, std::vector<MemoryLocation>* m,
 			case OP_BGTEZ:
 				if (debug) {
 					std::cout << "Found a conditional branch at location " << std::to_string(pc->contents) << std::endl;
+					std::cout << "Decide whether to jump by " << dataCond.im1 << " or not." << std::endl;
 				}
-				// TODO: Stall until the rest of the pipeline catches up
+				stalled = true;
+			break;
+
+			case OP_HLT:
+				if (debug) {
+					std::cout << "Found a halt at location " << std::to_string(pc->contents) << std::endl;
+				}
+				stalled = true;
 			break;
 
 			default:
-				// Increment the PC
 				pc->contents++;
 			break;
 		}
 	} else {
-		// Increment the PC
 		pc->contents++;
 	}
 
-	if (debug) {
-		std::cout << "fu.pc = " << pc->toString() << std::endl;
-	}
+	return stalled;
 }

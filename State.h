@@ -25,9 +25,11 @@ using namespace std;
 class State {
 private:
 	unsigned int ticks;
+	unsigned int waitForFetch, waitForDecode, waitForExecute;
 	int state;
 	bool debug;
 	bool pipeline;
+	bool stalled;
 	FetchUnit fu;
 	DecodeUnit du;
 	ExecutionUnit eu;
@@ -44,10 +46,16 @@ private:
 
 		// Initial value of program counter is set to be 0
 		pc.contents = 0;
-		fu.setPc(pc.contents);
+		fu.pc = pc;
 
 		// Clear ticks
 		ticks = 0;
+
+		// Not stalled
+		stalled = false;
+		waitForFetch = 0;
+		waitForDecode = 1;
+		waitForExecute = 2;
 
 		// Set debug to false
 		setDebug(false);

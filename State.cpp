@@ -105,32 +105,62 @@ bool State::tick() {
 		cout << getTicks() << endl;
 	}
 
+	// TODO: stall at branch
+	// TODO: branch prediction
 	if (getPipeline()) {
-		// Fetch
-		fu.tick(&memory);
+		// Execute
+		if (!waitForExecute) {
+			halted = eu.tick(&pc, &registerFile, &memory);
+			if (halted) {
+				return halted;
+			}
+		} else {
+			waitForExecute--;
+		}
 
 		// Decode
-		// TODO - this hasn't been filled yet!
-		// TODO - what about stalls?
-		if (getTicks() > 0) {
+		if (!waitForDecode) {
 			du.tick(&ir, &eu);
 
-			// Update registers
-			if (getDebug()) {
-				cout << "pc = " << pc.toString() << endl;
-				cout << "ir = " << ir.toString() << endl;
-				cout << "pc\' = " << fu.getPc().toString() << endl;
-				cout << "ir\' = " << fu.getIr().toString() << endl;
+			// Wait for one tick
+			if (stalled) {
+				waitForDecode = 1;
 			}
-			pc = fu.getPc();
-			ir = fu.getIr();
+		} else {
+			waitForDecode--;
 		}
 
-		// Execute
-		// TODO - this hasn't been filled yet!
-		if (getTicks() > 1) {
-			halted = eu.tick(&pc, &registerFile, &memory);
+		// Fetch
+		if (!waitForFetch) {
+			// Previous instruction caused a stall?
+			// If so, use EU-updated PC
+			if (stalled) {
+				cout << "waitForFetch finished. pc = " << pc.toString() << endl;
+				stalled = fu.tick(&fu.ir, &pc, &memory, true);
+				fu.pc = pc;
+			} else {
+				stalled = fu.tick(&memory);
+			}
+
+			// Newly fetched instruction caused a stall
+			// Wait for two ticks
+			if (stalled) {
+				cout << "Stalled again!" << endl;
+				waitForFetch = 2;
+			}
+		} else {
+			waitForFetch--;
+			cout << "waitForFetch = " << waitForFetch << endl;
 		}
+
+		// Update registers
+		if (getDebug()) {
+			cout << "ir = " << ir.toString() << endl;
+			cout << "pc = " << pc.toString() << endl;
+			cout << fu.toString() << endl << endl;
+		}
+		pc = fu.pc;
+		ir = fu.ir;
 	} else {
 		halted = tickNoPipeline();
 	}
