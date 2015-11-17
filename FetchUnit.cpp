@@ -8,6 +8,7 @@
 #include "FetchUnit.h"
 #include "DecodeUnit.h"
 #include "opcodes.h"
+#include "common.h"
 	
 FetchUnit::FetchUnit() {
 	// Initialise the local program counter
@@ -45,15 +46,17 @@ bool FetchUnit::tick(Register* ir, Register* pc, std::vector<MemoryLocation>* m,
 	// Fill the instruction register
 	ir->contents = m->at(pc->contents).contents;
 
-	// Not stalled
-	stalled = false;
-
 	if (pipeline) {
 		// Decode the instruction and check for a branch
 		// if the branch is conditional, stall
 		instruction_t instr = *(instruction_t*) &ir->contents;
 		instruction_oi_t data = *(instruction_oi_t *) &ir->contents; // B
 		instruction_ori_t dataCond = *(instruction_ori_t *) &ir->contents; // Conditional
+		
+		if (debug) {
+			std::cout << "Fetched instruction " << optos(instr.opcode) << std::endl;
+		}
+
 		switch (instr.opcode) {
 			case OP_B:
 				if (debug) {
@@ -73,23 +76,23 @@ bool FetchUnit::tick(Register* ir, Register* pc, std::vector<MemoryLocation>* m,
 					std::cout << "Found a conditional branch at location " << std::to_string(pc->contents) << std::endl;
 					std::cout << "Decide whether to jump by " << dataCond.im1 << " or not." << std::endl;
 				}
-				stalled = true;
+				return true;
 			break;
 
 			case OP_HLT:
 				if (debug) {
 					std::cout << "Found a halt at location " << std::to_string(pc->contents) << std::endl;
 				}
-				stalled = true;
-			break;
-
-			default:
-				pc->contents++;
+				return true;
 			break;
 		}
-	} else {
-		pc->contents++;
 	}
 
-	return stalled;
+	// Always increment, unless stalled
+	// Even if we've already added an offset using a branch.
+	// This is because the offset operand assumes an incremented PC
+	pc->contents++;
+
+	// Not stalled!
+	return false;
 }

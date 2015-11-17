@@ -105,6 +105,10 @@ void ExecutionUnit::issue(uint8_t opcode) {
 bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<MemoryLocation>* m) {
 	bool halted = false;
 
+	if (debug) {
+		std::cout << "Executing instruction " << optos(opcode) << std::endl;
+	}
+
 	// Signed value representations
 	int32_t r1val_s, r2val_s, r3val_s;
 	r1val_s = r->at(r1).contents;

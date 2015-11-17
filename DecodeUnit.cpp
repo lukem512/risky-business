@@ -15,6 +15,10 @@ void DecodeUnit::tick(Register *ir, ExecutionUnit* eu) {
 	// Cast to struct to decode bits
 	instruction_t instr = *(instruction_t*) &ir->contents;
 
+	if (debug) {
+		std::cout << "Decoding instruction " << optos(instr.opcode) << std::endl;
+	}
+
 	// Decode operands
 	if (IS_O(instr.opcode)) {
 		if (debug) {

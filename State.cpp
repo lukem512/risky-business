@@ -124,7 +124,7 @@ bool State::tick() {
 
 			// Wait for one tick
 			if (stalled) {
-				waitForDecode = 1;
+				waitForDecode = 2;
 			}
 		} else {
 			waitForDecode--;
@@ -135,9 +135,9 @@ bool State::tick() {
 			// Previous instruction caused a stall?
 			// If so, use EU-updated PC
 			if (stalled) {
-				cout << "waitForFetch finished. pc = " << pc.toString() << endl;
-				stalled = fu.tick(&fu.ir, &pc, &memory, true);
-				fu.pc = pc;
+				// Increment program counter - we want to fetch the next entry!
+				fu.pc.contents = pc.contents + 1;
+				stalled = fu.tick(&memory);
 			} else {
 				stalled = fu.tick(&memory);
 			}
@@ -145,12 +145,10 @@ bool State::tick() {
 			// Newly fetched instruction caused a stall
 			// Wait for two ticks
 			if (stalled) {
-				cout << "Stalled again!" << endl;
 				waitForFetch = 2;
 			}
 		} else {
 			waitForFetch--;
-			cout << "waitForFetch = " << waitForFetch << endl;
 		}
 
 		// Update registers
@@ -163,6 +161,10 @@ bool State::tick() {
 		ir = fu.ir;
 	} else {
 		halted = tickNoPipeline();
+	}
+
+	if (getDebug()) {
+		cout << endl;
 	}
 
 	ticks++;
