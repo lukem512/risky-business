@@ -105,7 +105,6 @@ bool State::tick() {
 		cout << getTicks() << endl;
 	}
 
-	// TODO: stall at branch
 	// TODO: branch prediction
 	if (getPipeline()) {
 		// Execute
@@ -152,11 +151,6 @@ bool State::tick() {
 		}
 
 		// Update registers
-		if (getDebug()) {
-			cout << "ir = " << ir.toString() << endl;
-			cout << "pc = " << pc.toString() << endl;
-			cout << fu.toString() << endl << endl;
-		}
 		pc = fu.pc;
 		ir = fu.ir;
 	} else {
