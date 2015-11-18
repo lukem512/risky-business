@@ -28,7 +28,7 @@ bool State::getDebug() {
 }
 
 void State::setPipeline(bool pipeline) {
-	this->pipeline = pipeline;;
+	this->pipeline = pipeline;
 }
 
 bool State::getPipeline() {
@@ -63,6 +63,10 @@ void State::print() {
 
 unsigned int State::getTicks() {
 	return ticks;
+}
+
+float State::getInstructionsPerTick() {
+	return ((float) eu.n / (float) getTicks());
 }
 
 bool State::tickNoPipeline() {

@@ -82,7 +82,14 @@ int main(int argc, char** argv){
 	}
 
 	std::cout << std::endl;
-	s.print();
+	std::cout << "Finished execution successfully." << std::endl;
+	std::cout << "Average instructions per cycle: " << s.getInstructionsPerTick();
+	std::cout << " (" << s.getTicks() << " cycles)" << std::endl;
+	std::cout << std::endl;
+
+	if (s.getDebug()) {
+		s.print();
+	}
 
 	return 0;
 }

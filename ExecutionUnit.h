@@ -27,6 +27,7 @@ private:
 
 public:
 	bool debug;
+	unsigned int n; // instruciton count
 	
 	ExecutionUnit();
 	std::string toString();

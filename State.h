@@ -82,6 +82,7 @@ public:
 	void setPipeline(bool pipeline);
 	bool getPipeline();
 	void print();
+	float getInstructionsPerTick();
 	unsigned int getTicks();
 	bool tick();
 };

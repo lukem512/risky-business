@@ -20,6 +20,9 @@ ExecutionUnit::ExecutionUnit() {
 
 	// No debugging by default
 	debug = false;
+
+	// Reset instruction counter
+	n = 0;
 }
 
 std::string ExecutionUnit::toString() {
@@ -310,5 +313,6 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 		break;
 	}
 
+	n++;
 	return halted;
 }
