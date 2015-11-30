@@ -1,23 +1,31 @@
+// Luke Mitchell, 2015
+// luke.mitchell.2011@my.bristol.ac.uk
+
+#include <algorithm>
+
+#include "Dependence.h"
+#include "opcodes.h"
+
 // Get the set of memory locations read by instr
-std::vector<MemoryLocation> Dependence::IM(instruction_t instr, Register* pc, std::vector<Register>* r) {
-	std::vector<MemoryLocation> vim;
+std::vector<uint32_t> Dependence::IM(instruction_t instr, uint32_t pc, std::vector<Register>* r) {
+	std::vector<uint32_t> vim;
 
 	if (IS_OI(instr.opcode)) {
-		instruction_oi_t data = *(instruction_oi_t *) &ir->contents;
+		instruction_oi_t data = *(instruction_oi_t *) &instr;
 
 		switch (instr.opcode) {
 			case OP_B:
-				vim.push_back(new MemoryLocation(pc->contents + data.im1));
+				vim.push_back(pc + data.im1);
 			break;
 		}
 	}
 
 	if (IS_ORI(instr.opcode)) {
-		instruction_ori_t data = *(instruction_ori_t *) &ir->contents;
+		instruction_ori_t data = *(instruction_ori_t *) &instr;
 
 		switch (instr.opcode) {
 			case OP_LD:
-				vim.push_back(new MemoryLocation(data.im1));
+				vim.push_back(data.im1);
 			break;
 
 			case OP_BZ:
@@ -26,17 +34,17 @@ std::vector<MemoryLocation> Dependence::IM(instruction_t instr, Register* pc, st
 			case OP_BLTEZ:
 			case OP_BGTZ:
 			case OP_BGTEZ:
-				vim.push_back(new MemoryLocation(pc->contents + data.im1));
+				vim.push_back(pc + data.im1);
 			break;
 		}
 	}
 
 	if (IS_ORR(instr.opcode)) {
-		instruction_orr_t data = *(instruction_orr_t *) &ir->contents;
+		instruction_orr_t data = *(instruction_orr_t *) &instr;
 
 		switch (instr.opcode) {
 			case OP_LDR:
-				vim.push_back(new MemoryLocation(r[data.r2.contents].contents));
+				vim.push_back(r->at(data.r2).contents);
 			break;
 		}
 	}
@@ -45,11 +53,11 @@ std::vector<MemoryLocation> Dependence::IM(instruction_t instr, Register* pc, st
 }
 
 // Get the set of registers read by instr
-std::vector<Register> Dependence::IR(instruction_t instr) {
-	std::vector<Register> vir;
+std::vector<uint8_t> Dependence::IR(instruction_t instr) {
+	std::vector<uint8_t> vir;
 
 	if (IS_ORI(instr.opcode)) {
-		instruction_ori_t data = *(instruction_ori_t *) &ir->contents;
+		instruction_ori_t data = *(instruction_ori_t *) &instr;
 
 		switch (instr.opcode) {
 			case OP_ST:
@@ -59,56 +67,57 @@ std::vector<Register> Dependence::IR(instruction_t instr) {
 			case OP_BLTEZ:
 			case OP_BGTZ:
 			case OP_BGTEZ:
-				vir.push_back(new Register(data.r1));
+				vir.push_back(data.r1);
 			break;
 		}
 	}
 
 	if (IS_ORR(instr.opcode)) {
-		instruction_orr_t data = *(instruction_orr_t *) &ir->contents;
+		instruction_orr_t data = *(instruction_orr_t *) &instr;
 
 		switch (instr.opcode) {
-			case: OP_STR:
-				vir.push_back(new Register(data.r1));
+			case OP_STR:
+				vir.push_back(data.r1);
 			break;
 		}
 
-		vir.push_back(new Register(data.r2));
+		vir.push_back(data.r2);
 	}
 
 	if (IS_ORRR(instr.opcode)) {
-		instruction_orrr_t data = *(instruction_orrr_t *) &ir->contents;
-		vir.push_back(new Register(data.r2));
-		vir.push_back(new Register(data.r3));
+		instruction_orrr_t data = *(instruction_orrr_t *) &instr;
+		vir.push_back(data.r2);
+		vir.push_back(data.r3);
 	}
 
 	if (instr.opcode == OP_PRNT) {
-		vir.push_back(new Register(data.r1));
+		instruction_or_t data = *(instruction_or_t *) &instr;
+		vir.push_back(data.r1);
 	}
 
 	return vir;
 }
 
 // Get the set of memory locations written by instr
-std::vector<MemoryLocation> Dependence::OM(instruction_t instr) {
-	std::vector<MemoryLocation> vom;
+std::vector<uint32_t> Dependence::OM(instruction_t instr, std::vector<Register>* r) {
+	std::vector<uint32_t> vom;
 
 	if (IS_ORI(instr.opcode)) {
-		instruction_ori_t data = *(instruction_ori_t *) &ir->contents;
+		instruction_ori_t data = *(instruction_ori_t *) &instr;
 
 		switch (instr.opcode) {
 			case OP_ST:
-				vim.push_back(new MemoryLocation(data.im1));
+				vom.push_back(data.im1);
 			break;
 		}
 	}
 
 	if (IS_ORR(instr.opcode)) {
-		instruction_orr_t data = *(instruction_orr_t *) &ir->contents;
+		instruction_orr_t data = *(instruction_orr_t *) &instr;
 
 		switch (instr.opcode) {
 			case OP_STR:
-				vim.push_back(new MemoryLocation(r[data.r1.contents].contents));
+				vom.push_back(r->at(data.r1).contents);
 			break;
 		}
 	}
@@ -117,58 +126,71 @@ std::vector<MemoryLocation> Dependence::OM(instruction_t instr) {
 }
 
 // Get the set of registers written by instr
-std::vector<Register> Dependence::OR(instruction_t instr) {
-	std::vector<Register> vor;
+std::vector<uint8_t> Dependence::OR(instruction_t instr) {
+	std::vector<uint8_t> vor;
 
 	if (IS_ORI(instr.opcode)) {
-		instruction_ori_t data = *(instruction_ori_t *) &ir->contents;
+		instruction_ori_t data = *(instruction_ori_t *) &instr;
 		switch (instr.opcode) {
 			case OP_LD:
-				vor.push_back(new Register(data.r1));
+				vor.push_back(data.r1);
 			break;
 		}
 	}
 
 	if (IS_ORR(instr.opcode)) {
-		instruction_orr_t data = *(instruction_orr_t *) &ir->contents;
+		instruction_orr_t data = *(instruction_orr_t *) &instr;
 
 		switch (instr.opcode) {
-			case: OP_MOV:
-			case: OP_LDR:
-				vor.push_back(new Register(data.r1));
+			case OP_MOV:
+			case OP_LDR:
+				vor.push_back(data.r1);
 			break;
 		}
 	}
 
 	if (IS_ORRR(instr.opcode)) {
-		instruction_orrr_t data = *(instruction_orrr_t *) &ir->contents;
-		vor.push_back(new Register(data.r1));
+		instruction_orrr_t data = *(instruction_orrr_t *) &instr;
+		vor.push_back(data.r1);
 	}
 
 	return vor;
 }
 
-bool Dependence::depends(Register s1, Register s2, Register* pc, std::vector<Register>* r) {
-	// Bernstein condition
-	// s2 depends on s1 if the following is true:
-	// [I(s1) ∩ O(s2)] ∪ [O(s1) ∩ I(s2)] ∪ [O(s1) ∩ O(s2)] ≠ Ø
-	instruction_t s1_instr = *(instruction_t*) &s1->contents;
-	instruction_t s2_instr = *(instruction_t*) &s2->contents;
+bool Dependence::depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Register>* r) {
+	__depends(s1, s2, pc, r);
+}
 
-	// Print, NOP never causes a dep.
-	if (s1_instr.opcode == OP_NOP || s1_instr.opcode == OP_PRNT) {
+bool Dependence::depends(uint32_t s1, uint32_t s2, Register* pc, std::vector<Register>* r) {
+	__depends(s1, s2, pc->contents, r);
+}
+
+bool Dependence::depends(Register s1, Register s2, Register* pc, std::vector<Register>* r) {
+	__depends(s1.contents, s2.contents, pc->contents, r);
+}
+
+// Bernstein condition
+// s2 depends on s1 if the following is true:
+// [I(s1) ∩ O(s2)] ∪ [O(s1) ∩ I(s2)] ∪ [O(s1) ∩ O(s2)] ≠ Ø
+bool Dependence::__depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Register>* r) {
+	// Get instructions
+	instruction_t s1_instr = *(instruction_t*) &s1;
+	instruction_t s2_instr = *(instruction_t*) &s2;
+
+	// NOP never causes a dep.
+	if (s1_instr.opcode == OP_NOP) {
 		return false;
 	}
 
 	// Compute the sets
-	std::vector<MemoryLocation> ims1, oms1, ims2, oms2;
-	std::vector<Register> irs1, ors1, irs2, ors2;
+	std::vector<uint32_t> ims1, oms1, ims2, oms2;
+	std::vector<uint8_t> irs1, ors1, irs2, ors2;
 
-	ims1 = IM(s1_instr);
-	ims2 = IM(s2_instr);
+	ims1 = IM(s1_instr, pc, r);
+	ims2 = IM(s2_instr, pc, r);
 
-	oms1 = OM(s1_instr);
-	oms2 = OM(s2_instr);
+	oms1 = OM(s1_instr, r);
+	oms2 = OM(s2_instr, r);
 
 	irs1 = IR(s1_instr);
 	irs2 = IR(s2_instr);
