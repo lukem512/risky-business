@@ -4,4 +4,4 @@ all: dependence
 
 .PHONY: dependence
 dependence:
-	g++ -o dependence -std=$(CPP_STD) ../../Dependence.cpp ../../Assembler.cpp dependence.cpp 
+	g++ -o dependence -std=$(CPP_STD) ../../Dependence.cpp ../../Assembler.cpp ../../Location.cpp ../../common.cpp dependence.cpp 

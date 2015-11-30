@@ -2,20 +2,21 @@
 // luke.mitchell.2011@my.bristol.ac.uk
 
 #include <algorithm>
+#include <set>
 
 #include "Dependence.h"
 #include "opcodes.h"
 
 // Get the set of memory locations read by instr
-std::vector<uint32_t> Dependence::IM(instruction_t instr, uint32_t pc, std::vector<Register>* r) {
-	std::vector<uint32_t> vim;
+std::set<uint32_t> Dependence::IM(instruction_t instr, uint32_t pc, std::vector<Register>* r) {
+	std::set<uint32_t> sim;
 
 	if (IS_OI(instr.opcode)) {
 		instruction_oi_t data = *(instruction_oi_t *) &instr;
 
 		switch (instr.opcode) {
 			case OP_B:
-				vim.push_back(pc + data.im1);
+				sim.insert(pc + data.im1);
 			break;
 		}
 	}
@@ -25,7 +26,7 @@ std::vector<uint32_t> Dependence::IM(instruction_t instr, uint32_t pc, std::vect
 
 		switch (instr.opcode) {
 			case OP_LD:
-				vim.push_back(data.im1);
+				sim.insert(data.im1);
 			break;
 
 			case OP_BZ:
@@ -34,7 +35,7 @@ std::vector<uint32_t> Dependence::IM(instruction_t instr, uint32_t pc, std::vect
 			case OP_BLTEZ:
 			case OP_BGTZ:
 			case OP_BGTEZ:
-				vim.push_back(pc + data.im1);
+				sim.insert(pc + data.im1);
 			break;
 		}
 	}
@@ -44,17 +45,17 @@ std::vector<uint32_t> Dependence::IM(instruction_t instr, uint32_t pc, std::vect
 
 		switch (instr.opcode) {
 			case OP_LDR:
-				vim.push_back(r->at(data.r2).contents);
+				sim.insert(r->at(data.r2).contents);
 			break;
 		}
 	}
 
-	return vim;
+	return sim;
 }
 
 // Get the set of registers read by instr
-std::vector<uint8_t> Dependence::IR(instruction_t instr) {
-	std::vector<uint8_t> vir;
+std::set<uint8_t> Dependence::IR(instruction_t instr) {
+	std::set<uint8_t> sir;
 
 	if (IS_ORI(instr.opcode)) {
 		instruction_ori_t data = *(instruction_ori_t *) &instr;
@@ -67,7 +68,7 @@ std::vector<uint8_t> Dependence::IR(instruction_t instr) {
 			case OP_BLTEZ:
 			case OP_BGTZ:
 			case OP_BGTEZ:
-				vir.push_back(data.r1);
+				sir.insert(data.r1);
 			break;
 		}
 	}
@@ -77,37 +78,37 @@ std::vector<uint8_t> Dependence::IR(instruction_t instr) {
 
 		switch (instr.opcode) {
 			case OP_STR:
-				vir.push_back(data.r1);
+				sir.insert(data.r1);
 			break;
 		}
 
-		vir.push_back(data.r2);
+		sir.insert(data.r2);
 	}
 
 	if (IS_ORRR(instr.opcode)) {
 		instruction_orrr_t data = *(instruction_orrr_t *) &instr;
-		vir.push_back(data.r2);
-		vir.push_back(data.r3);
+		sir.insert(data.r2);
+		sir.insert(data.r3);
 	}
 
 	if (instr.opcode == OP_PRNT) {
 		instruction_or_t data = *(instruction_or_t *) &instr;
-		vir.push_back(data.r1);
+		sir.insert(data.r1);
 	}
 
-	return vir;
+	return sir;
 }
 
 // Get the set of memory locations written by instr
-std::vector<uint32_t> Dependence::OM(instruction_t instr, std::vector<Register>* r) {
-	std::vector<uint32_t> vom;
+std::set<uint32_t> Dependence::OM(instruction_t instr, std::vector<Register>* r) {
+	std::set<uint32_t> som;
 
 	if (IS_ORI(instr.opcode)) {
 		instruction_ori_t data = *(instruction_ori_t *) &instr;
 
 		switch (instr.opcode) {
 			case OP_ST:
-				vom.push_back(data.im1);
+				som.insert(data.im1);
 			break;
 		}
 	}
@@ -117,23 +118,23 @@ std::vector<uint32_t> Dependence::OM(instruction_t instr, std::vector<Register>*
 
 		switch (instr.opcode) {
 			case OP_STR:
-				vom.push_back(r->at(data.r1).contents);
+				som.insert(r->at(data.r1).contents);
 			break;
 		}
 	}
 
-	return vom;
+	return som;
 }
 
 // Get the set of registers written by instr
-std::vector<uint8_t> Dependence::OR(instruction_t instr) {
-	std::vector<uint8_t> vor;
+std::set<uint8_t> Dependence::OR(instruction_t instr) {
+	std::set<uint8_t> sor;
 
 	if (IS_ORI(instr.opcode)) {
 		instruction_ori_t data = *(instruction_ori_t *) &instr;
 		switch (instr.opcode) {
 			case OP_LD:
-				vor.push_back(data.r1);
+				sor.insert(data.r1);
 			break;
 		}
 	}
@@ -144,17 +145,17 @@ std::vector<uint8_t> Dependence::OR(instruction_t instr) {
 		switch (instr.opcode) {
 			case OP_MOV:
 			case OP_LDR:
-				vor.push_back(data.r1);
+				sor.insert(data.r1);
 			break;
 		}
 	}
 
 	if (IS_ORRR(instr.opcode)) {
 		instruction_orrr_t data = *(instruction_orrr_t *) &instr;
-		vor.push_back(data.r1);
+		sor.insert(data.r1);
 	}
 
-	return vor;
+	return sor;
 }
 
 bool Dependence::depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Register>* r) {
@@ -183,8 +184,8 @@ bool Dependence::__depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Re
 	}
 
 	// Compute the sets
-	std::vector<uint32_t> ims1, oms1, ims2, oms2;
-	std::vector<uint8_t> irs1, ors1, irs2, ors2;
+	std::set<uint32_t> ims1, oms1, ims2, oms2;
+	std::set<uint8_t> irs1, ors1, irs2, ors2;
 
 	ims1 = IM(s1_instr, pc, r);
 	ims2 = IM(s2_instr, pc, r);
@@ -198,23 +199,51 @@ bool Dependence::__depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Re
 	ors1 = OR(s1_instr);
 	ors2 = OR(s2_instr);
 
+	// Output vectors
+	std::vector<uint32_t> smem;
+	std::vector<uint8_t> sreg;
+
 	// Check IM(s1) ∩ OM(s2)
-	if (std::set_intersection(ims1, oms2)) return true;
+	std::set_intersection(ims1.begin(), oms2.begin(), ims1.end(), oms2.end(), std::back_inserter(smem));
+
+	if (smem.size() > 0) {
+		return true;
+	}
 
 	// Check IM(s2) ∩ OM(s1)
-	if (std::set_intersection(oms1, ims2)) return true;
+	std::set_intersection(oms1.begin(), ims2.begin(), oms1.end(), ims2.end(), std::back_inserter(smem));
 
-	// Check IR(s1) ∩ OR(s2)
-	if (std::set_intersection(irs1, ors2)) return true;
+	if (smem.size() > 0) {
+		return true;
+	}
 
-	// Check IR(s2) ∩ OR(s1)
-	if (std::set_intersection(irs2, ors1)) return true;
+	// // Check IR(s1) ∩ OR(s2)
+	std::set_intersection(irs1.begin(), ors2.begin(), irs1.end(), ors2.end(), std::back_inserter(sreg));
 
-	// Check OM(s1) ∩ OM(s2)
-	if (std::set_intersection(oms1, oms2)) return true;
+	if (sreg.size() > 0) {
+		return true;
+	}
 
-	// Check OR(s1) ∩ OR(s2)
-	if (std::set_intersection(ors1, ors2)) return true;
+	// // Check IR(s2) ∩ OR(s1)
+	std::set_intersection(irs2.begin(), ors1.begin(), irs2.end(), ors1.end(), std::back_inserter(sreg));
+
+	if (sreg.size() > 0) {
+		return true;
+	}
+
+	// // Check OM(s1) ∩ OM(s2)
+	std::set_intersection(oms1.begin(), oms2.begin(), oms1.end(), oms2.end(), std::back_inserter(smem));
+
+	if (smem.size() > 0) {
+		return true;
+	}
+
+	// // Check OR(s1) ∩ OR(s2)
+	std::set_intersection(ors1.begin(), ors2.begin(), ors1.end(), ors2.end(), std::back_inserter(sreg));
+
+	if (sreg.size() > 0) {
+		return true;
+	}
 
 	return false;
 }

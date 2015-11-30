@@ -337,6 +337,8 @@ unsigned int Assembler::getLabelLocation(std::string label) {
 	return UINT16_MAX;
 }
 
+#ifdef __STANDALONE_ASSEMBLER
+
 int main (int argc, char** argv) {
 	std::string input, output;
 
@@ -398,3 +400,5 @@ int main (int argc, char** argv) {
 
 	return 0;
 }
+
+#endif
