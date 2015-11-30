@@ -13,11 +13,13 @@ int main (int argc, char** argv) {
 	std::vector<uint32_t> program;
 
 	std::string source =
-		"NOP\n"
-		"LDC r1 10\n"
-		"LDC r2 15\n"
-		"ADD r3 r1 r2\n"
-		"PRNT r3";
+		"NOP\n" 			// 0
+		"LDC r1 10\n"		// 1
+		"LDC r2 15\n"		// 2
+		"ADD r3 r1 r2\n"	// 3
+		"PRNT r3\n"			// 4
+		"ADD r4 r3 r1\n"	// 5
+		"ADD r4 r1 r1\n";	// 6
 
 	ass.assemble(source, &program);
 
@@ -67,12 +69,31 @@ int main (int argc, char** argv) {
 	// See Test 3.
 	// Expected result: true
 	std::cout << "Test 4...";
-	if (Dependence::depends(program[2], program[3], &pc, &r) == true) {
+	if (Dependence::depends(program[3], program[4], &pc, &r) == true) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;
 		failed++;
 	}
 
-	return 0;
+	// Test 5
+	// Fails due to both instructions writing to the same register
+	// Expected result: false
+	std::cout << "Test 5...";
+	if (Dependence::depends(program[5], program[6], &pc, &r) == true) {
+		std::cout << " passed!" << std::endl;
+	} else {
+		std::cout << " failed!" << std::endl;
+		failed++;
+	}
+
+	// TODO: fail at IM(s1) ∩ OM(s2)
+
+	// TODO: fail at IM(s2) ∩ OM(s1)
+
+	// TODO: fail at IR(s1) ∩ OR(s2)
+
+	// TODO: fail at OM(s1) ∩ OM(s2)
+
+	return failed;
 }
