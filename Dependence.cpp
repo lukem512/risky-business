@@ -228,7 +228,6 @@ bool Dependence::__depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Re
 	std::set_intersection(ims1.begin(), ims1.end(), oms2.begin(), oms2.end(), std::back_inserter(smem));
 
 	if (smem.size() > 0) {
-		std::cout << "Failed at IM(s1) ∩ OM(s2)." << std::endl;
 		return true;
 	}
 
@@ -236,7 +235,6 @@ bool Dependence::__depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Re
 	std::set_intersection(oms1.begin(), oms1.end(), ims2.begin(), ims2.end(), std::back_inserter(smem));
 
 	if (smem.size() > 0) {
-		std::cout << "Failed at IM(s2) ∩ OM(s1)." << std::endl;
 		return true;
 	}
 
@@ -244,7 +242,6 @@ bool Dependence::__depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Re
 	std::set_intersection(irs1.begin(), irs1.end(), ors2.begin(), ors2.end(), std::back_inserter(sreg));
 
 	if (sreg.size() > 0) {
-		std::cout << "Failed at IR(s1) ∩ OR(s2)." << std::endl;
 		return true;
 	}
 
@@ -252,7 +249,6 @@ bool Dependence::__depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Re
 	std::set_intersection(irs2.begin(), irs2.end(), ors1.begin(), ors1.end(), std::back_inserter(sreg));
 
 	if (sreg.size() > 0) {
-		std::cout << "Failed at IR(s2) ∩ OR(s1)." << std::endl;
 		return true;
 	}
 
@@ -260,7 +256,6 @@ bool Dependence::__depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Re
 	std::set_intersection(oms1.begin(), oms1.end(), oms2.begin(), oms2.end(), std::back_inserter(smem));
 
 	if (smem.size() > 0) {
-		std::cout << "Failed at OM(s1) ∩ OM(s2)." << std::endl;
 		return true;
 	}
 
@@ -268,7 +263,6 @@ bool Dependence::__depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Re
 	std::set_intersection(ors1.begin(), ors1.end(), ors2.begin(), ors2.end(), std::back_inserter(sreg));
 
 	if (sreg.size() > 0) {
-		std::cout << "Failed at OR(s1) ∩ OR(s2)." << std::endl;
 		return true;
 	}
 
