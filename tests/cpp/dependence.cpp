@@ -78,9 +78,20 @@ int main (int argc, char** argv) {
 
 	// Test 5
 	// Fails due to both instructions writing to the same register
-	// Expected result: false
+	// Expected result: true
 	std::cout << "Test 5...";
 	if (Dependence::depends(program[5], program[6], &pc, &r) == true) {
+		std::cout << " passed!" << std::endl;
+	} else {
+		std::cout << " failed!" << std::endl;
+		failed++;
+	}
+
+	// Test 6
+	// See Test 3, reversed
+	// Expected result: true
+	std::cout << "Test 6...";
+	if (Dependence::depends(program[4], program[3], &pc, &r) == true) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;
@@ -90,8 +101,6 @@ int main (int argc, char** argv) {
 	// TODO: fail at IM(s1) ∩ OM(s2)
 
 	// TODO: fail at IM(s2) ∩ OM(s1)
-
-	// TODO: fail at IR(s1) ∩ OR(s2)
 
 	// TODO: fail at OM(s1) ∩ OM(s2)
 
