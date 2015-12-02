@@ -31,8 +31,8 @@ int main (int argc, char** argv) {
 	Register pc;
 	pc.contents = 0;
 
-	std::vector<Register> r;
-	r.assign(16, Register());
+	// std::vector<Register> r;
+	// r.assign(16, Register());
 
 	int failed = 0;
 
@@ -40,7 +40,7 @@ int main (int argc, char** argv) {
 	// NOP should not depend upon anything
 	// Expected result: false
 	std::cout << "Test 1...";
-	if (Dependence::depends(program[0], program[1], &pc, &r) == false) {
+	if (Dependence::depends(program[0], program[1], &pc/*, &r*/) == false) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;
@@ -51,7 +51,7 @@ int main (int argc, char** argv) {
 	// Two loads to different registers should not depend
 	// Expected result: false
 	std::cout << "Test 2...";
-	if (Dependence::depends(program[1], program[2], &pc, &r) == false) {
+	if (Dependence::depends(program[1], program[2], &pc/*, &r*/) == false) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;
@@ -62,7 +62,7 @@ int main (int argc, char** argv) {
 	// A load and an add, taking the LDC destination as an operand, depend
 	// Expected result: true
 	std::cout << "Test 3...";
-	if (Dependence::depends(program[1], program[3], &pc, &r) == true) {
+	if (Dependence::depends(program[1], program[3], &pc/*, &r*/) == true) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;
@@ -73,7 +73,7 @@ int main (int argc, char** argv) {
 	// See Test 3.
 	// Expected result: true
 	std::cout << "Test 4...";
-	if (Dependence::depends(program[3], program[4], &pc, &r) == true) {
+	if (Dependence::depends(program[3], program[4], &pc/*, &r*/) == true) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;
@@ -84,7 +84,7 @@ int main (int argc, char** argv) {
 	// Fails due to both instructions writing to the same register
 	// Expected result: true
 	std::cout << "Test 5...";
-	if (Dependence::depends(program[5], program[6], &pc, &r) == true) {
+	if (Dependence::depends(program[5], program[6], &pc/*, &r*/) == true) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;
@@ -95,7 +95,7 @@ int main (int argc, char** argv) {
 	// See Test 3, reversed
 	// Expected result: true
 	std::cout << "Test 6...";
-	if (Dependence::depends(program[4], program[3], &pc, &r) == true) {
+	if (Dependence::depends(program[4], program[3], &pc/*, &r*/) == true) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;
@@ -106,7 +106,7 @@ int main (int argc, char** argv) {
 	// A read and a write to the same location depend
 	// Expected result: true
 	std::cout << "Test 7...";
-	if (Dependence::depends(program[9], program[7], &pc, &r) == true) {
+	if (Dependence::depends(program[9], program[7], &pc/*, &r*/) == true) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;
@@ -117,7 +117,7 @@ int main (int argc, char** argv) {
 	// Test 7, reversed
 	// Expected result: true
 	std::cout << "Test 8...";
-	if (Dependence::depends(program[7], program[9], &pc, &r) == true) {
+	if (Dependence::depends(program[7], program[9], &pc/*, &r*/) == true) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;
@@ -128,7 +128,7 @@ int main (int argc, char** argv) {
 	// Two stores, to the same location, depend
 	// Expected result: true
 	std::cout << "Test 9...";
-	if (Dependence::depends(program[7], program[8], &pc, &r) == true) {
+	if (Dependence::depends(program[7], program[8], &pc/*, &r*/) == true) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;
@@ -139,7 +139,7 @@ int main (int argc, char** argv) {
 	// Two loads, from the same location, do not depend
 	// Expected result: false
 	std::cout << "Test 10...";
-	if (Dependence::depends(program[9], program[10], &pc, &r) == false) {
+	if (Dependence::depends(program[9], program[10], &pc/*, &r*/) == false) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;

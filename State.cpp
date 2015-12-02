@@ -19,8 +19,14 @@ State::State(uint32_t memorySize, uint8_t registerCount) {
 void State::setDebug(bool debug) {
 	this->debug = debug;
 	fu.debug = debug;
-	du.debug = debug;
-	eu.debug = debug;
+
+	for (int i = 0; i < du.size(); i++) {
+		du[i].debug = debug;
+	}
+
+	for (int i = 0; i < eu.size(); i++) {
+		eu[i].debug = debug;
+	}
 }
 
 bool State::getDebug() {
@@ -66,29 +72,41 @@ unsigned int State::getTicks() {
 }
 
 float State::getInstructionsPerTick() {
-	return ((float) eu.n / (float) getTicks());
+	float n = 0;
+
+	for (int i = 0; i < eu.size(); i++) {
+		n += eu[i].n;
+	}
+
+	return (n / (float) getTicks());
 }
 
 bool State::tickNoPipeline() {
 	bool halted = false;
+	std::vector<Register> irs = {ir};
 
 	switch (state) {
 		case STATE_FETCH:
 			// Grab the next instruction from memory
-			fu.tick(&ir, &pc, &memory, false);
+			fu.tick(&irs, &pc, &memory, false);
+			ir = irs[0];
 			state = STATE_DECODE;
 		break;
 
 		case STATE_DECODE:
 			// Decode the instruction from the PC
 			// and feed it into the EU
-			du.tick(&ir, &eu);
+			for (int i = 0; i < du.size(); i++) {
+				du[i].tick(&ir, &eu[i]);
+			}
 			state = STATE_EXECUTE;
 		break;
 
 		case STATE_EXECUTE:
 			// Poke the EU into life
-			halted = eu.tick(&pc, &registerFile, &memory);
+			for (int i = 0; i < eu.size(); i++) {
+				halted &= eu[i].tick(&pc, &registerFile, &memory);
+			}
 			state = STATE_FETCH;
 		break;
 
@@ -110,12 +128,16 @@ bool State::tick() {
 	}
 
 	// TODO: branch prediction
+	// TODO: multiple-cycle instruction execution
+	// TODO: out-of-order execution
 	if (getPipeline()) {
 		// Execute
 		if (!waitForExecute) {
-			halted = eu.tick(&pc, &registerFile, &memory);
-			if (halted) {
-				return halted;
+			for (int i = 0; i < eu.size(); i++) {
+				halted = eu[i].tick(&pc, &registerFile, &memory);
+				if (halted) {
+					return halted;
+				}
 			}
 		} else {
 			waitForExecute--;
@@ -123,7 +145,14 @@ bool State::tick() {
 
 		// Decode
 		if (!waitForDecode) {
-			du.tick(&ir, &eu);
+			for (int i = 0; i < du.size(); i++) {
+				// The IR buffer is filled from L to R;
+				// as soon as one is empty we can exit.
+				if (!fu.fetched[i]) {
+					break;
+				}
+				du[i].tick(&fu.ir[i], &eu[i]);
+			}
 
 			// Wait for one tick
 			if (stalled) {
@@ -156,7 +185,7 @@ bool State::tick() {
 
 		// Update registers
 		pc = fu.pc;
-		ir = fu.ir;
+		ir = fu.ir[0];
 	} else {
 		halted = tickNoPipeline();
 	}

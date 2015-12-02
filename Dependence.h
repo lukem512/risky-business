@@ -12,16 +12,16 @@
 
 class Dependence {
 private:
-	static std::vector<uint32_t> IM(instruction_t instr, uint32_t pc, std::vector<Register>* r);
+	static std::vector<uint32_t> IM(instruction_t instr, uint32_t pc/*, std::vector<Register>* r*/);
 	static std::vector<uint8_t> IR(instruction_t instr);
-	static std::vector<uint32_t> OM(instruction_t instr, std::vector<Register>* r);
+	static std::vector<uint32_t> OM(instruction_t instr/*, std::vector<Register>* r*/);
 	static std::vector<uint8_t> OR(instruction_t instr);
-	static bool __depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Register>* r);
+	static bool __depends(uint32_t s1, uint32_t s2, uint32_t pc/*, std::vector<Register>* r*/);
 
 public:
-	static bool depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Register>* r);
-	static bool depends(uint32_t s1, uint32_t s2, Register* pc, std::vector<Register>* r);
-	static bool depends(Register s1, Register s2, Register* pc, std::vector<Register>* r);
+	static bool depends(uint32_t s1, uint32_t s2, uint32_t pc/*, std::vector<Register>* r*/);
+	static bool depends(uint32_t s1, uint32_t s2, Register* pc/*, std::vector<Register>* r*/);
+	static bool depends(Register s1, Register s2, Register* pc/*, std::vector<Register>* r*/);
 };
 
 #endif

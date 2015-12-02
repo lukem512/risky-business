@@ -16,7 +16,7 @@ template <class T> inline std::vector<T> removeDuplicates (std::vector<T> v) {
 }
 
 // Get the vector of memory locations read by instr
-std::vector<uint32_t> Dependence::IM(instruction_t instr, uint32_t pc, std::vector<Register>* r) {
+std::vector<uint32_t> Dependence::IM(instruction_t instr, uint32_t pc/*, std::vector<Register>* r*/) {
 	std::vector<uint32_t> sim;
 
 	if (IS_OI(instr.opcode)) {
@@ -48,15 +48,15 @@ std::vector<uint32_t> Dependence::IM(instruction_t instr, uint32_t pc, std::vect
 		}
 	}
 
-	if (IS_ORR(instr.opcode)) {
-		instruction_orr_t data = *(instruction_orr_t *) &instr;
+	// if (IS_ORR(instr.opcode)) {
+	// 	instruction_orr_t data = *(instruction_orr_t *) &instr;
 
-		switch (instr.opcode) {
-			case OP_LDR:
-				sim.push_back(r->at(data.r2).contents);
-			break;
-		}
-	}
+	// 	switch (instr.opcode) {
+	// 		case OP_LDR:
+	// 			sim.push_back(r->at(data.r2).contents);
+	// 		break;
+	// 	}
+	// }
 
 	return removeDuplicates(sim);
 }
@@ -108,7 +108,7 @@ std::vector<uint8_t> Dependence::IR(instruction_t instr) {
 }
 
 // Get the vector of memory locations written by instr
-std::vector<uint32_t> Dependence::OM(instruction_t instr, std::vector<Register>* r) {
+std::vector<uint32_t> Dependence::OM(instruction_t instr/*, std::vector<Register>* r*/) {
 	std::vector<uint32_t> som;
 
 	if (IS_ORI(instr.opcode)) {
@@ -121,15 +121,15 @@ std::vector<uint32_t> Dependence::OM(instruction_t instr, std::vector<Register>*
 		}
 	}
 
-	if (IS_ORR(instr.opcode)) {
-		instruction_orr_t data = *(instruction_orr_t *) &instr;
+	// if (IS_ORR(instr.opcode)) {
+	// 	instruction_orr_t data = *(instruction_orr_t *) &instr;
 
-		switch (instr.opcode) {
-			case OP_STR:
-				som.push_back(r->at(data.r1).contents);
-			break;
-		}
-	}
+	// 	switch (instr.opcode) {
+	// 		case OP_STR:
+	// 			som.push_back(r->at(data.r1).contents);
+	// 		break;
+	// 	}
+	// }
 
 	return removeDuplicates(som);
 }
@@ -167,22 +167,22 @@ std::vector<uint8_t> Dependence::OR(instruction_t instr) {
 	return removeDuplicates(sor);
 }
 
-bool Dependence::depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Register>* r) {
-	__depends(s1, s2, pc, r);
+bool Dependence::depends(uint32_t s1, uint32_t s2, uint32_t pc/*, std::vector<Register>* r*/) {
+	__depends(s1, s2, pc/*, r*/);
 }
 
-bool Dependence::depends(uint32_t s1, uint32_t s2, Register* pc, std::vector<Register>* r) {
-	__depends(s1, s2, pc->contents, r);
+bool Dependence::depends(uint32_t s1, uint32_t s2, Register* pc/*, std::vector<Register>* r*/) {
+	__depends(s1, s2, pc->contents/*, r*/);
 }
 
-bool Dependence::depends(Register s1, Register s2, Register* pc, std::vector<Register>* r) {
-	__depends(s1.contents, s2.contents, pc->contents, r);
+bool Dependence::depends(Register s1, Register s2, Register* pc/*, std::vector<Register>* r*/) {
+	__depends(s1.contents, s2.contents, pc->contents/*, r*/);
 }
 
 // Bernstein condition
 // s2 depends on s1 if the following is true:
 // [I(s1) ∩ O(s2)] ∪ [O(s1) ∩ I(s2)] ∪ [O(s1) ∩ O(s2)] ≠ Ø
-bool Dependence::__depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Register>* r) {
+bool Dependence::__depends(uint32_t s1, uint32_t s2, uint32_t pc/*, std::vector<Register>* r*/) {
 	// Get instructions
 	instruction_t s1_instr = *(instruction_t*) &s1;
 	instruction_t s2_instr = *(instruction_t*) &s2;
@@ -196,14 +196,14 @@ bool Dependence::__depends(uint32_t s1, uint32_t s2, uint32_t pc, std::vector<Re
 	std::vector<uint32_t> ims1, oms1, ims2, oms2;
 	std::vector<uint8_t> irs1, ors1, irs2, ors2;
 
-	ims1 = IM(s1_instr, pc, r);
-	ims2 = IM(s2_instr, pc, r);
+	ims1 = IM(s1_instr, pc/*, r*/);
+	ims2 = IM(s2_instr, pc/*, r*/);
 
 	std::sort(ims1.begin(), ims1.end());
 	std::sort(ims2.begin(), ims2.end());
 
-	oms1 = OM(s1_instr, r);
-	oms2 = OM(s2_instr, r);
+	oms1 = OM(s1_instr/*, r*/);
+	oms2 = OM(s2_instr/*, r*/);
 
 	std::sort(oms1.begin(), oms1.end());
 	std::sort(oms2.begin(), oms2.end());

@@ -18,6 +18,8 @@ using namespace std;
 #define DEFAULT_MEMORY_SIZE 256
 #define DEFAULT_REGISTER_COUNT 16
 
+#define DEFAULT_PIPELINE_WIDTH 2
+
 #define STATE_FETCH 1
 #define STATE_DECODE 2
 #define STATE_EXECUTE 3
@@ -31,8 +33,9 @@ private:
 	bool pipeline;
 	bool stalled;
 	FetchUnit fu;
-	DecodeUnit du;
-	ExecutionUnit eu;
+
+	std::vector<DecodeUnit> du;
+	std::vector<ExecutionUnit> eu;
 	
 	// Initialise state
 	void init(uint32_t memorySize = DEFAULT_MEMORY_SIZE,
@@ -40,6 +43,10 @@ private:
 	  	// Initialise memory and registers
 		memory.assign(memorySize, MemoryLocation());
 		registerFile.assign(registerCount, Register());
+
+		// Set up pipeline
+		du.assign(DEFAULT_PIPELINE_WIDTH, DecodeUnit());
+		eu.assign(DEFAULT_PIPELINE_WIDTH, ExecutionUnit());
 
 		// Begin in the fetch part of the cycle
 		state = STATE_FETCH;

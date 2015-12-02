@@ -12,7 +12,8 @@
 class FetchUnit {
 public:
 	Register pc;
-	Register ir;
+	std::vector<Register> ir;
+	std::vector<bool> fetched;
 
 	bool debug;
 	bool stalled;
@@ -20,8 +21,8 @@ public:
 	FetchUnit();
 	std::string toString();
 	bool tick(std::vector<MemoryLocation>* m);
-	bool tick(Register* ir, Register* pc, std::vector<MemoryLocation>* m);
-	bool tick(Register* ir, Register* pc, std::vector<MemoryLocation>* m,
+	bool tick(std::vector<Register>* ir, Register* pc, std::vector<MemoryLocation>* m);
+	bool tick(std::vector<Register>* ir, Register* pc, std::vector<MemoryLocation>* m,
 		bool pipeline);
 };
 

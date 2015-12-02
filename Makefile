@@ -4,11 +4,11 @@ all: proc ass
 
 .PHONY: proc
 proc: 
-	g++ -o proc -std=$(CPP_STD) Location.cpp State.cpp FetchUnit.cpp DecodeUnit.cpp ExecutionUnit.cpp common.cpp option.cpp main.cpp
+	g++ -o proc -std=$(CPP_STD) Location.cpp State.cpp FetchUnit.cpp DecodeUnit.cpp ExecutionUnit.cpp Dependence.cpp common.cpp option.cpp main.cpp
 
 .PHONY: ass
 ass:
-	g++ -o ass -std=$(CPP_STD) common.cpp option.cpp Assembler.cpp
+	g++ -o ass -std=$(CPP_STD) -D __STANDALONE_ASSEMBLER common.cpp option.cpp Assembler.cpp
 
 clean:
 	rm ass
