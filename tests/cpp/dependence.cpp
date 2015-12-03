@@ -23,7 +23,9 @@ int main (int argc, char** argv) {
 		"ST r1 100\n"		// 7
 		"ST r2 100\n"		// 8
 		"LD r3 100\n"		// 9
-		"LD r4 100\n";		// 10
+		"LD r4 100\n"		// 10
+		"PRNT r10\n"		// 11
+		"ADD r10 r10 r11";  // 12
 
 	ass.assemble(source, &program);
 
@@ -140,6 +142,17 @@ int main (int argc, char** argv) {
 	// Expected result: false
 	std::cout << "Test 10...";
 	if (Dependence::depends(program[9], program[10], &pc/*, &r*/) == false) {
+		std::cout << " passed!" << std::endl;
+	} else {
+		std::cout << " failed!" << std::endl;
+		failed++;
+	}
+
+	// Test 11
+	// PRNT and and ADD
+	// Expected result: true
+	std::cout << "Test 10...";
+	if (Dependence::depends(program[11], program[12], &pc/*, &r*/) == true) {
 		std::cout << " passed!" << std::endl;
 	} else {
 		std::cout << " failed!" << std::endl;

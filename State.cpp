@@ -12,8 +12,8 @@ State::State() {
 }
 
 // Specific c'tor
-State::State(uint32_t memorySize, uint8_t registerCount) {
-	init(memorySize, registerCount);
+State::State(uint32_t memorySize, uint8_t registerCount, uint32_t pipelineWidth) {
+	init(memorySize, registerCount, pipelineWidth);
 }
 
 void State::setDebug(bool debug) {
@@ -41,6 +41,17 @@ bool State::getPipeline() {
 	return pipeline;
 }
 
+void State::setPipelineWidth(unsigned int width) {
+	// Set up pipeline
+	fu = FetchUnit(width);
+	du.assign(width, DecodeUnit());
+	eu.assign(width, ExecutionUnit());
+}
+
+unsigned int State::getPipelineWidth() {
+	return du.size();
+}
+
 void State::print() {
 	// Print registers
 	for (int i = 0; i < registerFile.size(); i++) {
@@ -50,7 +61,6 @@ void State::print() {
 	cout << endl;
 
 	cout << "pc = " << pc.toString() << endl;
-	cout << "ir = " << ir.toString() << endl;
 
 	cout << endl;
 
@@ -78,18 +88,15 @@ float State::getInstructionsPerTick() {
 		n += eu[i].n;
 	}
 
-	return (n / (float) getTicks());
+	return (n / (float) (getTicks() + 1));
 }
 
 bool State::tickNoPipeline() {
 	bool halted = false;
-	std::vector<Register> irs = {ir};
-
 	switch (state) {
 		case STATE_FETCH:
 			// Grab the next instruction from memory
-			fu.tick(&irs, &pc, &memory, false);
-			ir = irs[0];
+			fu.tick(&memory, false);
 			state = STATE_DECODE;
 		break;
 
@@ -97,7 +104,18 @@ bool State::tickNoPipeline() {
 			// Decode the instruction from the PC
 			// and feed it into the EU
 			for (int i = 0; i < du.size(); i++) {
-				du[i].tick(&ir, &eu[i]);
+				// The IR buffer is filled from L to R;
+				// as soon as one is empty we can exit.
+				if (!fu.ready[i]) {
+					du[i].ready = false;
+					break;
+				}
+
+				du[i].tick(&fu.irs[i], &fu.pcs[i], &eu[i]);
+
+				// Update flags
+				du[i].ready = true;
+				fu.ready[i] = false;
 			}
 			state = STATE_EXECUTE;
 		break;
@@ -105,7 +123,32 @@ bool State::tickNoPipeline() {
 		case STATE_EXECUTE:
 			// Poke the EU into life
 			for (int i = 0; i < eu.size(); i++) {
-				halted &= eu[i].tick(&pc, &registerFile, &memory);
+				// Ensure the decode unit feeding in
+				// has decoded its instruction.
+				if (!du[i].ready) {
+					break;
+				}
+
+				bool halts = false;
+
+				// Store the old PC
+				Register current;
+				current.contents = eu[i].pc.contents;
+
+				halts = eu[i].tick(&registerFile, &memory);
+
+				// Does the PC need updating?
+				if (current.contents != eu[i].pc.contents) {
+					fu.pc.contents = eu[i].pc.contents;
+				}
+
+				// Clear decode ready flag
+				du[i].ready = false;
+
+				// Did the instruction halt?
+				if (halts) {
+					halted = true;
+				}
 			}
 			state = STATE_FETCH;
 		break;
@@ -121,6 +164,7 @@ bool State::tickNoPipeline() {
 }
 
 bool State::tick() {
+
 	bool halted = false;
 
 	if (getDebug()) {
@@ -134,7 +178,23 @@ bool State::tick() {
 		// Execute
 		if (!waitForExecute) {
 			for (int i = 0; i < eu.size(); i++) {
-				halted = eu[i].tick(&pc, &registerFile, &memory);
+				// Ensure the decode unit feeding in
+				// has decoded its instruction.
+				if (!du[i].ready) {
+					break;
+				}
+
+				// If the PC value is changed, update global PC
+				Register current;
+				current.contents = eu[i].pc.contents;
+				halted = eu[i].tick(&registerFile, &memory);
+
+				// NOTE: This gets complicated with branch-prediction
+				if (current.contents != eu[i].pc.contents) {
+					pc.contents = eu[i].pc.contents;
+				}
+
+				du[i].ready = false;
 				if (halted) {
 					return halted;
 				}
@@ -148,10 +208,13 @@ bool State::tick() {
 			for (int i = 0; i < du.size(); i++) {
 				// The IR buffer is filled from L to R;
 				// as soon as one is empty we can exit.
-				if (!fu.fetched[i]) {
+				if (!fu.ready[i]) {
+					du[i].ready = false;
 					break;
 				}
-				du[i].tick(&fu.ir[i], &eu[i]);
+				du[i].tick(&fu.irs[i], &fu.pcs[i], &eu[i]);
+				du[i].ready = true;
+				fu.ready[i] = false;
 			}
 
 			// Wait for one tick
@@ -167,25 +230,22 @@ bool State::tick() {
 			// Previous instruction caused a stall?
 			// If so, use EU-updated PC
 			if (stalled) {
-				// Increment program counter - we want to fetch the next entry!
-				fu.pc.contents = pc.contents + 1;
-				stalled = fu.tick(&memory);
-			} else {
-				stalled = fu.tick(&memory);
+				fu.pc.contents = pc.contents;	
 			}
+
+			stalled = fu.tick(&memory);
 
 			// Newly fetched instruction caused a stall
 			// Wait for two ticks
 			if (stalled) {
 				waitForFetch = 2;
 			}
+
+			// Update registers
+			pc = fu.pc;
 		} else {
 			waitForFetch--;
 		}
-
-		// Update registers
-		pc = fu.pc;
-		ir = fu.ir[0];
 	} else {
 		halted = tickNoPipeline();
 	}

@@ -33,17 +33,49 @@ int main(int argc, char** argv){
 		std::cerr << "No input filename was specified." << std::endl;
 		return 1;
 	}
-	
-	// Use debug?
-	if (option_exists(argv, argv+argc, "-d")) {
-		std::cout << "Setting debug flag to true" << std::endl;
-		s.setDebug(true);
-	}
 
 	// Use pipeline?
 	if (option_exists(argv, argv+argc, "-no-pipeline")) {
-		std::cout << "Setting pipeline flag to false" << std::endl;
+		std::cout << "Setting pipeline flag to false." << std::endl;
 		s.setPipeline(false);
+		s.setPipelineWidth(1);
+	}
+
+	// Pipeline width
+	unsigned int width = 0;
+	if (option_exists(argv, argv+argc, "-width")) {
+		if (!s.getPipeline()) {
+			std::cerr << "You must enable the pipeline to set its width." << std::endl;
+			return 1;
+		}
+		char* w = get_option(argv, argv+argc, "-width");
+		if (w) {
+			width = atoi(w);
+			s.setPipelineWidth(width);
+			std::cout << "Setting pipeline width to " << width << "." << std::endl;
+		} else {
+			std::cerr << "No pipeline width specified." << std::endl;
+			return 1;
+		}
+	}
+
+	// Use debug?
+	if (option_exists(argv, argv+argc, "-d")) {
+		std::cout << "Setting debug flag to true." << std::endl;
+		s.setDebug(true);
+	}
+
+	// Cap execution time?
+	unsigned int maxTicks = 0;
+	if (option_exists(argv, argv+argc, "-max-ticks")) {
+		char* t = get_option(argv, argv+argc, "-max-ticks");
+		if (t) {
+			maxTicks = atoi(t);
+			std::cout << "Setting max-ticks to " << maxTicks << "." << std::endl;
+		} else {
+			std::cerr << "No maximum number of ticks specified." << std::endl;
+			return 1;
+		}
 	}
 
 	// Load program from file into vector
@@ -79,12 +111,16 @@ int main(int argc, char** argv){
 			// Execution halted
 			break;
 		}
+		if (maxTicks != 0 && s.getTicks() >= maxTicks) {
+			// Max ticks exceeded
+			break;
+		}
 	}
 
 	std::cout << std::endl;
 	std::cout << "Finished execution successfully." << std::endl;
 	std::cout << "Average instructions per cycle: " << s.getInstructionsPerTick();
-	std::cout << " (" << s.getTicks() << " cycles)" << std::endl;
+	std::cout << " (" << s.getTicks() + 1 << " cycles)" << std::endl;
 	std::cout << std::endl;
 
 	if (s.getDebug()) {

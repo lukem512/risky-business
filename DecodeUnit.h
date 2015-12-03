@@ -73,8 +73,10 @@ typedef struct {
 class DecodeUnit {
 public:
 	bool debug;
+	bool ready;
+
 	DecodeUnit();
-	void tick(Register* ir, ExecutionUnit* eu);
+	void tick(Register* ir, Register* pc, ExecutionUnit* eu);
 };
 
 #endif

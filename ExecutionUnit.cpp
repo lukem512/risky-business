@@ -17,6 +17,7 @@ ExecutionUnit::ExecutionUnit() {
 	r2 = 0;
 	r3 = 0;
 	im1 = 0;
+	pc.contents = 0;
 
 	// No debugging by default
 	debug = false;
@@ -105,7 +106,7 @@ void ExecutionUnit::issue(uint8_t opcode) {
 }
 
 // Returns true when state should be halted
-bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<MemoryLocation>* m) {
+bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* m) {
 	bool halted = false;
 
 	if (debug) {
@@ -164,7 +165,6 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 			// TODO: use a LoadStoreUnit
 			// For now, the memory access is instant
 			if (debug) {
-				std::cout << "OP_LD: test me!" << std::endl;
 				std::cout << rtos(r1) << " = " << "M[" << std::to_string((long long unsigned int)r->at(r2).contents) << "] (" << std::to_string((long long unsigned int)m->at(im1).contents) << ")" << std::endl;
 			}
 			r->at(r1).contents = m->at(im1).contents;
@@ -174,7 +174,6 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 			// TODO: use a LoadStoreUnit
 			// For now, the memory access is instant
 			if (debug) {
-				std::cout << "OP_ST: test me!" << std::endl;
 				std::cout << "M[" << std::to_string((long long unsigned int)im1) << "] = " << std::to_string((long long unsigned int)r->at(r1).contents) << std::endl;
 			}
 			m->at(im1).contents = r->at(r1).contents;
@@ -209,7 +208,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 			if (debug) {
 				std::cout << "B " << " " << std::to_string((long long int)im1) << std::endl;
 			}
-			pc->contents = pc->contents + im1;
+			pc.contents = pc.contents + im1;
 		break;
 
 		case OP_BZ:
@@ -220,7 +219,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
-				pc->contents = pc->contents + im1;
+				pc.contents = pc.contents + im1;
 			}
 		break;
 
@@ -232,7 +231,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
-				pc->contents = pc->contents + im1;
+				pc.contents = pc.contents + im1;
 			}
 		break;
 		
@@ -244,7 +243,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
-				pc->contents = pc->contents + im1;
+				pc.contents = pc.contents + im1;
 			}
 		break;
 
@@ -256,7 +255,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
-				pc->contents = pc->contents + im1;
+				pc.contents = pc.contents + im1;
 			}
 		break;
 
@@ -268,7 +267,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
-				pc->contents = pc->contents + im1;
+				pc.contents = pc.contents + im1;
 			}
 		break;
 
@@ -280,7 +279,7 @@ bool ExecutionUnit::tick(Register* pc, std::vector<Register>* r, std::vector<Mem
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
-				pc->contents = pc->contents + im1;
+				pc.contents = pc.contents + im1;
 			}
 		break;
 

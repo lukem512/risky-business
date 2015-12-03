@@ -28,6 +28,8 @@ private:
 public:
 	bool debug;
 	unsigned int n; // instruciton count
+
+	Register pc;
 	
 	ExecutionUnit();
 	std::string toString();
@@ -38,7 +40,7 @@ public:
 	void issue(uint8_t opcode, uint8_t r1);
 	void issue(uint8_t opcode, int16_t im1);
 	void issue(uint8_t opcode);
-	bool tick(Register* pc, std::vector<Register>* r,
+	bool tick(std::vector<Register>* r,
 	  std::vector<MemoryLocation>* m);
 };
 

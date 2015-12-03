@@ -10,19 +10,26 @@
 #include "MemoryLocation.h"
 
 class FetchUnit {
+private:
+	void init(uint32_t pipelineWidth);
+
 public:
 	Register pc;
-	std::vector<Register> ir;
-	std::vector<bool> fetched;
+	
+	std::vector<Register> pcs;
+	std::vector<Register> irs;
+	std::vector<bool> ready;
 
 	bool debug;
 	bool stalled;
 	
 	FetchUnit();
+	FetchUnit(uint32_t pipelineWidth);
 	std::string toString();
 	bool tick(std::vector<MemoryLocation>* m);
-	bool tick(std::vector<Register>* ir, Register* pc, std::vector<MemoryLocation>* m);
-	bool tick(std::vector<Register>* ir, Register* pc, std::vector<MemoryLocation>* m,
+	bool tick(std::vector<MemoryLocation>* m, bool pipelining);
+	bool tick(std::vector<Register>* irs, std::vector<Register>* pcs, std::vector<MemoryLocation>* m);
+	bool tick(std::vector<Register>* irs, std::vector<Register>* pcs, std::vector<MemoryLocation>* m,
 		bool pipeline);
 };
 
