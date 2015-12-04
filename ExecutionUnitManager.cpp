@@ -43,3 +43,11 @@ ExecutionUnit* ExecutionUnitManager::getAvailableExecutionUnit() {
 	}
 	return NULL;
 }
+
+bool ExecutionUnitManager::tick(std::vector<Register>* r, std::vector<MemoryLocation>* m) {
+	for (int i = 0; i < eus.size(); i++) {
+		if (eus[i].tick(r, m)) {
+			return true;
+		}
+	}
+}

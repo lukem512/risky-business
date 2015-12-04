@@ -9,3 +9,4 @@ TODO List
 [x] EU to hold instructions until execution is finished
 [ ] State to use new *Manager classes
 [ ] Test
+[ ] Multiple instruction lengths

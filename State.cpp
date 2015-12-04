@@ -171,6 +171,43 @@ bool State::tick() {
 		cout << getTicks() << endl;
 	}
 
+	if (getPipeline()) {
+		// Execute
+		if (!waitForExecute) {
+			halted = eum.tick(&registerFile, &memory);
+		} else {
+			waitForExecute--;
+		}
+
+		if (!waitForDecode) {
+			dum.tick();
+		} else {
+			waitForDecode--;
+		}
+
+		if (!waitForFetch) {
+			if (stalled) {
+				// TODO: which PC value do we use?
+				// Also, we now need to wait until EU executes
+				// a specific PC value, not just wait a certain amount of ticks
+			}
+			stalled = fum.tick(&memory, true);
+		} else {
+			waitForFetch--;
+		}
+	}
+
+	return halted;
+};
+
+bool State::tick() {
+
+	bool halted = false;
+
+	if (getDebug()) {
+		cout << getTicks() << endl;
+	}
+
 	// TODO: branch prediction
 	// TODO: multiple-cycle instruction execution
 	// TODO: out-of-order execution

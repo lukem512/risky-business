@@ -34,7 +34,7 @@ std::string FetchUnitManager::toString() {
 	return ss.str();
 }
 
-void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline) {
+bool FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline) {
 	for (int i = 0; i < fus.size(); i++) {
 		// Create dependents vector. This is all
 		// other FUs.
@@ -42,7 +42,9 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline) {
 		dependents.erase(dependents.begin() + i);
 
 		// Call tick!
-		fus[i].tick(m, dependents, pipeline):
+		if (fus[i].tick(m, dependents, pipeline)) {
+			return true;
+		}
 	}
 }
 

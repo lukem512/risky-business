@@ -8,6 +8,7 @@
 #include <string>
 
 #include "FetchUnit.h"
+#include "MemoryLocation.h"
 #include "DecodeUnitManager.h"
 
 class FetchUnitManager {
@@ -22,6 +23,7 @@ public:
 	bool getDebug();
 	std::string toString();
 	FetchUnit* getAvailableFetchUnit();
+	bool tick(std::vector<MemoryLocation>* m, bool pipeline);
 };
 
 #endif

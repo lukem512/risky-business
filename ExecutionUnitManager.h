@@ -27,6 +27,7 @@ public:
 	void setDebug(bool debug);
 	bool getDebug();
 	std::string toString();
+	bool tick(std::vector<Register>* r, std::vector<MemoryLocation>* m);
 	ExecutionUnit* getAvailableExecutionUnit();
 };
 

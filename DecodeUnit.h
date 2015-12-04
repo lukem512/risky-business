@@ -92,7 +92,7 @@ public:
 
 	DecodeUnit(ExecutionUnitManager* eum);
 	void issue(Register ir, Register pc);
-	void tick(ExecutionUnit* eu);
+	void tick();
 };
 
 #endif

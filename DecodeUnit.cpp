@@ -36,7 +36,7 @@ bool DecodeUnit::passToExecutionUnit() {
 	return false;
 }
 
-void DecodeUnit::tick(ExecutionUnit* eu) {
+void DecodeUnit::tick() {
 
 	// Is there an instruction waiting?
 	if (decoded) {
