@@ -212,6 +212,9 @@ bool State::tick() {
 					du[i].ready = false;
 					break;
 				}
+				// TODO: this should pass ALL execution units
+				// and the DU should select one.
+				// This would allow for heterogenous EUs.
 				du[i].tick(&fu.irs[i], &fu.pcs[i], &eu[i]);
 				du[i].ready = true;
 				fu.ready[i] = false;

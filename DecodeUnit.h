@@ -71,12 +71,18 @@ typedef struct {
 } instruction_o_t;
 
 class DecodeUnit {
+private:
+	Register ir;	// Instruction register, passed from FU
+	Register pc;	// Program counter, passed from FU
+
 public:
-	bool debug;
-	bool ready;
+	bool debug;		// Debugging output
+	bool decoded; 	// Holding decoded instruction
+	bool ready;		// Ready to receive fetched input 
 
 	DecodeUnit();
-	void tick(Register* ir, Register* pc, ExecutionUnit* eu);
+	void issue(Register ir, Register pc);
+	void tick(ExecutionUnit* eu);
 };
 
 #endif

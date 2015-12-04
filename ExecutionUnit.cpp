@@ -22,6 +22,9 @@ ExecutionUnit::ExecutionUnit() {
 	// No debugging by default
 	debug = false;
 
+	// Ready for an instruction!
+	ready = true;
+
 	// Reset instruction counter
 	n = 0;
 }

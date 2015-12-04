@@ -20,14 +20,17 @@
 
 class ExecutionUnit {
 private:
-	uint8_t opcode; // instruction opcode
-	uint8_t r1, r2, r3; // register operands
-	int16_t im1; // immediate operand
+	uint8_t opcode; 	// Instruction opcode
+	uint8_t r1, r2, r3; // Register operands
+	int16_t im1; 		// Immediate operand
 	uint8_t type;
 
 public:
-	bool debug;
-	unsigned int n; // instruciton count
+	bool debug; 		// Debugging output
+	bool working; 		// Executing an instruction
+	bool ready;			// Ready to receive decoded input
+
+	unsigned int n; 	// Instruction count
 
 	Register pc;
 	

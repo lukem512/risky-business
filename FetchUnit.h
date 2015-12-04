@@ -11,26 +11,22 @@
 
 class FetchUnit {
 private:
-	void init(uint32_t pipelineWidth);
+	int delta;
+	void init();
 
 public:
 	Register pc;
-	
-	std::vector<Register> pcs;
-	std::vector<Register> irs;
-	std::vector<bool> ready;
+	Register ir;
 
-	bool debug;
+	bool debug;		// Debugging output
+	bool fetched;	// Holding fetched instruction
+	bool ready;		// Ready to fetch input
 	bool stalled;
 	
 	FetchUnit();
-	FetchUnit(uint32_t pipelineWidth);
 	std::string toString();
 	bool tick(std::vector<MemoryLocation>* m);
 	bool tick(std::vector<MemoryLocation>* m, bool pipelining);
-	bool tick(std::vector<Register>* irs, std::vector<Register>* pcs, std::vector<MemoryLocation>* m);
-	bool tick(std::vector<Register>* irs, std::vector<Register>* pcs, std::vector<MemoryLocation>* m,
-		bool pipeline);
 };
 
 #endif
