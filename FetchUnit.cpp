@@ -10,11 +10,14 @@
 #include "Dependence.h"
 #include "opcodes.h"
 #include "common.h"
-	
-void FetchUnit::init(uint32_t pipelineWidth) {
+
+FetchUnit::FetchUnit(DecodeUnitManager* dum) {
 	// Initialise the pc
 	pc.contents = 0;
 	delta = 0;
+
+	// Add local reference to DU manager
+	this->dum = dum;
 
 	// Set up flags
 	setState(true);
@@ -24,10 +27,6 @@ void FetchUnit::init(uint32_t pipelineWidth) {
 
 	// No debugging by default
 	debug = false;
-}
-
-FetchUnit::FetchUnit() {
-	init();
 }
 
 std::string FetchUnit::toString() {
@@ -43,12 +42,6 @@ std::string FetchUnit::toString() {
 	return ss.str();
 }
 
-// Toggles the FU state
-void FetchUnit::toggleState() {
-	fetched = !fetched;
-	ready = !ready;
-}
-
 // Sets the FU state.
 // When ready is true, the FU
 // is ready to accept input.
@@ -58,7 +51,7 @@ void FetchUnit::setState(bool ready) {
 }
 
 bool FetchUnit::passToDecodeUnit() {
-	DecodeUnit du = DecodeUnitManager.getAvailableDecodeUnit();
+	DecodeUnit du = dum.getAvailableDecodeUnit();
 	if (du) {
 		du.issue(ir, pc);
 		setState(true);
@@ -79,7 +72,7 @@ bool FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 	// Is there an instruction waiting?
 	if (fetched) {
 		if (!passToDecodeUnit()) {
-			continue;
+			return;
 		}
 	}
 

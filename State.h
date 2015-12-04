@@ -36,6 +36,10 @@ private:
 	FetchUnit fu;
 	std::vector<DecodeUnit> du;
 	std::vector<ExecutionUnit> eu;
+
+	FetchUnitManager fum;
+	DecodeUnitManager dum;
+	ExecutionUnitManager eum;
 	
 	// Initialise state
 	void init(uint32_t memorySize = DEFAULT_MEMORY_SIZE,
@@ -44,6 +48,11 @@ private:
 	  	// Initialise memory and registers
 		memory.assign(memorySize, MemoryLocation());
 		registerFile.assign(registerCount, Register());
+
+		// Set up variable-width pipeline
+		eum = ExecutionUnitManager(pipelineWidth);
+		dum = DecodeUnitManager(pipelineWidth, &eum);
+		fum = FetchUnitManager(pipelineWidth, &dum);
 
 		// Set up pipeline
 		setPipelineWidth(pipelineWidth);

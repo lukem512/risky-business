@@ -2,13 +2,16 @@
 // luke.mitchell.2011@my.bristol.ac.uk
 
 #include "FetchUnitManager.h"
-	
-FetchUnitManager::FetchUnitManager() {
-	init();
-}
 
-FetchUnitManager::FetchUnitManager(unsigned int n) {
-	init(n);
+FetchUnitManager::FetchUnitManager(unsigned int width, DecodeUnitManager* dum) {
+	// Set debugging to false, by default
+	debug = false;
+
+	// Store a local reference to the DU manager
+	this->dum = dum;
+
+	// Set up the Fetch Units
+	fus.assign(width, FetchUnit(dum));
 }
 
 void FetchUnitManager::setDebug(bool debug) {

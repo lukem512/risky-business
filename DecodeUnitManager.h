@@ -9,21 +9,14 @@
 
 #include "DecodeUnit.h"
 
-#define DEFAULT_DU_COUNT 1
-
 class DecodeUnitManager {
 private:
 	bool debug;
+	ExecutionUnitManager* eum;
 	std::vector<DecodeUnit> dus;
 
-	void init(unsigned int n = DEFAULT_DU_COUNT) {
-		debug = false;
-		dus.assign(width, DecodeUnit());
-	};
-
 public:
-	DecodeUnitManager();
-	DecodeUnitManager(unsigned int n);
+	DecodeUnitManager(unsigned int n, ExecutionUnitManager* eum);
 	void setDebug(bool debug);
 	bool getDebug();
 	std::string toString();

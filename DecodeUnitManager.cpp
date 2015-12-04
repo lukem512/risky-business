@@ -2,13 +2,16 @@
 // luke.mitchell.2011@my.bristol.ac.uk
 
 #include "DecodeUnitManager.h"
-	
-DecodeUnitManager::DecodeUnitManager() {
-	init();
-}
 
-DecodeUnitManager::DecodeUnitManager(unsigned int n) {
-	init(n);
+DecodeUnitManager::DecodeUnitManager(unsigned int width, ExecutionUnitManager* eum) {
+	// Set debugging to false, by default
+	debug = false;
+
+	// Store a local reference to the EU manager
+	this->eum = eum;
+
+	// Set up the Decode Units
+	dus.assign(width, DecodeUnit(eum));
 }
 
 void DecodeUnitManager::setDebug(bool debug) {

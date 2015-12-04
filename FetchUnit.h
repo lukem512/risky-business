@@ -8,11 +8,14 @@
 
 #include "Register.h"
 #include "MemoryLocation.h"
+#include "DecodeUnitManager.h"
 
 class FetchUnit {
 private:
+	DecodeUnitManager* dum;
 	int delta;
-	void init();
+
+	void setState(bool ready);
 
 public:
 	Register pc;
@@ -23,7 +26,7 @@ public:
 	bool ready;		// Ready to fetch input
 	bool stalled;
 	
-	FetchUnit();
+	FetchUnit(DecodeUnitManager* dum);
 	std::string toString();
 	bool tick(std::vector<MemoryLocation>* m);
 	bool tick(std::vector<MemoryLocation>* m, bool pipelining);

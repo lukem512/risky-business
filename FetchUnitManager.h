@@ -8,22 +8,16 @@
 #include <string>
 
 #include "FetchUnit.h"
-
-#define DEFAULT_FU_COUNT 1
+#include "DecodeUnitManager.h"
 
 class FetchUnitManager {
 private:
 	bool debug;
+	DecodeUnitManager* dum;
 	std::vector<FetchUnit> fus;
 
-	void init(unsigned int n = DEFAULT_FU_COUNT) {
-		debug = false;
-		fus.assign(width, FetchUnit());
-	};
-
 public:
-	FetchUnitManager();
-	FetchUnitManager(unsigned int n);
+	FetchUnitManager(unsigned int width, DecodeUnitManager* dum);
 	void setDebug(bool debug);
 	bool getDebug();
 	std::string toString();

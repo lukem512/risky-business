@@ -8,6 +8,7 @@
 
 #include "Register.h"
 #include "ExecutionUnit.h"
+#include "ExecutionUnitManager.h"
 #include "opcodes.h"
 
 // Instruction and unknown operands
@@ -72,15 +73,24 @@ typedef struct {
 
 class DecodeUnit {
 private:
-	Register ir;	// Instruction register, passed from FU
-	Register pc;	// Program counter, passed from FU
+	ExecutionUnitManager* eum;
+
+	Register ir;		// Instruction register, passed from FU
+	Register pc;		// Program counter, passed from FU
+
+	uint8_t opcode; 	// Instruction opcode
+	uint8_t r1, r2, r3; // Register operands
+	int16_t im1; 		// Immediate operand
+	uint8_t type;		// Type of instruction
+
+	void setState(bool ready);
 
 public:
 	bool debug;		// Debugging output
 	bool decoded; 	// Holding decoded instruction
 	bool ready;		// Ready to receive fetched input 
 
-	DecodeUnit();
+	DecodeUnit(ExecutionUnitManager* eum);
 	void issue(Register ir, Register pc);
 	void tick(ExecutionUnit* eu);
 };

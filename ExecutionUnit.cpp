@@ -23,10 +23,15 @@ ExecutionUnit::ExecutionUnit() {
 	debug = false;
 
 	// Ready for an instruction!
-	ready = true;
+	setState(true);
 
 	// Reset instruction counter
 	n = 0;
+}
+
+void ExecutionUnit::setState(bool ready) {
+	this->ready = ready;
+	working = !ready;
 }
 
 std::string ExecutionUnit::toString() {
@@ -61,60 +66,53 @@ std::string ExecutionUnit::toString() {
 	return ss.str();
 }
 
-void ExecutionUnit::issue(uint8_t opcode, uint8_t r1, uint8_t r2, uint8_t r3) {
-	type = EU_ISSUE_ORRR;
+// Issue the instruction to the EU
+// This is a general-purpose EU
+// Operands not needed are ignored, as determined by type
+void ExecutionUnit::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uint8_t r3, int16_t im1, Register pc) {
+	// Instruction type
+	this->type = type;
+	
+	// Instruction and operands
 	this->opcode = opcode;
 	this->r1 = r1;
 	this->r2 = r2;
 	this->r3 = r3;
-}
-
-void ExecutionUnit::issue(uint8_t opcode, uint8_t r1, uint8_t r2, int16_t im1) {
-	type = EU_ISSUE_ORRI;
-	this->opcode = opcode;
-	this->r1 = r1;
-	this->r2 = r2;
 	this->im1 = im1;
+
+	// Value of PC
+	this->pc = pc;
+
+	// Set up counter
+	// How many ticks to execute this instruction?
+	// TODO: vary this for different instructions!
+	count = 1;
 }
 
-void ExecutionUnit::issue(uint8_t opcode, uint8_t r1, uint8_t r2) {
-	type = EU_ISSUE_ORR;
-	this->opcode = opcode;
-	this->r1 = r1;
-	this->r2 = r2;
-}
-
-void ExecutionUnit::issue(uint8_t opcode, uint8_t r1, int16_t im1) {
-	type = EU_ISSUE_ORI;
-	this->opcode = opcode;
-	this->r1 = r1;
-	this->im1 = im1;
-}
-
-void ExecutionUnit::issue(uint8_t opcode, uint8_t r1) {
-	type = EU_ISSUE_OR;
-	this->opcode = opcode;
-	this->r1 = r1;
-}
-
-void ExecutionUnit::issue(uint8_t opcode, int16_t im1) {
-	type = EU_ISSUE_OI;
-	this->opcode = opcode;
-	this->im1 = im1;
-}
-
-void ExecutionUnit::issue(uint8_t opcode) {
-	type = EU_ISSUE_O;
-	this->opcode = opcode;
+bool ExecutionUnit::willCompleteThisTick() {
+	return (count <= 1);
 }
 
 // Returns true when state should be halted
 bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* m) {
-	bool halted = false;
 
 	if (debug) {
-		std::cout << "Executing instruction " << optos(opcode) << std::endl;
+		std::cout << "Executing instruction " << optos(opcode);
+		if (!willCompleteThisTick()) {
+			std::cout << " (" << count << " cycles remaining)";
+		}
+		std::cout << "." << std::endl;
 	}
+
+	// When the instruction is not complete, just return.
+	// NOTE: a more complete simulation could execute
+	// different parts of an instruction per-cycle.
+	if (!willCompleteThisTick()) {
+		return;
+	}
+
+	// Halted flag
+	bool halted = false;
 
 	// Signed value representations
 	int32_t r1val_s, r2val_s, r3val_s;
@@ -315,6 +313,14 @@ bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 		break;
 	}
 
+	// Set state to ready
+	setState(true);
+
+	// Update instruction counter
 	n++;
+
+	// Decrement execution counter
+	count--;
+
 	return halted;
 }
