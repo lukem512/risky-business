@@ -13,9 +13,14 @@
 #include "MemoryLocation.h"
 #include "Register.h"
 
+#include "FetchUnitManager.h"
+#include "DecodeUnitManager.h"
+#include "ExecutionUnitManager.h"
+#include "BranchTable.h"
+
 using namespace std;
 
-#define DEFAULT_MEMORY_SIZE 1024
+#define DEFAULT_MEMORY_SIZE 256
 #define DEFAULT_REGISTER_COUNT 16
 
 #define DEFAULT_PIPELINE_WIDTH 4
@@ -33,13 +38,11 @@ private:
 	bool pipeline;
 	bool stalled;
 
-	FetchUnit fu;
-	std::vector<DecodeUnit> du;
-	std::vector<ExecutionUnit> eu;
+	BranchTable bt;
 
-	FetchUnitManager fum;
-	DecodeUnitManager dum;
-	ExecutionUnitManager eum;
+	FetchUnitManager* fum;
+	DecodeUnitManager* dum;
+	ExecutionUnitManager* eum;
 	
 	// Initialise state
 	void init(uint32_t memorySize = DEFAULT_MEMORY_SIZE,
@@ -50,19 +53,15 @@ private:
 		registerFile.assign(registerCount, Register());
 
 		// Set up variable-width pipeline
-		eum = ExecutionUnitManager(pipelineWidth);
-		dum = DecodeUnitManager(pipelineWidth, &eum);
-		fum = FetchUnitManager(pipelineWidth, &dum);
-
-		// Set up pipeline
-		setPipelineWidth(pipelineWidth);
+		eum = new ExecutionUnitManager(pipelineWidth);
+		dum = new DecodeUnitManager(pipelineWidth-1, eum);
+		fum = new FetchUnitManager(pipelineWidth-1, dum);
 
 		// Begin in the fetch part of the cycle
 		state = STATE_FETCH;
 
 		// Initial value of program counter is set to be 0
 		pc.contents = 0;
-		fu.pc = pc;
 
 		// Clear ticks
 		ticks = 0;
@@ -96,8 +95,6 @@ public:
 	bool getDebug();
 	void setPipeline(bool pipeline);
 	bool getPipeline();
-	void setPipelineWidth(unsigned int width);
-	unsigned int getPipelineWidth();
 	void print();
 	float getInstructionsPerTick();
 	unsigned int getTicks();

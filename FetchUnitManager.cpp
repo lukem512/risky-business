@@ -1,6 +1,10 @@
 // Luke Mitchell, 2015
 // luke.mitchell.2011@my.bristol.ac.uk
 
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+
 #include "FetchUnitManager.h"
 
 FetchUnitManager::FetchUnitManager(unsigned int width, DecodeUnitManager* dum) {
@@ -10,6 +14,9 @@ FetchUnitManager::FetchUnitManager(unsigned int width, DecodeUnitManager* dum) {
 	// Store a local reference to the DU manager
 	this->dum = dum;
 
+	// Set up PC
+	pc.contents = 0;
+
 	// Set up the Fetch Units
 	fus.assign(width, FetchUnit(dum));
 }
@@ -17,7 +24,7 @@ FetchUnitManager::FetchUnitManager(unsigned int width, DecodeUnitManager* dum) {
 void FetchUnitManager::setDebug(bool debug) {
 	this->debug = debug;
 
-	for (int i = 0; i < eus.size(); i++) {
+	for (int i = 0; i < fus.size(); i++) {
 		fus[i].debug = debug;
 	}
 }
@@ -34,16 +41,42 @@ std::string FetchUnitManager::toString() {
 	return ss.str();
 }
 
-bool FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline) {
+void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, BranchTable* bt) {
+	int s = 0;
+
+	// If any FU is stalled, start from there
 	for (int i = 0; i < fus.size(); i++) {
+		if (fus[i].stalled) {
+			s = i;
+			break;
+		}
+	}
+
+	// TODO: when a HLT is fetched, all Fetch Units
+	// should stop reading new instructions
+
+	for (int i = s; i < fus.size(); i++) {
+
+		if (debug) {
+			std::cout << "[FU #" << i << "] calling tick()." << std::endl;
+		}
+
 		// Create dependents vector. This is all
 		// other FUs.
 		std::vector<FetchUnit> dependents(fus);
 		dependents.erase(dependents.begin() + i);
 
 		// Call tick!
-		if (fus[i].tick(m, dependents, pipeline)) {
-			return true;
+		fus[i].tick(m, &dependents, pipeline, bt, &pc);
+
+		if (fus[i].stalled) {
+			// Don't fill the other FUs
+			break;
+		}
+
+		if (fus[i].halted) {
+			// Don't fill the other FUs
+			break;
 		}
 	}
 }
@@ -53,6 +86,9 @@ bool FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline) {
 FetchUnit* FetchUnitManager::getAvailableFetchUnit() {
 	for (int i = 0; i < fus.size(); i++) {
 		if (fus[i].ready && !fus[i].fetched) {
+			if (debug) {
+				std::cout << "FU #" << i << " is available." << std::endl;
+			}
 			return &fus[i];
 		}
 	}

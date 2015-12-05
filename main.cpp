@@ -38,26 +38,26 @@ int main(int argc, char** argv){
 	if (option_exists(argv, argv+argc, "-no-pipeline")) {
 		std::cout << "Setting pipeline flag to false." << std::endl;
 		s.setPipeline(false);
-		s.setPipelineWidth(1);
+		// s.setPipelineWidth(1);
 	}
 
 	// Pipeline width
-	unsigned int width = 0;
-	if (option_exists(argv, argv+argc, "-width")) {
-		if (!s.getPipeline()) {
-			std::cerr << "You must enable the pipeline to set its width." << std::endl;
-			return 1;
-		}
-		char* w = get_option(argv, argv+argc, "-width");
-		if (w) {
-			width = atoi(w);
-			s.setPipelineWidth(width);
-			std::cout << "Setting pipeline width to " << width << "." << std::endl;
-		} else {
-			std::cerr << "No pipeline width specified." << std::endl;
-			return 1;
-		}
-	}
+	// unsigned int width = 0;
+	// if (option_exists(argv, argv+argc, "-width")) {
+	// 	if (!s.getPipeline()) {
+	// 		std::cerr << "You must enable the pipeline to set its width." << std::endl;
+	// 		return 1;
+	// 	}
+	// 	char* w = get_option(argv, argv+argc, "-width");
+	// 	if (w) {
+	// 		width = atoi(w);
+	// 		s.setPipelineWidth(width);
+	// 		std::cout << "Setting pipeline width to " << width << "." << std::endl;
+	// 	} else {
+	// 		std::cerr << "No pipeline width specified." << std::endl;
+	// 		return 1;
+	// 	}
+	// }
 
 	// Use debug?
 	if (option_exists(argv, argv+argc, "-d")) {
@@ -111,7 +111,7 @@ int main(int argc, char** argv){
 			// Execution halted
 			break;
 		}
-		if (maxTicks != 0 && s.getTicks() >= maxTicks) {
+		if (maxTicks != 0 && s.getTicks() + 1 >= maxTicks) {
 			// Max ticks exceeded
 			break;
 		}

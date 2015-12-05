@@ -8,6 +8,7 @@
 
 #include "Register.h"
 #include "MemoryLocation.h"
+#include "BranchTable.h"
 
 #define EU_ISSUE_ORRR 1
 #define EU_ISSUE_ORRI 2
@@ -33,17 +34,20 @@ public:
 	bool working; 		// Executing an instruction
 	bool ready;			// Ready to receive decoded input
 
+	bool halted;		// Flag declaring a HLT was executed
+	bool branched;		// Flag declaring a branch was executed
+
 	unsigned int n; 	// Executed instruction count
-	unsigned int count;	// Current instruction counter
+	int count;			// Current instruction counter
 
 	Register pc;		// PC value for instruction
 	
 	ExecutionUnit();
 	std::string toString();
 	void issue(uint8_t type, uint8_t opcode, uint8_t r1,
-	  uint8_t r2, uint8_t r3, int16_t im1, Register pc);
-	bool tick(std::vector<Register>* r,
-	  std::vector<MemoryLocation>* m);
+	  uint8_t r2, uint8_t r3, int16_t im1, Register* pc);
+	void tick(std::vector<Register>* r,
+	  std::vector<MemoryLocation>* m, BranchTable* bt);
 };
 
 #endif

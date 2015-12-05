@@ -10,6 +10,7 @@
 #include "FetchUnit.h"
 #include "MemoryLocation.h"
 #include "DecodeUnitManager.h"
+#include "BranchTable.h"
 
 class FetchUnitManager {
 private:
@@ -18,12 +19,14 @@ private:
 	std::vector<FetchUnit> fus;
 
 public:
+	Register pc;
+
 	FetchUnitManager(unsigned int width, DecodeUnitManager* dum);
 	void setDebug(bool debug);
 	bool getDebug();
 	std::string toString();
 	FetchUnit* getAvailableFetchUnit();
-	bool tick(std::vector<MemoryLocation>* m, bool pipeline);
+	void tick(std::vector<MemoryLocation>* m, bool pipeline, BranchTable* bt);
 };
 
 #endif

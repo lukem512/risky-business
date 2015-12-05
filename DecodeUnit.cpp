@@ -2,9 +2,11 @@
 // luke.mitchell.2011@my.bristol.ac.uk
 
 #include <iostream>
-#include "common.h"
+#include <sstream>
+#include <iomanip>
 
 #include "DecodeUnit.h"
+#include "common.h"
 
 DecodeUnit::DecodeUnit(ExecutionUnitManager* eum) {
 	// No debugging by default
@@ -17,9 +19,13 @@ DecodeUnit::DecodeUnit(ExecutionUnitManager* eum) {
 	setState(true);
 }
 
-void DecodeUnit::issue(Register ir, Register pc) {
-	this->ir = ir;
-	this->pc = pc;
+void DecodeUnit::issue(Register* ir, Register* pc) {
+	if (debug) {
+		std::cout << "Being issued with " << optos(ir->contents) << std::endl;
+	}
+	this->ir.contents = ir->contents;
+	this->pc.contents = pc->contents;
+	ready = false;
 }
 
 void DecodeUnit::setState(bool ready) {
@@ -28,9 +34,12 @@ void DecodeUnit::setState(bool ready) {
 }
 
 bool DecodeUnit::passToExecutionUnit() {
-	ExecutionUnit eu = eum.getAvailableExecutionUnit();
-	if (eu) {
-		eu.issue(type, opcode, r1, r2, r3, im1, pc);
+	ExecutionUnit* eu = eum->getAvailableExecutionUnit();
+	if (eu != NULL) {
+		if (debug) {
+			std::cout << "Success! Calling eu->issue" << std::endl;
+		}
+		eu->issue(type, opcode, r1, r2, r3, im1, &pc);
 		setState(true);
 	}
 	return false;
@@ -38,9 +47,23 @@ bool DecodeUnit::passToExecutionUnit() {
 
 void DecodeUnit::tick() {
 
+	// Waiting for input?
+	if (ready) {
+		if (debug) {
+			std::cout << "Returning due to lack of input." << std::endl;
+		}
+		return;
+	}
+
 	// Is there an instruction waiting?
 	if (decoded) {
+		if (debug) {
+			std::cout << "Trying to pass to EU" << std::endl;
+		}
 		if (!passToExecutionUnit()) {
+			if (debug) {
+				std::cout << "No EU available" << std::endl;
+			}
 			return;
 		}
 	}

@@ -22,6 +22,9 @@ ExecutionUnit::ExecutionUnit() {
 	// No debugging by default
 	debug = false;
 
+	// Set halted flag to false
+	halted = false;
+
 	// Ready for an instruction!
 	setState(true);
 
@@ -69,7 +72,7 @@ std::string ExecutionUnit::toString() {
 // Issue the instruction to the EU
 // This is a general-purpose EU
 // Operands not needed are ignored, as determined by type
-void ExecutionUnit::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uint8_t r3, int16_t im1, Register pc) {
+void ExecutionUnit::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uint8_t r3, int16_t im1, Register* pc) {
 	// Instruction type
 	this->type = type;
 	
@@ -81,20 +84,37 @@ void ExecutionUnit::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, 
 	this->im1 = im1;
 
 	// Value of PC
-	this->pc = pc;
+	if (debug) {
+		std::cout << "Setting pc to " << pc->contents << std::endl;
+	}
+	this->pc.contents = pc->contents;
 
 	// Set up counter
 	// How many ticks to execute this instruction?
 	// TODO: vary this for different instructions!
 	count = 1;
+
+	// Set the state to ready
+	setState(false);
 }
 
 bool ExecutionUnit::willCompleteThisTick() {
-	return (count <= 1);
+	return (count <= 0);
 }
 
 // Returns true when state should be halted
-bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* m) {
+void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* m, BranchTable* bt) {
+
+	// Waiting for input?
+	if (ready) {
+		if (debug) {
+			std::cout << "Returning due to lack of input." << std::endl;
+		}
+		return;
+	}
+
+	// Decrement execution counter
+	count--;
 
 	if (debug) {
 		std::cout << "Executing instruction " << optos(opcode);
@@ -112,7 +132,7 @@ bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 	}
 
 	// Halted flag
-	bool halted = false;
+	halted = false;
 
 	// Signed value representations
 	int32_t r1val_s, r2val_s, r3val_s;
@@ -220,7 +240,13 @@ bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
+				if (debug) {
+					std::cout << "Updating branch table at location " << hexify(pc.contents) << std::endl;
+				}
+				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
+			} else {
+				bt->actual[pc.contents - 1] = NOT_TAKEN;
 			}
 		break;
 
@@ -232,7 +258,13 @@ bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
+				if (debug) {
+					std::cout << "Updating branch table at location " << pc.contents << std::endl;
+				}
+				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
+			} else {
+				bt->actual[pc.contents - 1] = NOT_TAKEN;
 			}
 		break;
 		
@@ -244,7 +276,13 @@ bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
+				if (debug) {
+					std::cout << "Updating branch table at location " << pc.contents << std::endl;
+				}
+				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
+			} else {
+				bt->actual[pc.contents - 1] = NOT_TAKEN;
 			}
 		break;
 
@@ -256,7 +294,13 @@ bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
+				if (debug) {
+					std::cout << "Updating branch table at location " << pc.contents << std::endl;
+				}
+				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
+			} else {
+				bt->actual[pc.contents - 1] = NOT_TAKEN;
 			}
 		break;
 
@@ -268,7 +312,13 @@ bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
+				if (debug) {
+					std::cout << "Updating branch table at location " << pc.contents << std::endl;
+				}
+				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
+			} else {
+				bt->actual[pc.contents - 1] = NOT_TAKEN;
 			}
 		break;
 
@@ -280,7 +330,13 @@ bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
+				if (debug) {
+					std::cout << "Updating branch table at location " << pc.contents << std::endl;
+				}
+				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
+			} else {
+				bt->actual[pc.contents - 1] = NOT_TAKEN;
 			}
 		break;
 
@@ -298,6 +354,7 @@ bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				std::cout << "Halting execution" << std::endl;
 			}
 			halted = true;
+			bt->actual[pc.contents - 1] = HALTED;
 		break;
 
 		case OP_NOP:
@@ -318,9 +375,4 @@ bool ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 
 	// Update instruction counter
 	n++;
-
-	// Decrement execution counter
-	count--;
-
-	return halted;
 }

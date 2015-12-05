@@ -9,6 +9,7 @@
 #include "Register.h"
 #include "MemoryLocation.h"
 #include "DecodeUnitManager.h"
+#include "BranchTable.h"
 
 class FetchUnit {
 private:
@@ -16,20 +17,23 @@ private:
 	int delta;
 
 	void setState(bool ready);
+	bool passToDecodeUnit();
 
 public:
-	Register pc;
-	Register ir;
+	Register _pc;
+	Register _ir;
 
 	bool debug;		// Debugging output
 	bool fetched;	// Holding fetched instruction
 	bool ready;		// Ready to fetch input
+
 	bool stalled;
+	bool halted;
 	
 	FetchUnit(DecodeUnitManager* dum);
 	std::string toString();
-	bool tick(std::vector<MemoryLocation>* m);
-	bool tick(std::vector<MemoryLocation>* m, bool pipelining);
+	void tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
+		bool pipelining, BranchTable* bt, Register* pc);
 };
 
 #endif

@@ -8,6 +8,7 @@
 #include <string>
 
 #include "ExecutionUnit.h"
+#include "BranchTable.h"
 
 #define DEFAULT_EU_COUNT 1
 
@@ -16,18 +17,23 @@ private:
 	bool debug;
 	std::vector<ExecutionUnit> eus;
 
-	void init(unsigned int n = DEFAULT_EU_COUNT) {
+	void init(unsigned int width = DEFAULT_EU_COUNT) {
 		debug = false;
+		halted = false;
 		eus.assign(width, ExecutionUnit());
 	};
 
 public:
+	bool halted;
+
 	ExecutionUnitManager();
-	ExecutionUnitManager(unsigned int n);
+	ExecutionUnitManager(unsigned int width);
 	void setDebug(bool debug);
 	bool getDebug();
 	std::string toString();
-	bool tick(std::vector<Register>* r, std::vector<MemoryLocation>* m);
+	float getTotalInstructionsExecuted();
+	void tick(std::vector<Register>* r, std::vector<MemoryLocation>* m,
+		BranchTable* bt);
 	ExecutionUnit* getAvailableExecutionUnit();
 };
 

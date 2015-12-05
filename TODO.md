@@ -7,6 +7,11 @@ TODO List
 [x] DU to hold instructions until passed to EU
 [x] Pass ExecutionUnitManager to DU
 [x] EU to hold instructions until execution is finished
-[ ] State to use new *Manager classes
+[x] Fetch step needs to change
+[x] State to use new *Manager classes
+[ ] Clean up comments and dead code
 [ ] Test
 [ ] Multiple instruction lengths
+[ ] Out-of-Order execution
+[ ] Static branch prediction
+[ ] Dynamic branch prediction

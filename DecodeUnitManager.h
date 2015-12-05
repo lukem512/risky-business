@@ -21,6 +21,7 @@ public:
 	bool getDebug();
 	std::string toString();
 	DecodeUnit* getAvailableDecodeUnit();
+	void tick();
 };
 
 #endif

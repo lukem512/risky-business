@@ -1,6 +1,10 @@
 // Luke Mitchell, 2015
 // luke.mitchell.2011@my.bristol.ac.uk
 
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+
 #include "DecodeUnitManager.h"
 
 DecodeUnitManager::DecodeUnitManager(unsigned int width, ExecutionUnitManager* eum) {
@@ -36,6 +40,10 @@ std::string DecodeUnitManager::toString() {
 
 void DecodeUnitManager::tick() {
 	for (int i = 0; i < dus.size(); i++) {
+		if (debug) {
+			std::cout << "[DU #" << i << "] calling tick()." << std::endl;
+		}
+
 		// Call tick!
 		dus[i].tick();
 	}
@@ -46,6 +54,9 @@ void DecodeUnitManager::tick() {
 DecodeUnit* DecodeUnitManager::getAvailableDecodeUnit() {
 	for (int i = 0; i < dus.size(); i++) {
 		if (dus[i].ready && !dus[i].decoded) {
+			if (debug) {
+				std::cout << "DU #" << i << " is available." << std::endl;
+			}
 			return &dus[i];
 		}
 	}
