@@ -8,29 +8,35 @@
 
 #include "Register.h"
 #include "MemoryLocation.h"
+#include "DecodeUnitManager.h"
+#include "BranchTable.h"
 
 class FetchUnit {
 private:
-	void init(uint32_t pipelineWidth);
+	void setState(bool ready);
 
 public:
-	Register pc;
-	
-	std::vector<Register> pcs;
-	std::vector<Register> irs;
-	std::vector<bool> ready;
+	Register _pc;
+	Register _ir;
 
-	bool debug;
+	bool debug;		// Debugging output
+	bool fetched;	// Holding fetched instruction
+	bool ready;		// Ready to fetch input
+
 	bool stalled;
+	bool halted;
+	bool dependent;
+
+	DecodeUnitManager* dum;
+	int delta;
 	
-	FetchUnit();
-	FetchUnit(uint32_t pipelineWidth);
+	FetchUnit(const FetchUnit &copy);
+	FetchUnit(DecodeUnitManager* dum);
 	std::string toString();
-	bool tick(std::vector<MemoryLocation>* m);
-	bool tick(std::vector<MemoryLocation>* m, bool pipelining);
-	bool tick(std::vector<Register>* irs, std::vector<Register>* pcs, std::vector<MemoryLocation>* m);
-	bool tick(std::vector<Register>* irs, std::vector<Register>* pcs, std::vector<MemoryLocation>* m,
-		bool pipeline);
+	bool checkForStallResolution(BranchTable* bt, Register* pc);
+	void tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
+		bool pipelining, BranchTable* bt, Register* pc);
+	bool passToDecodeUnit();
 };
 
 #endif

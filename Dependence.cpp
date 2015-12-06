@@ -7,6 +7,7 @@
 
 #include "Dependence.h"
 #include "opcodes.h"
+#include "common.h"
 
 // Remove duplicates from vector
 template <class T> inline std::vector<T> removeDuplicates (std::vector<T> v) {

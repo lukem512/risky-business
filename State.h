@@ -13,12 +13,20 @@
 #include "MemoryLocation.h"
 #include "Register.h"
 
+#include "FetchUnitManager.h"
+#include "DecodeUnitManager.h"
+#include "ExecutionUnitManager.h"
+#include "BranchTable.h"
+
 using namespace std;
 
-#define DEFAULT_MEMORY_SIZE 1024
+#define DEFAULT_MEMORY_SIZE 256
 #define DEFAULT_REGISTER_COUNT 16
 
 #define DEFAULT_PIPELINE_WIDTH 4
+#define DEFAULT_EU_WIDTH 4
+#define DEFAULT_DU_WIDTH 4
+#define DEFAULT_FU_WIDTH 4
 
 #define STATE_FETCH 1
 #define STATE_DECODE 2
@@ -33,27 +41,32 @@ private:
 	bool pipeline;
 	bool stalled;
 
-	FetchUnit fu;
-	std::vector<DecodeUnit> du;
-	std::vector<ExecutionUnit> eu;
+	BranchTable bt;
+
+	FetchUnitManager* fum;
+	DecodeUnitManager* dum;
+	ExecutionUnitManager* eum;
 	
 	// Initialise state
 	void init(uint32_t memorySize = DEFAULT_MEMORY_SIZE,
 	  uint8_t registerCount = DEFAULT_REGISTER_COUNT,
-	  uint32_t pipelineWidth = DEFAULT_PIPELINE_WIDTH) {
+	  uint32_t eus = DEFAULT_EU_WIDTH,
+	  uint32_t dus = DEFAULT_DU_WIDTH,
+	  uint32_t fus = DEFAULT_FU_WIDTH) {
 	  	// Initialise memory and registers
 		memory.assign(memorySize, MemoryLocation());
 		registerFile.assign(registerCount, Register());
 
-		// Set up pipeline
-		setPipelineWidth(pipelineWidth);
+		// Set up variable-width pipeline
+		setEus(eus);
+		setDus(dus);
+		setFus(fus);
 
 		// Begin in the fetch part of the cycle
 		state = STATE_FETCH;
 
 		// Initial value of program counter is set to be 0
 		pc.contents = 0;
-		fu.pc = pc;
 
 		// Clear ticks
 		ticks = 0;
@@ -81,14 +94,26 @@ public:
 	vector<Register> registerFile;
 	Register pc;
 
+	// Setter functions for pipeline width
+	void setEus(uint32_t eus) {
+		eum = new ExecutionUnitManager(eus);
+	};
+
+	void setDus(uint32_t dus) {
+		dum = new DecodeUnitManager(dus, eum);
+	};
+
+	void setFus(uint32_t fus) {
+		fum = new FetchUnitManager(fus, dum);
+	};
+
 	State();
-	State(uint32_t memorySize, uint8_t registerCount, uint32_t pipelineWidth);
+	State(uint32_t memorySize, uint8_t registerCount,
+		uint32_t eus, uint32_t dus, uint32_t fus);
 	void setDebug(bool debug);
 	bool getDebug();
 	void setPipeline(bool pipeline);
 	bool getPipeline();
-	void setPipelineWidth(unsigned int width);
-	unsigned int getPipelineWidth();
 	void print();
 	float getInstructionsPerTick();
 	unsigned int getTicks();

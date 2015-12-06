@@ -1,170 +1,241 @@
 // Luke Mitchell, 2015
 // luke.mitchell.2011@my.bristol.ac.uk
 
-#include <sstream>
-#include <string>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 #include "FetchUnit.h"
 #include "DecodeUnit.h"
 #include "Dependence.h"
 #include "opcodes.h"
 #include "common.h"
-	
-void FetchUnit::init(uint32_t pipelineWidth) {
-	// Initialise the pc
-	pc.contents = 0;
 
-	// Initilise the ir/pc vectors
-	pcs.resize(pipelineWidth);
-	irs.resize(pipelineWidth);
-	ready.resize(pipelineWidth);
+FetchUnit::FetchUnit(const FetchUnit &copy) {
+	_pc.contents = copy._pc.contents;
+	_ir.contents = copy._ir.contents;
 
-	// Not stalled!
+	debug = copy.debug;
+	fetched = copy.fetched;
+	ready = copy.ready;
+
+	stalled = copy.stalled;
+	halted = copy.halted;
+	dependent = copy.dependent;
+
+	dum = copy.dum;
+
+	delta = copy.delta;
+}
+
+FetchUnit::FetchUnit(DecodeUnitManager* dum) {
+	// Initialise the _pc, _ir
+	_pc.contents = 0;
+	_ir.contents = 0;
+	delta = 0;
+
+	// Add local reference to DU manager
+	this->dum = dum;
+
+	// Set up flags
+	setState(true);
+
 	stalled = false;
+	halted = false;
+	dependent = false;
 
 	// No debugging by default
 	debug = false;
 }
 
-FetchUnit::FetchUnit(uint32_t pipelineWidth) {
-	init(pipelineWidth);
-}
-
-
-FetchUnit::FetchUnit() {
-	init(1);
-}
-
 std::string FetchUnit::toString() {
 	std::ostringstream ss;
 
-	ss << "fu.pc = " << pc.toString() << std::endl;
-
-	for (int i = 0; i < pcs.size(); i++) {
-		ss << "fu.pcs[" << i << "] = " << pcs[i].toString() << std::endl;
-	}
-
-	for (int i = 0; i < irs.size(); i++) {
-		ss << "fu.irs[" << i << "] = " << irs[i].toString() << std::endl;
-	}
-
-	if (stalled) {
-		ss << "Currently stalled." << std::endl;
-	}
+	ss << "_pc = " << _pc.toString() << std::endl;
+	ss << "_ir = " << _ir.toString() << std::endl;
+	ss << "_ir decodes to " << optos(_ir.contents) << std::endl;
 
 	return ss.str();
 }
 
-// Use local registers, for pipelining
-bool FetchUnit::tick(std::vector<MemoryLocation>* m) {
-	return tick(&irs, &pcs, m, true);
+// Sets the FU state.
+// When ready is true, the FU
+// is ready to accept input.
+void FetchUnit::setState(bool ready) {
+	this->ready = ready;
+	this->fetched = !ready;
 }
 
-bool FetchUnit::tick(std::vector<MemoryLocation>* m, bool pipelining) {
-	return tick(&irs, &pcs, m, pipelining);
+bool FetchUnit::passToDecodeUnit() {
+	DecodeUnit* du = dum->getAvailableDecodeUnit();
+	if (du != NULL) {
+		du->issue(&_ir, &_pc);
+		setState(true);
+		return true;
+	}
+	return false;
 }
 
-// Use specific registers 
-bool FetchUnit::tick(std::vector<Register>* irs, std::vector<Register>* pcs, std::vector<MemoryLocation>* m) {
-	return tick(irs, pcs, m, false);
-}
-
-// General-purpose
-bool FetchUnit::tick(std::vector<Register>* irs, std::vector<Register>* pcs, std::vector<MemoryLocation>* m, bool pipeline) {
-
-	// Set all IR contents to not fetched
-	ready.assign(irs->size(), false);
-
-	bool stalled = false;
-
-	// For all instruction registers...
-	// Fill from left to right
-	// Stop if a stall is reached or a dependency encountered
-	for (int i = 0; i < irs->size(); i++) {
-
-		// Grab next instruction
-		uint32_t next =  m->at(pc.contents).contents;
-
-		if (debug) {
-			std::cout << "[FU #" << i << "] Fetched instruction " << optos(next) << std::endl;
-		}
-
-		// Check for dependencies
-		// Check ir[i] with ir[j] where j in {0 to i}
-		for (int j = 0; j < i; j++) {
-			if (Dependence::depends(next, irs->at(j).contents, pc.contents)) {
-				// If a dependency is reached, return
+bool FetchUnit::checkForStallResolution(BranchTable* bt, Register* pc) {
+	if (stalled) {
+		uint32_t previous = _pc.contents - 1;
+		if (bt->predicted[previous] == STALLED) {
+			if (bt->actual[previous] == UNKNOWN) {
+				// Waiting...
 				if (debug) {
-					std::cout << "Dependency between FU #" << i << " and FU #" << j << " found." << std::endl;
-					std::cout << optos(next) << " and " << optos(irs->at(j).contents) << std::endl;
+					std::cout << "Waiting for branch information for location " << hexify(previous) << "." << std::endl;
 				}
 				return false;
 			}
-		}
-		
-		// Fill the instruction registers
-		irs->at(i).contents = next;
 
-		// Update flags
-		ready[i] = true;
-
-		// Change to make to PC for next fetch
-		int delta = 0;
-
-		// [Pre-] decode the instruction and check for a branch
-		// if the branch is conditional, stall
-		if (pipeline) {
-			instruction_t instr = *(instruction_t*) &irs->at(i).contents;
-			instruction_oi_t data = *(instruction_oi_t *) &irs->at(i).contents; // B
-			instruction_ori_t dataCond = *(instruction_ori_t *) &irs->at(i).contents; // Conditional
-
-			switch (instr.opcode) {
-				case OP_B:
-					if (debug) {
-						std::cout << "[FU #" << i << "] Found a branch at location " << std::to_string(pc.contents);
-						std::cout <<  ". Jumping by " << data.im1 << "." << std::endl;
-					}
-					delta = data.im1;
-				break;
-
-				case OP_BZ:
-				case OP_BNZ:
-				case OP_BLTZ:
-				case OP_BLTEZ:
-				case OP_BGTZ:
-				case OP_BGTEZ:
-					if (debug) {
-						std::cout << "[FU #" << i << "] Found a conditional branch at location " << std::to_string(pc.contents) << std::endl;
-						std::cout << "Decide whether to jump by " << dataCond.im1 << " or not." << std::endl;
-					}
-					stalled = true;
-				break;
-
-				case OP_HLT:
-					if (debug) {
-						std::cout << "[FU #" << i << "] Found a halt at location " << std::to_string(pc.contents) << std::endl;
-					}
-					stalled = true;
-				break;
+			if (bt->actual[previous] == TAKEN) {
+				instruction_ori_t dataCond = *(instruction_ori_t *) &_ir.contents;
+				pc->contents += dataCond.im1;
+				if (debug) {
+					std::cout << "Branch at location " << previous << " was taken. Updating PC to " << pc->contents << "." << std::endl;
+				}
+			} else {
+				if (debug) {
+					std::cout << "Branch at location " << previous << " was not taken." << std::endl;
+				}
 			}
+
+			// Clear flag
+			stalled = false;
+
+			// Clear table entry
+			bt->predicted.erase(previous);
+			bt->actual.erase(previous);
+		} else {
+			if (debug) {
+				std::cerr << "fu.stalled is true but bt is not stalled." << std::endl;
+			}
+			return false;
+		}
+	}
+	return true;
+}
+
+// General-purpose
+void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
+	bool pipeline, BranchTable* bt, Register* pc) {
+
+	if (stalled) {
+		if (debug) {
+			std::cout << "Stalled." << std::endl;
+		}
+		return;
+	}
+
+	if (halted) {
+		if (debug) {
+			std::cout << "Halted." << std::endl;
+		}
+		return;
+	}
+
+	if (fetched) {
+		if (debug) {
+			std::cout << "Waiting for a DU to become available." << std::endl;
+		}
+		return;
+	}
+
+	if (debug) {
+		std::cout << "Looking for next instruction at " << pc->contents << "." << std::endl;
+	}
+
+	// Grab next instruction
+	uint32_t next =  m->at(pc->contents).contents;
+
+	if (debug) {
+		std::cout << "Fetched instruction " << optos(next) << std::endl;
+	}
+
+	// Check for dependencies
+	dependent = false;
+	for (int i = 0; i < fus->size(); i++) {
+		if (fus->at(i).ready || !fus->at(i).fetched) {
+			// Don't check, FU is empty
+			continue;
 		}
 
-		// Always increment
-		// Even if we've already added an offset using a branch.
-		// This is because the offset operand assumes an incremented PC
-		pc.contents++;
+		if (Dependence::depends(next, fus->at(i)._ir.contents, pc->contents)) {
+			// Dependency!
+			if (debug) {
+				std::cout << "Dependency found!" << std::endl;
+			}
+			dependent = true;
+			return;
+		}
+	}
+	
+	// Fill the instruction register
+	if (debug) {
+		std::cout << "Filling _ir with " << optos(next) << std::endl;
+	}
+	_ir.contents = next;
 
-		// Add to PC file
-		pcs->at(i).contents = pc.contents;
+	// Update flags
+	setState(false);
 
-		// And jump ahead for the next fetch
-		pc.contents += delta;
+	// [Pre-] decode the instruction and check for a branch
+	// if the branch is conditional, stall
+	if (pipeline) {
+		instruction_t instr = *(instruction_t*) &_ir.contents;			  	// O_pcode
+		instruction_oi_t data = *(instruction_oi_t *) &_ir.contents; 	  	// B
+		instruction_ori_t dataCond = *(instruction_ori_t *) &_ir.contents;	// Conditional
 
-		if (stalled) {
+		switch (instr.opcode) {
+			case OP_B:
+				if (debug) {
+					std::cout << "Found a branch at location " << std::to_string(pc->contents);
+					std::cout <<  ". Jumping by " << data.im1 << "." << std::endl;
+				}
+				delta = data.im1;
+			break;
+
+			case OP_BZ:
+			case OP_BNZ:
+			case OP_BLTZ:
+			case OP_BLTEZ:
+			case OP_BGTZ:
+			case OP_BGTEZ:
+				if (debug) {
+					std::cout << "Found a conditional branch at location " << std::to_string(pc->contents) << std::endl;
+					std::cout << "Decide whether to jump by " << dataCond.im1 << " or not." << std::endl;
+				}
+				bt->predicted[pc->contents] = STALLED;
+				bt->actual[pc->contents] = UNKNOWN;
+				stalled = true;
+			break;
+
+			case OP_HLT:
+				if (debug) {
+					std::cout << "Found a halt at location " << std::to_string(pc->contents) << std::endl;
+				}
+				bt->predicted[pc->contents] = HALTED;
+				bt->actual[pc->contents] = UNKNOWN;
+				halted = true;
 			break;
 		}
 	}
 
-	return stalled;
+	// Always increment
+	// Even if we've already added an offset using a branch.
+	// This is because the offset operand assumes an incremented PC
+	pc->contents++;
+	_pc.contents = pc->contents;
+
+	if (debug) {
+		std::cout << "Setting _pc to " << hexify(_pc.contents) << std::endl;
+	}
+
+	// ...and increment the copy for the FUM
+	pc->contents = pc->contents + delta;
+	delta = 0;
+
+	if (debug) {
+		std::cout << "Setting _pc to " << hexify(_pc.contents) << std::endl;
+	}
 }
