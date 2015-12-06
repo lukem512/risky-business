@@ -41,7 +41,7 @@ int main(int argc, char** argv){
 	}
 
 	// Pipeline width
-	uint32_t eus = 0;
+	uint32_t eus = 1;
 	if (option_exists(argv, argv+argc, "-eus")) {
 		char* w = get_option(argv, argv+argc, "-eus");
 		if (w) {
@@ -54,7 +54,7 @@ int main(int argc, char** argv){
 		}
 	}
 
-	uint32_t dus = 0;
+	uint32_t dus = 1;
 	if (option_exists(argv, argv+argc, "-dus")) {
 		char* w = get_option(argv, argv+argc, "-dus");
 		if (w) {
@@ -67,7 +67,7 @@ int main(int argc, char** argv){
 		}
 	}
 
-	uint32_t fus = 0;
+	uint32_t fus = 1;
 	if (option_exists(argv, argv+argc, "-fus")) {
 		char* w = get_option(argv, argv+argc, "-fus");
 		if (w) {
