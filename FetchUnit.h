@@ -13,9 +13,6 @@
 
 class FetchUnit {
 private:
-	DecodeUnitManager* dum;
-	int delta;
-
 	void setState(bool ready);
 
 public:
@@ -29,9 +26,14 @@ public:
 	bool stalled;
 	bool halted;
 	bool dependent;
+
+	DecodeUnitManager* dum;
+	int delta;
 	
+	FetchUnit(const FetchUnit &copy);
 	FetchUnit(DecodeUnitManager* dum);
 	std::string toString();
+	bool checkForStallResolution(BranchTable* bt, Register* pc);
 	void tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
 		bool pipelining, BranchTable* bt, Register* pc);
 	bool passToDecodeUnit();

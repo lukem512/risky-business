@@ -11,9 +11,27 @@
 #include "opcodes.h"
 #include "common.h"
 
+FetchUnit::FetchUnit(const FetchUnit &copy) {
+	_pc.contents = copy._pc.contents;
+	_ir.contents = copy._ir.contents;
+
+	debug = copy.debug;
+	fetched = copy.fetched;
+	ready = copy.ready;
+
+	stalled = copy.stalled;
+	halted = copy.halted;
+	dependent = copy.dependent;
+
+	dum = copy.dum;
+
+	delta = copy.delta;
+}
+
 FetchUnit::FetchUnit(DecodeUnitManager* dum) {
-	// Initialise the _pc
+	// Initialise the _pc, _ir
 	_pc.contents = 0;
+	_ir.contents = 0;
 	delta = 0;
 
 	// Add local reference to DU manager
@@ -35,7 +53,7 @@ std::string FetchUnit::toString() {
 
 	ss << "_pc = " << _pc.toString() << std::endl;
 	ss << "_ir = " << _ir.toString() << std::endl;
-	ss << "_ir decodes to " << optos(_ir.contents) << "." << std::endl;
+	ss << "_ir decodes to " << optos(_ir.contents) << std::endl;
 
 	return ss.str();
 }
@@ -58,10 +76,7 @@ bool FetchUnit::passToDecodeUnit() {
 	return false;
 }
 
-// General-purpose
-void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
-	bool pipeline, BranchTable* bt, Register* pc) {
-
+bool FetchUnit::checkForStallResolution(BranchTable* bt, Register* pc) {
 	if (stalled) {
 		uint32_t previous = _pc.contents - 1;
 		if (bt->predicted[previous] == STALLED) {
@@ -70,7 +85,7 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 				if (debug) {
 					std::cout << "Waiting for branch information for location " << hexify(previous) << "." << std::endl;
 				}
-				return;
+				return false;
 			}
 
 			if (bt->actual[previous] == TAKEN) {
@@ -95,8 +110,21 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 			if (debug) {
 				std::cerr << "fu.stalled is true but bt is not stalled." << std::endl;
 			}
-			return;
+			return false;
 		}
+	}
+	return true;
+}
+
+// General-purpose
+void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
+	bool pipeline, BranchTable* bt, Register* pc) {
+
+	if (stalled) {
+		if (debug) {
+			std::cout << "Stalled." << std::endl;
+		}
+		return;
 	}
 
 	if (halted) {
@@ -206,4 +234,8 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 	// ...and increment the copy for the FUM
 	pc->contents = pc->contents + delta;
 	delta = 0;
+
+	if (debug) {
+		std::cout << "Setting _pc to " << hexify(_pc.contents) << std::endl;
+	}
 }

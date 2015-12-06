@@ -59,6 +59,9 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 	// Use a simple round-robin scheduler
 	for (int i = 0; i < fus.size(); i++) {
 		if (fus[lastIssued].fetched) {
+			if (debug) {
+				std::cout << "[FU #" << lastIssued << "] trying to issue stored instruction." << std::endl;
+			}
 			if (!fus[lastIssued].passToDecodeUnit()) {
 				break;
 			}
@@ -66,19 +69,20 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 		lastIssued = (lastIssued + 1) % fus.size();
 	}
 
-	// Start position
-	int s = 0;
-
 	// If any FU is stalled, start from there
 	for (int i = 0; i < fus.size(); i++) {
 		if (fus[i].stalled) {
-			s = i;
+			if (fus[i].checkForStallResolution(bt, &pc)) {
+				if (debug) {
+					std::cout << "[FU #" << i << "] stall resolved!" << std::endl;
+				}
+			}
 			break;
 		}
 	}
 
 	// Tick all FUs
-	for (int i = s; i < fus.size(); i++) {
+	for (int i = 0; i < fus.size(); i++) {
 
 		if (debug) {
 			std::cout << "[FU #" << i << "] calling tick()." << std::endl;
