@@ -14,6 +14,7 @@ private:
 	bool debug;
 	ExecutionUnitManager* eum;
 	std::vector<DecodeUnit> dus;
+	int lastIssued;
 
 public:
 	DecodeUnitManager(unsigned int n, ExecutionUnitManager* eum);

@@ -14,6 +14,9 @@ DecodeUnitManager::DecodeUnitManager(unsigned int width, ExecutionUnitManager* e
 	// Store a local reference to the EU manager
 	this->eum = eum;
 
+	// Nothing has been issued yet...
+	lastIssued = 0;
+
 	// Set up the Decode Units
 	dus.assign(width, DecodeUnit(eum));
 }
@@ -39,6 +42,11 @@ std::string DecodeUnitManager::toString() {
 }
 
 void DecodeUnitManager::tick() {
+	// Instructions should be issued to EU oldest-first;
+	// as with the Fetch Units.
+	// Round-robin.
+	// TODO
+	
 	for (int i = 0; i < dus.size(); i++) {
 		if (debug) {
 			std::cout << "[DU #" << i << "] calling tick()." << std::endl;

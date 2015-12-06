@@ -24,6 +24,7 @@ FetchUnit::FetchUnit(DecodeUnitManager* dum) {
 
 	stalled = false;
 	halted = false;
+	dependent = false;
 
 	// No debugging by default
 	debug = false;
@@ -34,6 +35,7 @@ std::string FetchUnit::toString() {
 
 	ss << "_pc = " << _pc.toString() << std::endl;
 	ss << "_ir = " << _ir.toString() << std::endl;
+	ss << "_ir decodes to " << optos(_ir.contents) << "." << std::endl;
 
 	return ss.str();
 }
@@ -49,9 +51,6 @@ void FetchUnit::setState(bool ready) {
 bool FetchUnit::passToDecodeUnit() {
 	DecodeUnit* du = dum->getAvailableDecodeUnit();
 	if (du != NULL) {
-		if (debug) {
-			std::cout << "Available DU found, issuing..." << std::endl;
-		}
 		du->issue(&_ir, &_pc);
 		setState(true);
 		return true;
@@ -62,20 +61,6 @@ bool FetchUnit::passToDecodeUnit() {
 // General-purpose
 void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
 	bool pipeline, BranchTable* bt, Register* pc) {
-
-	// Is there an instruction waiting?
-	// Try to pass to decode unit
-	if (fetched) {
-		if (debug) {
-			std::cout << "Trying to pass fetched input to DU." << std::endl;
-		}
-		if (!passToDecodeUnit()) {
-			if (debug) {
-				std::cout << "No DUs available." << std::endl;
-			}
-			return;
-		}
-	}
 
 	if (stalled) {
 		uint32_t previous = _pc.contents - 1;
@@ -121,51 +106,12 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 		return;
 	}
 
-	// If we have stalled, determine next behaviour
-	
-	// if (bt->predicted[previous] == STALLED) {
-	// 	if (bt->actual[previous] == UNKNOWN) {
-	// 		if (debug) {
-	// 			std::cout << "Waiting for branch information for location " << previous << "." << std::endl;
-	// 		}
-	// 		return;
-	// 	} else if (bt->actual[previous] == TAKEN) {
-	// 		instruction_ori_t dataCond = *(instruction_ori_t *) &_ir.contents;
-	// 		_pc.contents += dataCond.im1;
-
-	// 		if (debug) {
-	// 			std::cout << "Branch at location " << previous << " was taken. Updating PC to " << _pc.contents << "." << std::endl;
-	// 		}
-
-	// 		// Clear flag
-	// 		stalled = false;
-
-	// 		// Clear the table entry
-	// 		bt->predicted.erase(previous);
-	// 		bt->actual.erase(previous);
-	// 	}  else if (bt->actual[previous] == NOT_TAKEN) {
-	// 		_pc.contents += 0;
-
-	// 		if (debug) {
-	// 			std::cout << "Branch at location " << previous << " was not taken." << std::endl;
-	// 		}
-
-	// 		// Clear flag
-	// 		stalled = false;
-
-	// 		// Clear the table entry
-	// 		bt->predicted.erase(previous);
-	// 		bt->actual.erase(previous);
-	// 	}
-	// }
-
-	// // If we have halted, return
-	// if (bt->predicted[_pc.contents - 1] == HALTED) {
-	// 	if (debug) {
-	// 		std::cout << "Halted." << std::endl;
-	// 	}
-	// 	return;
-	// }
+	if (fetched) {
+		if (debug) {
+			std::cout << "Waiting for a DU to become available." << std::endl;
+		}
+		return;
+	}
 
 	if (debug) {
 		std::cout << "Looking for next instruction at " << pc->contents << "." << std::endl;
@@ -179,6 +125,7 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 	}
 
 	// Check for dependencies
+	dependent = false;
 	for (int i = 0; i < fus->size(); i++) {
 		if (fus->at(i).ready || !fus->at(i).fetched) {
 			// Don't check, FU is empty
@@ -188,9 +135,9 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 		if (Dependence::depends(next, fus->at(i)._ir.contents, pc->contents)) {
 			// Dependency!
 			if (debug) {
-				std::cout << "Dependency found between ";
-				std::cout << optos(next) << " and " << optos(fus->at(i)._ir.contents) << std::endl;
+				std::cout << "Dependency found!" << std::endl;
 			}
+			dependent = true;
 			return;
 		}
 	}
@@ -207,9 +154,9 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 	// [Pre-] decode the instruction and check for a branch
 	// if the branch is conditional, stall
 	if (pipeline) {
-		instruction_t instr = *(instruction_t*) &_ir.contents;			  // O_pcode
-		instruction_oi_t data = *(instruction_oi_t *) &_ir.contents; 	  // B
-		instruction_ori_t dataCond = *(instruction_ori_t *) &_ir.contents; // Conditional
+		instruction_t instr = *(instruction_t*) &_ir.contents;			  	// O_pcode
+		instruction_oi_t data = *(instruction_oi_t *) &_ir.contents; 	  	// B
+		instruction_ori_t dataCond = *(instruction_ori_t *) &_ir.contents;	// Conditional
 
 		switch (instr.opcode) {
 			case OP_B:
@@ -257,9 +204,6 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 	}
 
 	// ...and increment the copy for the FUM
-	pc->contents = _pc.contents + delta;
+	pc->contents = pc->contents + delta;
 	delta = 0;
-
-	// Try to pass this to an available Decode Unit
-	passToDecodeUnit();
 }

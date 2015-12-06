@@ -17,7 +17,6 @@ private:
 	int delta;
 
 	void setState(bool ready);
-	bool passToDecodeUnit();
 
 public:
 	Register _pc;
@@ -29,11 +28,13 @@ public:
 
 	bool stalled;
 	bool halted;
+	bool dependent;
 	
 	FetchUnit(DecodeUnitManager* dum);
 	std::string toString();
 	void tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
 		bool pipelining, BranchTable* bt, Register* pc);
+	bool passToDecodeUnit();
 };
 
 #endif

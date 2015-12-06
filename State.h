@@ -24,6 +24,9 @@ using namespace std;
 #define DEFAULT_REGISTER_COUNT 16
 
 #define DEFAULT_PIPELINE_WIDTH 4
+#define DEFAULT_EU_WIDTH 4
+#define DEFAULT_DU_WIDTH 4
+#define DEFAULT_FU_WIDTH 4
 
 #define STATE_FETCH 1
 #define STATE_DECODE 2
@@ -47,15 +50,17 @@ private:
 	// Initialise state
 	void init(uint32_t memorySize = DEFAULT_MEMORY_SIZE,
 	  uint8_t registerCount = DEFAULT_REGISTER_COUNT,
-	  uint32_t pipelineWidth = DEFAULT_PIPELINE_WIDTH) {
+	  uint32_t eus = DEFAULT_EU_WIDTH,
+	  uint32_t dus = DEFAULT_DU_WIDTH,
+	  uint32_t fus = DEFAULT_FU_WIDTH) {
 	  	// Initialise memory and registers
 		memory.assign(memorySize, MemoryLocation());
 		registerFile.assign(registerCount, Register());
 
 		// Set up variable-width pipeline
-		eum = new ExecutionUnitManager(pipelineWidth);
-		dum = new DecodeUnitManager(pipelineWidth-1, eum);
-		fum = new FetchUnitManager(pipelineWidth-1, dum);
+		setEus(eus);
+		setDus(dus);
+		setFus(fus);
 
 		// Begin in the fetch part of the cycle
 		state = STATE_FETCH;
@@ -89,8 +94,22 @@ public:
 	vector<Register> registerFile;
 	Register pc;
 
+	// Setter functions for pipeline width
+	void setEus(uint32_t eus) {
+		eum = new ExecutionUnitManager(eus);
+	};
+
+	void setDus(uint32_t dus) {
+		dum = new DecodeUnitManager(dus, eum);
+	};
+
+	void setFus(uint32_t fus) {
+		fum = new FetchUnitManager(fus, dum);
+	};
+
 	State();
-	State(uint32_t memorySize, uint8_t registerCount, uint32_t pipelineWidth);
+	State(uint32_t memorySize, uint8_t registerCount,
+		uint32_t eus, uint32_t dus, uint32_t fus);
 	void setDebug(bool debug);
 	bool getDebug();
 	void setPipeline(bool pipeline);

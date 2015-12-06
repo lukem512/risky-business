@@ -84,7 +84,6 @@ private:
 	uint8_t type;		// Type of instruction
 
 	void setState(bool ready);
-	bool passToExecutionUnit();
 
 public:
 	bool debug;		// Debugging output
@@ -94,6 +93,7 @@ public:
 	DecodeUnit(ExecutionUnitManager* eum);
 	void issue(Register* ir, Register* pc);
 	void tick();
+	bool passToExecutionUnit();
 };
 
 #endif

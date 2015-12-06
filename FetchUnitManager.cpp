@@ -17,6 +17,9 @@ FetchUnitManager::FetchUnitManager(unsigned int width, DecodeUnitManager* dum) {
 	// Set up PC
 	pc.contents = 0;
 
+	// Nothing has been issued yet...
+	lastIssued = 0;
+
 	// Set up the Fetch Units
 	fus.assign(width, FetchUnit(dum));
 }
@@ -38,10 +41,32 @@ std::string FetchUnitManager::toString() {
 
 	ss << "FetchUnitManager with " << fus.size() << " FUs." << std::endl;
 
+	for (int i = 0; i < fus.size(); i++) {
+		ss << "[FU #" << i << "]" <<	 std::endl;
+		ss << fus[i].toString();
+		ss << std::endl;
+	}
+
 	return ss.str();
 }
 
 void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, BranchTable* bt) {
+	
+	// Instructions should be issued to DU oldest-first;
+	// this is to prevent stagnation in the pipeline.
+	// According to Neil Burgess (a guest lecturer from ARM), this is
+	// fairly easy to do in hardware.
+	// Use a simple round-robin scheduler
+	for (int i = 0; i < fus.size(); i++) {
+		if (fus[lastIssued].fetched) {
+			if (!fus[lastIssued].passToDecodeUnit()) {
+				break;
+			}
+		}
+		lastIssued = (lastIssued + 1) % fus.size();
+	}
+
+	// Start position
 	int s = 0;
 
 	// If any FU is stalled, start from there
@@ -52,9 +77,7 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 		}
 	}
 
-	// TODO: when a HLT is fetched, all Fetch Units
-	// should stop reading new instructions
-
+	// Tick all FUs
 	for (int i = s; i < fus.size(); i++) {
 
 		if (debug) {
@@ -69,6 +92,11 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 		// Call tick!
 		fus[i].tick(m, &dependents, pipeline, bt, &pc);
 
+		if (fus[i].dependent) {
+			// Don't fill up the other FUs
+			break;
+		}
+
 		if (fus[i].stalled) {
 			// Don't fill the other FUs
 			break;
@@ -76,6 +104,7 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 
 		if (fus[i].halted) {
 			// Don't fill the other FUs
+			// TODO: this should persist
 			break;
 		}
 	}
@@ -87,7 +116,7 @@ FetchUnit* FetchUnitManager::getAvailableFetchUnit() {
 	for (int i = 0; i < fus.size(); i++) {
 		if (fus[i].ready && !fus[i].fetched) {
 			if (debug) {
-				std::cout << "FU #" << i << " is available." << std::endl;
+				std::cout << "[FU #" << i << "] I am available!" << std::endl;
 			}
 			return &fus[i];
 		}

@@ -38,26 +38,48 @@ int main(int argc, char** argv){
 	if (option_exists(argv, argv+argc, "-no-pipeline")) {
 		std::cout << "Setting pipeline flag to false." << std::endl;
 		s.setPipeline(false);
-		// s.setPipelineWidth(1);
 	}
 
 	// Pipeline width
-	// unsigned int width = 0;
-	// if (option_exists(argv, argv+argc, "-width")) {
-	// 	if (!s.getPipeline()) {
-	// 		std::cerr << "You must enable the pipeline to set its width." << std::endl;
-	// 		return 1;
-	// 	}
-	// 	char* w = get_option(argv, argv+argc, "-width");
-	// 	if (w) {
-	// 		width = atoi(w);
-	// 		s.setPipelineWidth(width);
-	// 		std::cout << "Setting pipeline width to " << width << "." << std::endl;
-	// 	} else {
-	// 		std::cerr << "No pipeline width specified." << std::endl;
-	// 		return 1;
-	// 	}
-	// }
+	uint32_t eus = 0;
+	if (option_exists(argv, argv+argc, "-eus")) {
+		char* w = get_option(argv, argv+argc, "-eus");
+		if (w) {
+			eus = atoi(w);
+			s.setEus(eus);
+			std::cout << "Setting number of EUs to " << eus << "." << std::endl;
+		} else {
+			std::cerr << "No EU width specified." << std::endl;
+			return 1;
+		}
+	}
+
+	uint32_t dus = 0;
+	if (option_exists(argv, argv+argc, "-dus")) {
+		char* w = get_option(argv, argv+argc, "-dus");
+		if (w) {
+			dus = atoi(w);
+			s.setDus(dus);
+			std::cout << "Setting number of DUs to " << dus << "." << std::endl;
+		} else {
+			std::cerr << "No EU width specified." << std::endl;
+			return 1;
+		}
+	}
+
+	uint32_t fus = 0;
+	if (option_exists(argv, argv+argc, "-fus")) {
+		char* w = get_option(argv, argv+argc, "-fus");
+		if (w) {
+			fus = atoi(w);
+			s.setFus(fus);
+			std::cout << "Setting number of FUs to " << fus << "." << std::endl;
+		} else {
+			std::cerr << "No FU width specified." << std::endl;
+			return 1;
+		}
+	}
+
 
 	// Use debug?
 	if (option_exists(argv, argv+argc, "-d")) {

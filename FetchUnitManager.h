@@ -17,6 +17,7 @@ private:
 	bool debug;
 	DecodeUnitManager* dum;
 	std::vector<FetchUnit> fus;
+	int lastIssued;
 
 public:
 	Register pc;
