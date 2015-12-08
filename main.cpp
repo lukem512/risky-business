@@ -18,6 +18,34 @@ int main(int argc, char** argv){
 	State s;
     s = State();
 
+    // Logo!
+    std::cout << "  _____  _     _            ____            _  					 " << std::endl
+ 		      << " |  __ \\(_)   | |          |  _ \\          (_) 					 " << std::endl
+ 			  << " | |__) |_ ___| | ___   _  | |_) |_   _ ___ _ _ __   ___  ___ ___  " << std::endl
+ 			  << " |  _  /| / __| |/ / | | | |  _ <| | | / __| | '_ \\ / _ \\/ __/ __| " << std::endl
+ 			  << " | | \\ \\| \\__ \\   <| |_| | | |_) | |_| \\__ \\ | | | |  __/\\__ \\__ \\ " << std::endl
+ 			  << " |_|  \\_\\_|___/_|\\_\\\\__, | |____/\\\\__,_|___/_|_| |_|\\___||___/___/ " << std::endl
+			  << "                     __/ |                                         " << std::endl
+			  << "                    |___/                                          " << std::endl;
+	std::cout << "A simple simulator of a SuperScalar RISC machine." << std::endl << std::endl;
+
+    // Show help?
+	if (option_exists(argv, argv+argc, "-h")) {
+		std::cout << "Usage:\t" << argv[0] << " [options] -f binary_to_run" << std::endl;
+		std::cout << std::endl;
+		std::cout << "Options:" << std::endl;
+		std::cout << "\t-h - Show this menu" << std::endl;
+		std::cout << "\t-d - Turn on debugging" << std::endl;
+		std::cout << "\t-max-ticks n - Cap execution to n clock cycles" << std::endl;
+		std::cout << "\t-no-pipeline - Turn off pipelined execution" << std::endl;
+		std::cout << "\t-eus n - Specify the number of Execution Units" << std::endl;
+		std::cout << "\t-dus n - Specify the number of Decode Units" << std::endl;
+		std::cout << "\t-fus n - Specify the number of Fetch Units" << std::endl;
+
+		// ...and return.
+		return 0;
+	}
+
     // Load the program filename
     std::string source;
 	if (option_exists(argv, argv+argc, "-f")) {
