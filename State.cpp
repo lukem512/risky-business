@@ -82,19 +82,28 @@ bool State::tick() {
 		eum->tick(&registerFile, &memory, &bt);
 		halted = eum->halted;
 
-		if (getDebug()) {
-			std::cout << std::endl;
+		if (!halted) {
+
+			// TODO: check for incorrectly predicted branches
+			// If found empty pipeline (all FUs, all DUs)
+			// and clear all fus[i].halted.
+			// Note: not all FU/DUs may be holding invalid instructions
+			// We need to set a speculative bit.
+
+			if (getDebug()) {
+				std::cout << std::endl;
+			}
+
+			// Decode
+			dum->tick();
+
+			if (getDebug()) {
+				std::cout << std::endl;
+			}
+
+			// Fetch
+			fum->tick(&memory, true, &bt);
 		}
-
-		// Decode
-		dum->tick();
-
-		if (getDebug()) {
-			std::cout << std::endl;
-		}
-
-		// Fetch
-		fum->tick(&memory, true, &bt);
 	} else {
 		switch(state) {
 			case STATE_FETCH:

@@ -120,6 +120,9 @@ bool FetchUnit::checkForStallResolution(BranchTable* bt, Register* pc) {
 void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
 	bool pipeline, BranchTable* bt, Register* pc) {
 
+	bool branchPrediction = false; // TODO: parameterize
+
+
 	if (stalled) {
 		if (debug) {
 			std::cout << "Stalled." << std::endl;
@@ -200,11 +203,33 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 			case OP_BGTEZ:
 				if (debug) {
 					std::cout << "Found a conditional branch at location " << std::to_string(pc->contents) << std::endl;
-					std::cout << "Decide whether to jump by " << dataCond.im1 << " or not." << std::endl;
 				}
-				bt->predicted[pc->contents] = STALLED;
-				bt->actual[pc->contents] = UNKNOWN;
-				stalled = true;
+				if (branchPrediction) {
+					bool t;
+
+					// Static prediction
+					// Take branch for backwards-facing
+					// Do not branch for forwards-facing
+					if (dataCond.im1 < 0) {
+						t = true;
+					} else {
+						t = false;
+					}
+
+					// Take the jump!
+					if (t) {
+						delta = dataCond.im1;
+					}
+
+					if (debug) {
+						std::cout << "Branch predictor has decided to " << (t ? "TAKE" : "NOT TAKE") << " the branch." << std::endl;
+					}
+					bt->predicted[pc -> contents] = (t ? TAKEN : NOT_TAKEN);
+				} else {
+					bt->predicted[pc->contents] = STALLED;
+					bt->actual[pc->contents] = UNKNOWN;
+					stalled = true;
+				}
 			break;
 
 			case OP_HLT:

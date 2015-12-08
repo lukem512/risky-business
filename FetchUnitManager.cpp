@@ -69,7 +69,7 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 		lastIssued = (lastIssued + 1) % fus.size();
 	}
 
-	// If any FU is stalled, start from there
+	// Resolve any stalls in pipeline
 	for (int i = 0; i < fus.size(); i++) {
 		if (fus[i].stalled) {
 			if (fus[i].checkForStallResolution(bt, &pc)) {
@@ -79,6 +79,13 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 			}
 			break;
 		}
+	}
+
+	// Don't fetch if we're halted
+	bool halted = false;
+	for (int i = 0; i < fus.size(); i++) {
+		halted = fus[i].halted;
+		if (halted) return;
 	}
 
 	// Tick all FUs
