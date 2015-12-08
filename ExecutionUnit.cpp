@@ -245,8 +245,10 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				}
 				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
+				bt->pc[pc.contents - 1] = pc.contents;
 			} else {
 				bt->actual[pc.contents - 1] = NOT_TAKEN;
+				bt->pc[pc.contents - 1] = pc.contents;
 			}
 		break;
 
@@ -265,6 +267,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				pc.contents = pc.contents + im1;
 			} else {
 				bt->actual[pc.contents - 1] = NOT_TAKEN;
+				bt->pc[pc.contents - 1] = pc.contents;
 			}
 		break;
 		
@@ -283,6 +286,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				pc.contents = pc.contents + im1;
 			} else {
 				bt->actual[pc.contents - 1] = NOT_TAKEN;
+				bt->pc[pc.contents - 1] = pc.contents;
 			}
 		break;
 
@@ -301,6 +305,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				pc.contents = pc.contents + im1;
 			} else {
 				bt->actual[pc.contents - 1] = NOT_TAKEN;
+				bt->pc[pc.contents - 1] = pc.contents;
 			}
 		break;
 
@@ -319,6 +324,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				pc.contents = pc.contents + im1;
 			} else {
 				bt->actual[pc.contents - 1] = NOT_TAKEN;
+				bt->pc[pc.contents - 1] = pc.contents;
 			}
 		break;
 
@@ -337,6 +343,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				pc.contents = pc.contents + im1;
 			} else {
 				bt->actual[pc.contents - 1] = NOT_TAKEN;
+				bt->pc[pc.contents - 1] = pc.contents;
 			}
 		break;
 

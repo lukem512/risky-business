@@ -20,6 +20,9 @@ FetchUnitManager::FetchUnitManager(unsigned int width, DecodeUnitManager* dum) {
 	// Nothing has been issued yet...
 	lastIssued = 0;
 
+	// Not speculative yet...
+	speculative = false;
+
 	// Set up the Fetch Units
 	fus.assign(width, FetchUnit(dum));
 }
@@ -34,6 +37,18 @@ void FetchUnitManager::setDebug(bool debug) {
 
 bool FetchUnitManager::getDebug() {
 	return debug;
+}
+
+void FetchUnitManager::setSpeculative(bool speculative) {
+	this->speculative = speculative;
+
+	for (int i = 0; i < fus.size(); i++) {
+		fus[i].speculative = speculative;
+	}
+}
+
+bool FetchUnitManager::getSpeculative() {
+	return speculative;
 }
 
 std::string FetchUnitManager::toString() {
@@ -82,10 +97,10 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 	}
 
 	// Don't fetch if we're halted
-	bool halted = false;
 	for (int i = 0; i < fus.size(); i++) {
-		halted = fus[i].halted;
-		if (halted) return;
+		if (fus[i].halted) {
+			return;
+		}
 	}
 
 	// Tick all FUs
@@ -101,7 +116,13 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 		dependents.erase(dependents.begin() + i);
 
 		// Call tick!
+		fus[i].speculative = getSpeculative();
 		fus[i].tick(m, &dependents, pipeline, bt, &pc);
+
+		if (fus[i].speculative) {
+			// TODO: mark all future fetches as such
+			speculative = true;
+		}
 
 		if (fus[i].dependent) {
 			// Don't fill up the other FUs
@@ -133,4 +154,18 @@ FetchUnit* FetchUnitManager::getAvailableFetchUnit() {
 		}
 	}
 	return NULL;
+}
+
+// Removes speculative values after incorrect branch prediction
+void FetchUnitManager::clearPipeline(uint32_t pc) {
+	for (int i = 0; i < fus.size(); i++) {
+		if (fus[i].speculative) {
+			fus[i].clear();
+		}
+	}
+	this->pc.contents = pc;
+	if (debug) {
+		std::cout << "Setting PC to " << this->pc.toString() << " after clearing pipeline." << std::endl;
+	}
+	speculative = false;
 }

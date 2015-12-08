@@ -15,28 +15,37 @@ DecodeUnit::DecodeUnit(ExecutionUnitManager* eum) {
 	// Add local reference to EU manager
 	this->eum = eum;
 
-	// Set up local register values
-	r1 = 0;
-	r2 = 0;
-	r3 = 0;
-	im1 = 0;
-
-	// Set state to ready
-	setState(true);
+	// Clear the pipe!
+	clear();
 }
 
-void DecodeUnit::issue(Register* ir, Register* pc) {
+void DecodeUnit::issue(Register* ir, Register* pc, bool speculative) {
 	if (debug) {
-		std::cout << "Being issued with " << optos(ir->contents) << std::endl;
+		std::cout << "Being issued with " << (speculative ? " speculative " : "") << "instructon " << optos(ir->contents) << std::endl;
 	}
 	this->ir.contents = ir->contents;
 	this->pc.contents = pc->contents;
+	this->speculative = speculative;
 	ready = false;
 }
 
 void DecodeUnit::setState(bool ready) {
 	this->ready = ready;
 	this->decoded = !ready;
+}
+
+void DecodeUnit::clear() {
+	// Initialialise local register values
+	r1 = 0;
+	r2 = 0;
+	r3 = 0;
+	im1 = 0;
+
+	// Clear speculative flag!
+	speculative = false;
+
+	// Set state to ready
+	setState(true);
 }
 
 bool DecodeUnit::passToExecutionUnit() {

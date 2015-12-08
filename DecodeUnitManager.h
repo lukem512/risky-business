@@ -23,6 +23,7 @@ public:
 	std::string toString();
 	DecodeUnit* getAvailableDecodeUnit();
 	void tick();
+	void clearPipeline();
 };
 
 #endif

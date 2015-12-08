@@ -15,6 +15,7 @@
 class FetchUnitManager {
 private:
 	bool debug;
+	bool speculative;
 	DecodeUnitManager* dum;
 	std::vector<FetchUnit> fus;
 	int lastIssued;
@@ -25,9 +26,12 @@ public:
 	FetchUnitManager(unsigned int width, DecodeUnitManager* dum);
 	void setDebug(bool debug);
 	bool getDebug();
+	void setSpeculative(bool speculative);
+	bool getSpeculative();
 	std::string toString();
 	FetchUnit* getAvailableFetchUnit();
 	void tick(std::vector<MemoryLocation>* m, bool pipeline, BranchTable* bt);
+	void clearPipeline(uint32_t pc);
 };
 
 #endif

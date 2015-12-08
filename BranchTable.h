@@ -20,6 +20,7 @@ class BranchTable {
 public:
 	std::map<uint32_t, Prediction> predicted;
 	std::map<uint32_t, Prediction> actual;
+	std::map<uint32_t, uint32_t>   pc;
 };
 
 #endif

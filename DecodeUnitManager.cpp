@@ -80,3 +80,12 @@ DecodeUnit* DecodeUnitManager::getAvailableDecodeUnit() {
 	}
 	return NULL;
 }
+
+// Removes speculative values after incorrect branch prediction
+void DecodeUnitManager::clearPipeline() {
+	for (int i = 0; i < dus.size(); i++) {
+		if (dus[i].speculative) {
+			dus[i].clear();
+		}
+	}
+}

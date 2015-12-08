@@ -83,12 +83,28 @@ bool State::tick() {
 		halted = eum->halted;
 
 		if (!halted) {
+			bool branchPrediction = true;
+			bool speculative = false;
+			if (branchPrediction) {
+				for (auto it : bt.predicted) {
+					if (bt.actual[it.first] == UNKNOWN) {
+						speculative = true;
+						continue;
+					}
+					if (bt.predicted[it.first] != bt.actual[it.first]) {
+						if (debug) {
+							std::cout << "Incorrect prediction at " << it.first << std::endl;
+						}
+						dum->clearPipeline();
+						fum->clearPipeline(bt.pc[it.first]);
+						bt.predicted[it.first] = bt.actual[it.first];
+						break;
+					}
+				}
+			}
 
-			// TODO: check for incorrectly predicted branches
-			// If found empty pipeline (all FUs, all DUs)
-			// and clear all fus[i].halted.
-			// Note: not all FU/DUs may be holding invalid instructions
-			// We need to set a speculative bit.
+			// Update speculative wire
+			fum->setSpeculative(speculative);
 
 			if (getDebug()) {
 				std::cout << std::endl;
