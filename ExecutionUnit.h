@@ -35,7 +35,8 @@ public:
 	bool ready;			// Ready to receive decoded input
 
 	bool halted;		// Flag declaring a HLT was executed
-	bool branched;		// Flag declaring a branch was executed
+	bool speculative;	// Flag declaring instruction is speculative
+	bool invalid;		// Flag declaring invalid pipeline
 
 	unsigned int n; 	// Executed instruction count
 	int count;			// Current instruction counter
@@ -45,9 +46,10 @@ public:
 	ExecutionUnit();
 	std::string toString();
 	void issue(uint8_t type, uint8_t opcode, uint8_t r1,
-	  uint8_t r2, uint8_t r3, int16_t im1, Register* pc);
+	  uint8_t r2, uint8_t r3, int16_t im1, Register* pc, bool speculative);
 	void tick(std::vector<Register>* r,
 	  std::vector<MemoryLocation>* m, BranchTable* bt);
+	void clear();
 };
 
 #endif

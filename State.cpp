@@ -95,6 +95,7 @@ bool State::tick() {
 						if (debug) {
 							std::cout << "Incorrect prediction at " << it.first << std::endl;
 						}
+						eum->clearPipeline();
 						dum->clearPipeline();
 						fum->clearPipeline(bt.pc[it.first]);
 						bt.predicted[it.first] = bt.actual[it.first];

@@ -35,6 +35,7 @@ public:
 	void tick(std::vector<Register>* r, std::vector<MemoryLocation>* m,
 		BranchTable* bt);
 	ExecutionUnit* getAvailableExecutionUnit();
+	void clearPipeline();
 };
 
 #endif

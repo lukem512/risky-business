@@ -21,7 +21,7 @@ DecodeUnit::DecodeUnit(ExecutionUnitManager* eum) {
 
 void DecodeUnit::issue(Register* ir, Register* pc, bool speculative) {
 	if (debug) {
-		std::cout << "Being issued with " << (speculative ? " speculative " : "") << "instructon " << optos(ir->contents) << std::endl;
+		std::cout << "Being issued with " << (speculative ? "speculative " : "") << "instructon " << optos(ir->contents) << std::endl;
 	}
 	this->ir.contents = ir->contents;
 	this->pc.contents = pc->contents;
@@ -54,7 +54,7 @@ bool DecodeUnit::passToExecutionUnit() {
 		if (debug) {
 			std::cout << "Success! Calling eu->issue" << std::endl;
 		}
-		eu->issue(type, opcode, r1, r2, r3, im1, &pc);
+		eu->issue(type, opcode, r1, r2, r3, im1, &pc, speculative);
 		setState(true);
 	}
 	return false;

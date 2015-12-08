@@ -48,6 +48,7 @@ std::string ExecutionUnitManager::toString() {
 void ExecutionUnitManager::tick(std::vector<Register>* r, std::vector<MemoryLocation>* m,
 	BranchTable* bt) {
 	for (int i = 0; i < eus.size(); i++) {
+
 		if (debug) {
 			std::cout << "[EU #" << i << "] calling tick()." << std::endl;
 		}
@@ -58,6 +59,14 @@ void ExecutionUnitManager::tick(std::vector<Register>* r, std::vector<MemoryLoca
 		// Encountered a halt?
 		if (eus[i].halted) {
 			halted = true;
+		}
+
+		// Pipeline invalid?
+		if (eus[i].invalid) {
+			if (debug) {
+				std::cout << "[EU #" << i << "] invalid pipeline!" << std::endl;
+			}
+			return;
 		}
 	}
 }
@@ -70,10 +79,20 @@ ExecutionUnit* ExecutionUnitManager::getAvailableExecutionUnit() {
 	for (int i = 0; i < eus.size(); i++) {
 		if (eus[i].ready && !eus[i].working) {
 			if (debug) {
-				std::cout << "EU #" << i << " is available." << std::endl;
+				std::cout << "[EU #" << i << "] I am available." << std::endl;
 			}
 			return &eus[i];
 		}
 	}
 	return NULL;
 }
+
+// Removes speculative values after incorrect branch prediction
+void ExecutionUnitManager::clearPipeline() {
+	for (int i = 0; i < eus.size(); i++) {
+		if (eus[i].speculative) {
+			eus[i].clear();
+		}
+	}
+}
+

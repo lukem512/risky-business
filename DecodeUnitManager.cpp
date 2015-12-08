@@ -73,7 +73,7 @@ DecodeUnit* DecodeUnitManager::getAvailableDecodeUnit() {
 	for (int i = 0; i < dus.size(); i++) {
 		if (dus[i].ready && !dus[i].decoded) {
 			if (debug) {
-				std::cout << "DU #" << i << " is available." << std::endl;
+				std::cout << "[DU #" << i << "] I am available." << std::endl;
 			}
 			return &dus[i];
 		}

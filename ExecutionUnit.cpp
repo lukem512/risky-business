@@ -12,21 +12,11 @@
 using namespace std;
 
 ExecutionUnit::ExecutionUnit() {
-	// Initialise arguments to 0
-	r1 = 0;
-	r2 = 0;
-	r3 = 0;
-	im1 = 0;
-	pc.contents = 0;
 
 	// No debugging by default
 	debug = false;
 
-	// Set halted flag to false
-	halted = false;
-
-	// Ready for an instruction!
-	setState(true);
+	clear();
 
 	// Reset instruction counter
 	n = 0;
@@ -35,6 +25,28 @@ ExecutionUnit::ExecutionUnit() {
 void ExecutionUnit::setState(bool ready) {
 	this->ready = ready;
 	working = !ready;
+}
+
+void ExecutionUnit::clear() {
+	// Set halted flag to false
+	halted = false;
+
+	// Set speculative flag to false
+	speculative = false;
+	invalid = false;
+
+	// Initialise arguments to 0
+	r1 = 0;
+	r2 = 0;
+	r3 = 0;
+	im1 = 0;
+	pc.contents = 0;
+
+	// Reset current instruction counter
+	count = 1;
+
+	// Set state to ready
+	setState(true);
 }
 
 std::string ExecutionUnit::toString() {
@@ -72,7 +84,8 @@ std::string ExecutionUnit::toString() {
 // Issue the instruction to the EU
 // This is a general-purpose EU
 // Operands not needed are ignored, as determined by type
-void ExecutionUnit::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uint8_t r3, int16_t im1, Register* pc) {
+void ExecutionUnit::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uint8_t r3,
+		int16_t im1, Register* pc, bool speculative) {
 	// Instruction type
 	this->type = type;
 	
@@ -82,6 +95,9 @@ void ExecutionUnit::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, 
 	this->r2 = r2;
 	this->r3 = r3;
 	this->im1 = im1;
+
+	// Speculative execution
+	this->speculative = speculative;
 
 	// Value of PC
 	if (debug) {
@@ -133,6 +149,10 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 
 	// Halted flag
 	halted = false;
+
+	// Flags for branch prediction
+	bool branched = false;
+	bool taken = false;
 
 	// Signed value representations
 	int32_t r1val_s, r2val_s, r3val_s;
@@ -236,6 +256,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 			if (debug) {
 				std::cout << "BZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
 			}
+			branched = true;
 			if (r->at(r1).contents == 0) {
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
@@ -243,12 +264,10 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Updating branch table at location " << hexify(pc.contents) << std::endl;
 				}
-				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
-				bt->pc[pc.contents - 1] = pc.contents;
+				taken = true;
 			} else {
-				bt->actual[pc.contents - 1] = NOT_TAKEN;
-				bt->pc[pc.contents - 1] = pc.contents;
+				taken = false;
 			}
 		break;
 
@@ -256,6 +275,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 			if (debug) {
 				std::cout << "BNZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
 			}
+			branched = true;
 			if (r->at(r1).contents != 0) {
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
@@ -263,11 +283,10 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Updating branch table at location " << pc.contents << std::endl;
 				}
-				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
+				taken = true;
 			} else {
-				bt->actual[pc.contents - 1] = NOT_TAKEN;
-				bt->pc[pc.contents - 1] = pc.contents;
+				taken = false;
 			}
 		break;
 		
@@ -275,6 +294,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 			if (debug) {
 				std::cout << "BLTZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
 			}
+			branched = true;
 			if (r1val_s < 0) {
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
@@ -282,11 +302,10 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Updating branch table at location " << pc.contents << std::endl;
 				}
-				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
+				taken = true;
 			} else {
-				bt->actual[pc.contents - 1] = NOT_TAKEN;
-				bt->pc[pc.contents - 1] = pc.contents;
+				taken = false;
 			}
 		break;
 
@@ -294,6 +313,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 			if (debug) {
 				std::cout << "BLTEZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
 			}
+			branched = true;
 			if (r1val_s <= 0) {
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
@@ -301,11 +321,10 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Updating branch table at location " << pc.contents << std::endl;
 				}
-				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
+				taken = true;
 			} else {
-				bt->actual[pc.contents - 1] = NOT_TAKEN;
-				bt->pc[pc.contents - 1] = pc.contents;
+				taken = false;
 			}
 		break;
 
@@ -313,6 +332,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 			if (debug) {
 				std::cout << "BGTZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
 			}
+			branched = true;
 			if (r1val_s > 0) {
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
@@ -320,11 +340,10 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Updating branch table at location " << pc.contents << std::endl;
 				}
-				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
+				taken = true;
 			} else {
-				bt->actual[pc.contents - 1] = NOT_TAKEN;
-				bt->pc[pc.contents - 1] = pc.contents;
+				taken = false;
 			}
 		break;
 
@@ -332,6 +351,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 			if (debug) {
 				std::cout << "BGTEZ " << std::to_string((long long int)r1val_s) << " " << std::to_string((long long int)im1) << std::endl;
 			}
+			branched = true;
 			if (r1val_s >= 0) {
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
@@ -339,11 +359,10 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Updating branch table at location " << pc.contents << std::endl;
 				}
-				bt->actual[pc.contents - 1] = TAKEN;
 				pc.contents = pc.contents + im1;
+				taken = true;
 			} else {
-				bt->actual[pc.contents - 1] = NOT_TAKEN;
-				bt->pc[pc.contents - 1] = pc.contents;
+				taken = false;
 			}
 		break;
 
@@ -375,6 +394,18 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				std::cerr << "Unknown opcode encountered (" << hexify(opcode) << ")" << std::endl;
 			}
 		break;
+	}
+
+	if (branched) {
+		if (taken) {
+			bt->actual[pc.contents - 1] = TAKEN;
+		} else {
+			bt->actual[pc.contents - 1] = NOT_TAKEN;
+		}
+		if (bt->actual[pc.contents - 1] != bt->predicted[pc.contents - 1]) {
+			invalid = true;
+		}
+		bt->pc[pc.contents - 1] = pc.contents;
 	}
 
 	// Set state to ready
