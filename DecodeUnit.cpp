@@ -15,6 +15,12 @@ DecodeUnit::DecodeUnit(ExecutionUnitManager* eum) {
 	// Add local reference to EU manager
 	this->eum = eum;
 
+	// Set up local register values
+	r1 = 0;
+	r2 = 0;
+	r3 = 0;
+	im1 = 0;
+
 	// Set state to ready
 	setState(true);
 }
