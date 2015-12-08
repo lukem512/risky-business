@@ -171,9 +171,6 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 	}
 	
 	// Fill the instruction register
-	if (debug) {
-		std::cout << "Filling _ir with " << optos(next) << std::endl;
-	}
 	_ir.contents = next;
 
 	// Update flags
@@ -227,15 +224,7 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 	pc->contents++;
 	_pc.contents = pc->contents;
 
-	if (debug) {
-		std::cout << "Setting _pc to " << hexify(_pc.contents) << std::endl;
-	}
-
 	// ...and increment the copy for the FUM
 	pc->contents = pc->contents + delta;
 	delta = 0;
-
-	if (debug) {
-		std::cout << "Setting _pc to " << hexify(_pc.contents) << std::endl;
-	}
 }

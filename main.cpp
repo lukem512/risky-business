@@ -41,50 +41,56 @@ int main(int argc, char** argv){
 	}
 
 	// Pipeline width
-	uint32_t eus = 1;
+	uint32_t eus = DEFAULT_EU_WIDTH;
 	if (option_exists(argv, argv+argc, "-eus")) {
 		char* w = get_option(argv, argv+argc, "-eus");
 		if (w) {
 			eus = atoi(w);
-			s.setEus(eus);
-			std::cout << "Setting number of EUs to " << eus << "." << std::endl;
 		} else {
 			std::cerr << "No EU width specified." << std::endl;
 			return 1;
 		}
 	}
 
-	uint32_t dus = 1;
+	uint32_t dus = DEFAULT_DU_WIDTH;
 	if (option_exists(argv, argv+argc, "-dus")) {
 		char* w = get_option(argv, argv+argc, "-dus");
 		if (w) {
 			dus = atoi(w);
-			s.setDus(dus);
-			std::cout << "Setting number of DUs to " << dus << "." << std::endl;
 		} else {
 			std::cerr << "No EU width specified." << std::endl;
 			return 1;
 		}
 	}
 
-	uint32_t fus = 1;
+	uint32_t fus = DEFAULT_FU_WIDTH;
 	if (option_exists(argv, argv+argc, "-fus")) {
 		char* w = get_option(argv, argv+argc, "-fus");
 		if (w) {
 			fus = atoi(w);
-			s.setFus(fus);
-			std::cout << "Setting number of FUs to " << fus << "." << std::endl;
 		} else {
 			std::cerr << "No FU width specified." << std::endl;
 			return 1;
 		}
 	}
+	
+	// Set up configuration
+	s.setEus(eus);
+	s.setDus(dus);
+	s.setFus(fus);
 
 
 	// Use debug?
 	if (option_exists(argv, argv+argc, "-d")) {
 		std::cout << "Setting debug flag to true." << std::endl;
 		s.setDebug(true);
+	}
+
+	// Print configuration?
+	if (s.getDebug()) {
+		std::cout << "Setting number of EUs to " << eus << "." << std::endl;
+		std::cout << "Setting number of DUs to " << dus << "." << std::endl;
+		std::cout << "Setting number of FUs to " << fus << "." << std::endl;
 	}
 
 	// Cap execution time?
