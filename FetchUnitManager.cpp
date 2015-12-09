@@ -42,6 +42,10 @@ bool FetchUnitManager::getDebug() {
 void FetchUnitManager::setSpeculative(bool speculative) {
 	this->speculative = speculative;
 
+	if (debug) {
+		std::cout << "Setting speculative flag to " << speculative << std::endl;
+	}
+
 	for (int i = 0; i < fus.size(); i++) {
 		fus[i].speculative = speculative;
 	}
@@ -166,6 +170,7 @@ void FetchUnitManager::clearPipeline(uint32_t pc) {
 	this->pc.contents = pc;
 	if (debug) {
 		std::cout << "Setting PC to " << this->pc.toString() << " after clearing pipeline." << std::endl;
+		std::cout << "Passed in pc is " << pc << std::endl;
 	}
-	speculative = false;
+	setSpeculative(false);
 }

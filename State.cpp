@@ -69,6 +69,43 @@ float State::getInstructionsPerTick() {
 	return (eum->getTotalInstructionsExecuted() / (float) getTicks());
 }
 
+void State::checkPipelineValid() {
+	bool speculative = false;
+	bool clearSpeculative = false;
+
+	for (auto it : bt.predicted) {
+		if (bt.actual[it.first] == UNKNOWN) {
+			if (debug) {
+				std::cout << "Unknown branch at " << it.first << std::endl;
+				std::cout << "Predicted " << bt.predicted[it.first] << std::endl;
+			}
+			speculative = true;
+			continue;
+		}
+		if (bt.predicted[it.first] != bt.actual[it.first]) {
+			if (debug) {
+				std::cout << "Incorrect prediction at " << it.first << std::endl;
+				std::cout << "Predicted " << bt.predicted[it.first] << " vs. " << bt.actual[it.first] << std::endl;
+			}
+			eum->clearPipeline();
+			dum->clearPipeline();
+			fum->clearPipeline(bt.pc[it.first]);
+			bt.predicted[it.first] = bt.actual[it.first];
+			speculative = false;
+			clearSpeculative = true;
+			break;
+		}
+	}
+
+	// Hoisted from foreach due to iterator
+	if (clearSpeculative) {
+		bt.clearSpeculative();
+	}
+
+	// Update speculative flag
+	fum->setSpeculative(speculative);
+}
+
 bool State::tick() {
 
 	bool halted = false;
@@ -83,29 +120,11 @@ bool State::tick() {
 		halted = eum->halted;
 
 		if (!halted) {
-			bool branchPrediction = true;
-			bool speculative = false;
+			// Check pipeline is valid
+			bool branchPrediction = true; // TODO: parameterize
 			if (branchPrediction) {
-				for (auto it : bt.predicted) {
-					if (bt.actual[it.first] == UNKNOWN) {
-						speculative = true;
-						continue;
-					}
-					if (bt.predicted[it.first] != bt.actual[it.first]) {
-						if (debug) {
-							std::cout << "Incorrect prediction at " << it.first << std::endl;
-						}
-						eum->clearPipeline();
-						dum->clearPipeline();
-						fum->clearPipeline(bt.pc[it.first]);
-						bt.predicted[it.first] = bt.actual[it.first];
-						break;
-					}
-				}
+				checkPipelineValid();
 			}
-
-			// Update speculative wire
-			fum->setSpeculative(speculative);
 
 			if (getDebug()) {
 				std::cout << std::endl;

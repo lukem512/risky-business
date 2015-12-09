@@ -11,7 +11,9 @@ TODO List
 [x] State to use new *Manager classes
 [x] Clean up comments and dead code
 [x] Test
+[x] Static branch prediction
+[ ] -eus [1|2] -dus 6 -fus 6 -f compiled/benchmarks/[fib|bubble].bin, -eus [1|2|3] -dus 6 -fus 6 -f compiled/benchmarks/sop.bin give wonky results
+[ ] -eus n -fus n -dus <n gives wonky result
+[ ] Dynamic branch prediction
 [ ] Multiple instruction lengths
 [ ] Out-of-Order execution
-[ ] Static branch prediction
-[ ] Dynamic branch prediction

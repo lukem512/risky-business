@@ -153,6 +153,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 	// Flags for branch prediction
 	bool branched = false;
 	bool taken = false;
+	int32_t delta = 0;
 
 	// Signed value representations
 	int32_t r1val_s, r2val_s, r3val_s;
@@ -249,7 +250,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 			if (debug) {
 				std::cout << "B " << " " << std::to_string((long long int)im1) << std::endl;
 			}
-			pc.contents = pc.contents + im1;
+			delta = im1;
 		break;
 
 		case OP_BZ:
@@ -261,10 +262,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
-				if (debug) {
-					std::cout << "Updating branch table at location " << hexify(pc.contents) << std::endl;
-				}
-				pc.contents = pc.contents + im1;
+				delta = im1;
 				taken = true;
 			} else {
 				taken = false;
@@ -280,10 +278,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
-				if (debug) {
-					std::cout << "Updating branch table at location " << pc.contents << std::endl;
-				}
-				pc.contents = pc.contents + im1;
+				delta = im1;
 				taken = true;
 			} else {
 				taken = false;
@@ -299,10 +294,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
-				if (debug) {
-					std::cout << "Updating branch table at location " << pc.contents << std::endl;
-				}
-				pc.contents = pc.contents + im1;
+				delta = im1;
 				taken = true;
 			} else {
 				taken = false;
@@ -318,10 +310,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
-				if (debug) {
-					std::cout << "Updating branch table at location " << pc.contents << std::endl;
-				}
-				pc.contents = pc.contents + im1;
+				delta = im1;
 				taken = true;
 			} else {
 				taken = false;
@@ -337,10 +326,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
-				if (debug) {
-					std::cout << "Updating branch table at location " << pc.contents << std::endl;
-				}
-				pc.contents = pc.contents + im1;
+				delta = im1;
 				taken = true;
 			} else {
 				taken = false;
@@ -356,10 +342,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				if (debug) {
 					std::cout << "Performing jump of " << std::to_string((long long int)im1) << std::endl;
 				}
-				if (debug) {
-					std::cout << "Updating branch table at location " << pc.contents << std::endl;
-				}
-				pc.contents = pc.contents + im1;
+				delta = im1;
 				taken = true;
 			} else {
 				taken = false;
@@ -381,6 +364,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 			}
 			halted = true;
 			bt->actual[pc.contents - 1] = HALTED;
+			bt->pc[pc.contents - 1] = pc.contents;
 		break;
 
 		case OP_NOP:
@@ -397,6 +381,10 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 	}
 
 	if (branched) {
+		if (debug) {
+			std::cout << "Updating BT with " << (taken ? "TAKEN" : "NOT_TAKEN") << " (";
+			std::cout << (taken ? TAKEN : NOT_TAKEN) << ") at " << pc.contents - 1 << std::endl;
+		}
 		if (taken) {
 			bt->actual[pc.contents - 1] = TAKEN;
 		} else {
@@ -405,7 +393,11 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 		if (bt->actual[pc.contents - 1] != bt->predicted[pc.contents - 1]) {
 			invalid = true;
 		}
-		bt->pc[pc.contents - 1] = pc.contents;
+		bt->pc[pc.contents - 1] = pc.contents + delta;
+		if (debug) {
+			std::cout << "Setting BT.PC[" << pc.contents - 1 << "] to " << bt->pc[pc.contents - 1] << std::endl;
+		}
+		pc.contents += delta;
 	}
 
 	// Set state to ready

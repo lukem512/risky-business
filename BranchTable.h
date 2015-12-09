@@ -21,6 +21,20 @@ public:
 	std::map<uint32_t, Prediction> predicted;
 	std::map<uint32_t, Prediction> actual;
 	std::map<uint32_t, uint32_t>   pc;
+	std::map<uint32_t, bool>	   speculative;
+
+	void clearSpeculative() {
+		for (auto it = speculative.cbegin(); it != speculative.cend();) {
+			if (it->second) {
+				predicted.erase(it->first);
+				actual.erase(it->first);
+				// pc won't have the entry
+				speculative.erase(it++);
+			} else {
+				++it;
+			}
+		}
+	}
 };
 
 #endif

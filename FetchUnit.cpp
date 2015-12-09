@@ -216,8 +216,6 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 				if (branchPrediction) {
 					bool t;
 
-					speculative =  true;
-
 					// Static prediction
 					// Take branch for backwards-facing
 					// Do not branch for forwards-facing
@@ -236,6 +234,8 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 						std::cout << "Branch predictor has decided to " << (t ? "TAKE" : "NOT TAKE") << " the branch." << std::endl;
 					}
 					bt->predicted[pc->contents] = (t ? TAKEN : NOT_TAKEN);
+					bt->speculative[pc->contents] = speculative;
+					speculative = true;
 				} else {
 					bt->predicted[pc->contents] = STALLED;
 					stalled = true;
@@ -248,6 +248,7 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 					std::cout << "Found a halt at location " << std::to_string(pc->contents) << std::endl;
 				}
 				bt->predicted[pc->contents] = HALTED;
+				bt->speculative[pc->contents] = speculative;
 				bt->actual[pc->contents] = UNKNOWN;
 				halted = true;
 			break;

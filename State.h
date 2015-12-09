@@ -85,6 +85,7 @@ private:
 	};
 
 	bool tickNoPipeline();
+	void checkPipelineValid();
 
 public:
 	// Memory

@@ -167,7 +167,7 @@ int main(int argc, char** argv){
 			// Execution halted
 			break;
 		}
-		if (maxTicks != 0 && s.getTicks() + 1 >= maxTicks) {
+		if (maxTicks != 0 && s.getTicks() >= maxTicks) {
 			// Max ticks exceeded
 			break;
 		}
