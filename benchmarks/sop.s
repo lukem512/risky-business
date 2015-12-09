@@ -28,7 +28,7 @@ LDC r3 4
 ST r3 103
 LDC r3 5
 ST r3 104
-%
+% ADDR 11 ^^
 %%%%%%%%%%%%%%%%%%%%%%
 % Address of B (B)
 LDC r10 200
@@ -54,7 +54,7 @@ STR r12 r13
 LDC r12 204
 LDC r13 2
 STR r12 r13
-%
+% ADDR ^ 28
 %%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%
@@ -66,8 +66,10 @@ LDC r2 1
 LDC r3 0
 % while (i < len(A))
 loop:
+% ADDR v 32
 CMP r4 r3 r1
 BLTZ r4 1
+% ADDR v 34
 B print
 % Address of A[i]
 ADD r5 r0 r3
@@ -85,29 +87,31 @@ ADD r9 r9 r7
 % i = i + incr
 ADD r3 r3 r2
 B loop
+% ADDR ^ 43
 %%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%
 print:
-% Print sum
+% Print sum (ADDR v 44)
 PRNT r9
 % Print product array
 LDC r3 0
 LDC r4 1
 printloop:
-% while (i < len)
+% while (i < len) (ADDR v 47)
 CMP r5 r3 r1
 BLTZ r5 1
 B halt
-%
+% (ADDR ^ 49)
 ADD r13 r0 r3
 LDR r9 r13
 PRNT r9
 ADD r3 r3 r4
-%
+% (ADDR v 54)
 B printloop
 %%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%
 halt:
 HLT
+% ADDR ^ 55

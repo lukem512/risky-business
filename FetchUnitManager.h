@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <string>
+#include <queue>
 
 #include "FetchUnit.h"
 #include "MemoryLocation.h"
@@ -19,6 +20,7 @@ private:
 	DecodeUnitManager* dum;
 	std::vector<FetchUnit> fus;
 	int lastIssued;
+	std::queue<int> waiting;
 
 public:
 	Register pc;

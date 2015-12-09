@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <string>
+#include <queue>
 
 #include "DecodeUnit.h"
 
@@ -15,6 +16,7 @@ private:
 	ExecutionUnitManager* eum;
 	std::vector<DecodeUnit> dus;
 	int lastIssued;
+	std::queue<int> waiting;
 
 public:
 	DecodeUnitManager(unsigned int n, ExecutionUnitManager* eum);

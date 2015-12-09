@@ -225,8 +225,12 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 			// TODO: use a LoadStoreUnit
 			// For now, the memory access is instant
 			if (debug) {
+				std::cout << "r1 = " << rtos(r1) << std::endl;
+				std::cout << "r2 = " << rtos(r2) << std::endl;
+				std::cout << std::to_string((long long unsigned int)r->at(r2).contents) << std::endl;
+				std::cout << std::to_string((long long unsigned int)m->at(r->at(r2).contents).contents) << std::endl;
 				std::cout << rtos(r1) << " = " << "M[" << std::to_string((long long unsigned int)r->at(r2).contents) << "] (" << std::to_string((long long unsigned int)m->at(r->at(r2).contents).contents) << ")" << std::endl;
-			}
+			}	
 			r->at(r1).contents = m->at(r->at(r2).contents).contents;
 		break;
 

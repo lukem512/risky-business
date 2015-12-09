@@ -75,17 +75,16 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 	// this is to prevent stagnation in the pipeline.
 	// According to Neil Burgess (a guest lecturer from ARM), this is
 	// fairly easy to do in hardware.
-	// Use a simple round-robin scheduler
-	for (int i = 0; i < fus.size(); i++) {
-		if (fus[lastIssued].fetched) {
-			if (debug) {
-				std::cout << "[FU #" << lastIssued << "] trying to issue stored instruction." << std::endl;
-			}
-			if (!fus[lastIssued].passToDecodeUnit()) {
-				break;
-			}
+	// Use a queue for simulation
+	while (!waiting.empty()){
+		auto i = waiting.front();
+		if (debug) {
+			std::cout << "[FU #" << i << "] trying to issue stored instruction." << std::endl;
 		}
-		lastIssued = (lastIssued + 1) % fus.size();
+		if (!fus[i].passToDecodeUnit()) {
+			break;
+		}
+		waiting.pop();
 	}
 
 	// Resolve any stalls in pipeline
@@ -110,6 +109,11 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 	// Tick all FUs
 	for (int i = 0; i < fus.size(); i++) {
 
+		// Skip a waiting FU
+		if (fus[i].fetched) {
+			continue;
+		}
+
 		if (debug) {
 			std::cout << "[FU #" << i << "] calling tick()." << std::endl;
 		}
@@ -123,8 +127,14 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 		fus[i].speculative = getSpeculative();
 		fus[i].tick(m, &dependents, pipeline, bt, &pc);
 
+		// Add to waiting queue
+		if (fus[i].fetched) {
+			waiting.push(i);
+		}
+
 		if (fus[i].speculative) {
-			// TODO: mark all future fetches as such
+			// All future instructions will be marked
+			// as speculative
 			speculative = true;
 		}
 
@@ -140,7 +150,6 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 
 		if (fus[i].halted) {
 			// Don't fill the other FUs
-			// TODO: this should persist
 			break;
 		}
 	}
@@ -162,15 +171,23 @@ FetchUnit* FetchUnitManager::getAvailableFetchUnit() {
 
 // Removes speculative values after incorrect branch prediction
 void FetchUnitManager::clearPipeline(uint32_t pc) {
+	// Clear the FUs
 	for (int i = 0; i < fus.size(); i++) {
 		if (fus[i].speculative) {
 			fus[i].clear();
 		}
 	}
+
+	// Empty the waiting queue
+	std::queue<int>().swap(waiting);
+
+	// Reset the PC
 	this->pc.contents = pc;
+
 	if (debug) {
 		std::cout << "Setting PC to " << this->pc.toString() << " after clearing pipeline." << std::endl;
-		std::cout << "Passed in pc is " << pc << std::endl;
 	}
+
+	// Reset the speculative flags
 	setSpeculative(false);
 }

@@ -44,6 +44,7 @@ std::string DecodeUnitManager::toString() {
 void DecodeUnitManager::tick() {
 	// Instructions should be issued to EU oldest-first;
 	// as with the Fetch Units.
+
 	// Round-robin.
 	for (int i = 0; i < dus.size(); i++) {
 		if (dus[lastIssued].decoded) {
@@ -56,14 +57,37 @@ void DecodeUnitManager::tick() {
 		}
 		lastIssued = (lastIssued + 1) % dus.size();
 	}
+
+	// Use a queue for simulation
+	while (!waiting.empty()){
+		auto i = waiting.front();
+		if (debug) {
+			std::cout << "[DU #" << i << "] trying to issue decoded instruction." << std::endl;
+		}
+		if (!dus[i].passToExecutionUnit()) {
+			break;
+		}
+		waiting.pop();
+	}
 	
 	for (int i = 0; i < dus.size(); i++) {
+		
+		// Skip a waiting DU
+		if (dus[i].decoded) {
+			continue;
+		}
+
 		if (debug) {
 			std::cout << "[DU #" << i << "] calling tick()." << std::endl;
 		}
 
 		// Call tick!
 		dus[i].tick();
+
+		// Add to waiting queue?
+		if (dus[i].decoded) {
+			waiting.push(i);
+		}
 	}
 }
 
@@ -83,9 +107,13 @@ DecodeUnit* DecodeUnitManager::getAvailableDecodeUnit() {
 
 // Removes speculative values after incorrect branch prediction
 void DecodeUnitManager::clearPipeline() {
+	// Clear the DUs
 	for (int i = 0; i < dus.size(); i++) {
 		if (dus[i].speculative) {
 			dus[i].clear();
 		}
 	}
+
+	// Empty the waiting queue
+	std::queue<int>().swap(waiting);
 }
