@@ -38,6 +38,7 @@ private:
 	unsigned int waitForFetch, waitForDecode, waitForExecute;
 	int state;
 	bool debug;
+	bool branchPrediction;
 	bool pipeline;
 	bool stalled;
 
@@ -80,6 +81,9 @@ private:
 		// Set debug to false
 		setDebug(false);
 
+		// Set branch prediction to true by default
+		setBranchPrediction(true);
+
 		// Set pipeline to true
 		setPipeline(true);
 	};
@@ -113,6 +117,8 @@ public:
 		uint32_t eus, uint32_t dus, uint32_t fus);
 	void setDebug(bool debug);
 	bool getDebug();
+	void setBranchPrediction(bool branchPrediction);
+	bool getBranchPrediction();
 	void setPipeline(bool pipeline);
 	bool getPipeline();
 	void print();

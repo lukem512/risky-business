@@ -8,9 +8,6 @@
 #include "FetchUnitManager.h"
 
 FetchUnitManager::FetchUnitManager(unsigned int width, DecodeUnitManager* dum) {
-	// Set debugging to false, by default
-	debug = false;
-
 	// Store a local reference to the DU manager
 	this->dum = dum;
 
@@ -25,6 +22,12 @@ FetchUnitManager::FetchUnitManager(unsigned int width, DecodeUnitManager* dum) {
 
 	// Set up the Fetch Units
 	fus.assign(width, FetchUnit(dum));
+
+	// Set debugging to false, by default
+	setDebug(false);
+
+	// Set branch prediction to true, by default
+	setBranchPrediction(true);
 }
 
 void FetchUnitManager::setDebug(bool debug) {
@@ -37,6 +40,19 @@ void FetchUnitManager::setDebug(bool debug) {
 
 bool FetchUnitManager::getDebug() {
 	return debug;
+}
+
+
+void FetchUnitManager::setBranchPrediction(bool branchPrediction) {
+	this->branchPrediction = branchPrediction;
+
+	for (int i = 0; i < fus.size(); i++) {
+		fus[i].branchPrediction = branchPrediction;
+	}
+}
+
+bool FetchUnitManager::getBranchPrediction() {
+	return branchPrediction;
 }
 
 void FetchUnitManager::setSpeculative(bool speculative) {

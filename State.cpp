@@ -17,6 +17,15 @@ State::State(uint32_t memorySize, uint8_t registerCount,
 	init(memorySize, registerCount, eus, dus, fus);
 }
 
+void State::setBranchPrediction(bool branchPrediction) {
+	this->branchPrediction = branchPrediction;
+	// fum->setBranchPrediction(branchPrediction);
+}
+
+bool State::getBranchPrediction() {
+	return branchPrediction;
+}
+
 void State::setDebug(bool debug) {
 	this->debug = debug;
 	fum->setDebug(debug);
@@ -120,8 +129,7 @@ bool State::tick() {
 
 		if (!halted) {
 			// Check pipeline is valid
-			bool branchPrediction = true; // TODO: parameterize
-			if (branchPrediction) {
+			if (getBranchPrediction()) {
 				checkPipelineValid();
 			}
 

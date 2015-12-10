@@ -23,6 +23,8 @@ public:
 	bool fetched;	// Holding fetched instruction
 	bool ready;		// Ready to fetch input
 
+	bool branchPrediction;
+
 	bool stalled;
 	bool halted;
 	bool dependent;

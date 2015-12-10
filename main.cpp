@@ -10,6 +10,8 @@
 #include "State.h"
 #include "option.h"
 
+void printLogo();
+
 int main(int argc, char** argv){
 	// Seed the random function
 	srand(time(NULL));
@@ -19,15 +21,9 @@ int main(int argc, char** argv){
     s = State();
 
     // Logo!
-    std::cout << "  _____  _     _            ____            _  					 " << std::endl
- 		      << " |  __ \\(_)   | |          |  _ \\          (_) 					 " << std::endl
- 			  << " | |__) |_ ___| | ___   _  | |_) |_   _ ___ _ _ __   ___  ___ ___  " << std::endl
- 			  << " |  _  /| / __| |/ / | | | |  _ <| | | / __| | '_ \\ / _ \\/ __/ __| " << std::endl
- 			  << " | | \\ \\| \\__ \\   <| |_| | | |_) | |_| \\__ \\ | | | |  __/\\__ \\__ \\ " << std::endl
- 			  << " |_|  \\_\\_|___/_|\\_\\\\__, | |____/\\\\__,_|___/_|_| |_|\\___||___/___/ " << std::endl
-			  << "                     __/ |                                         " << std::endl
-			  << "                    |___/                                          " << std::endl;
-	std::cout << "A simple simulator of a SuperScalar RISC machine." << std::endl << std::endl;
+    if (!option_exists(argv, argv+argc, "-q")) {
+		printLogo();
+	}
 
     // Show help?
 	if (option_exists(argv, argv+argc, "-h")) {
@@ -36,8 +32,10 @@ int main(int argc, char** argv){
 		std::cout << "Options:" << std::endl;
 		std::cout << "\t-h - Show this menu" << std::endl;
 		std::cout << "\t-d - Turn on debugging" << std::endl;
+		std::cout << "\t-q - Hide the logo" << std::endl;
 		std::cout << "\t-max-ticks n - Cap execution to n clock cycles" << std::endl;
 		std::cout << "\t-no-pipeline - Turn off pipelined execution" << std::endl;
+		std::cout << "\t-no-branch-prediction - Turn off branch prediction" << std::endl;
 		std::cout << "\t-eus n - Specify the number of Execution Units" << std::endl;
 		std::cout << "\t-dus n - Specify the number of Decode Units" << std::endl;
 		std::cout << "\t-fus n - Specify the number of Fetch Units" << std::endl;
@@ -67,6 +65,13 @@ int main(int argc, char** argv){
 		std::cout << "Setting pipeline flag to false." << std::endl;
 		s.setPipeline(false);
 	}
+
+	// Use branch prediction?
+	if (option_exists(argv, argv+argc, "-no-branch-prediction")) {
+		std::cout << "Setting branch prediction flag to false." << std::endl;
+		s.setBranchPrediction(false);
+	}
+
 
 	// Pipeline width
 	uint32_t eus = DEFAULT_EU_WIDTH;
@@ -184,4 +189,16 @@ int main(int argc, char** argv){
 	}
 
 	return 0;
+}
+
+void printLogo() {
+	std::cout << "  _____  _     _            ____            _  					 " << std::endl
+ 		      << " |  __ \\(_)   | |          |  _ \\          (_) 					 " << std::endl
+ 			  << " | |__) |_ ___| | ___   _  | |_) |_   _ ___ _ _ __   ___  ___ ___  " << std::endl
+ 			  << " |  _  /| / __| |/ / | | | |  _ <| | | / __| | '_ \\ / _ \\/ __/ __| " << std::endl
+ 			  << " | | \\ \\| \\__ \\   <| |_| | | |_) | |_| \\__ \\ | | | |  __/\\__ \\__ \\ " << std::endl
+ 			  << " |_|  \\_\\_|___/_|\\_\\\\__, | |____/\\\\__,_|___/_|_| |_|\\___||___/___/ " << std::endl
+			  << "                     __/ |                                         " << std::endl
+			  << "                    |___/                                          " << std::endl;
+	std::cout << "A simple simulator of a SuperScalar RISC machine." << std::endl << std::endl;
 }

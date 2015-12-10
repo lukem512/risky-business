@@ -16,6 +16,7 @@ FetchUnit::FetchUnit(const FetchUnit &copy) {
 	_ir.contents = copy._ir.contents;
 
 	debug = copy.debug;
+	branchPrediction = copy.branchPrediction;
 	fetched = copy.fetched;
 	ready = copy.ready;
 
@@ -31,6 +32,9 @@ FetchUnit::FetchUnit(const FetchUnit &copy) {
 FetchUnit::FetchUnit(DecodeUnitManager* dum) {
 	// No debugging by default
 	debug = false;
+
+	// BP, by default
+	branchPrediction = true;
 
 	// Add local reference to DU manager
 	this->dum = dum;
@@ -132,9 +136,6 @@ bool FetchUnit::checkForStallResolution(BranchTable* bt, Register* pc) {
 // General-purpose
 void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
 	bool pipeline, BranchTable* bt, Register* pc) {
-
-	bool branchPrediction = true; // TODO: parameterize
-
 
 	if (stalled) {
 		if (debug) {
