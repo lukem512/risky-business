@@ -88,39 +88,77 @@ bool FetchUnit::passToDecodeUnit() {
 bool FetchUnit::checkForStallResolution(BranchTable* bt, Register* pc) {
 	if (stalled) {
 		uint32_t previous = _pc.contents - 1;
-		if (bt->predicted[previous] == STALLED) {
-			if (bt->actual[previous] == UNKNOWN) {
-				// Waiting...
-				if (debug) {
-					std::cout << "Waiting for branch information for location " << hexify(previous) << "." << std::endl;
-				}
-				return false;
-			}
 
-			if (bt->actual[previous] == TAKEN) {
-				instruction_ori_t dataCond = *(instruction_ori_t *) &_ir.contents;
-				pc->contents += dataCond.im1;
-				if (debug) {
-					std::cout << "Branch at location " << previous << " was taken. Updating PC to " << pc->contents << "." << std::endl;
-				}
-			} else {
-				if (debug) {
-					std::cout << "Branch at location " << previous << " was not taken." << std::endl;
-				}
+		BranchTableEntry* e = bt->get(previous);
+
+		if (e->predicted == STALLED) {
+			switch (e->actual) {
+				case UNKNOWN:
+					// Waiting...
+					if (debug) {
+						std::cout << "Waiting for branch information for location " << previous << "." << std::endl;
+					}
+					return false;
+
+				case TAKEN:
+					pc->contents = e->pc;
+					if (debug) {
+						std::cout << "Branch at location " << previous << " was taken. Updating PC to " << pc->contents << "." << std::endl;
+					}
+					break;
+
+				case NOT_TAKEN:
+					if (debug) {
+						std::cout << "Branch at location " << previous << " was not taken." << std::endl;
+					}
+					break;
 			}
 
 			// Clear flag
 			stalled = false;
 
 			// Clear table entry
-			bt->predicted.erase(previous);
-			bt->actual.erase(previous);
+			bt->remove(e);
 		} else {
 			if (debug) {
 				std::cerr << "fu.stalled is true but bt is not stalled." << std::endl;
 			}
 			return false;
 		}
+
+		// if (bt->predicted[previous] == STALLED) {
+		// 	if (bt->actual[previous] == UNKNOWN) {
+		// 		// Waiting...
+		// 		if (debug) {
+		// 			std::cout << "Waiting for branch information for location " << hexify(previous) << "." << std::endl;
+		// 		}
+		// 		return false;
+		// 	}
+
+		// 	if (bt->actual[previous] == TAKEN) {
+		// 		instruction_ori_t dataCond = *(instruction_ori_t *) &_ir.contents;
+		// 		pc->contents += dataCond.im1;
+		// 		if (debug) {
+		// 			std::cout << "Branch at location " << previous << " was taken. Updating PC to " << pc->contents << "." << std::endl;
+		// 		}
+		// 	} else {
+		// 		if (debug) {
+		// 			std::cout << "Branch at location " << previous << " was not taken." << std::endl;
+		// 		}
+		// 	}
+
+		// 	// Clear flag
+		// 	stalled = false;
+
+		// 	// Clear table entry
+		// 	bt->predicted.erase(previous);
+		// 	bt->actual.erase(previous);
+		// } else {
+		// 	if (debug) {
+		// 		std::cerr << "fu.stalled is true but bt is not stalled." << std::endl;
+		// 	}
+		// 	return false;
+		// }
 	}
 	return true;
 }
@@ -233,23 +271,27 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 					if (debug) {
 						std::cout << "Branch predictor has decided to " << (t ? "TAKE" : "NOT TAKE") << " the branch." << std::endl;
 					}
-					bt->predicted[pc->contents] = (t ? TAKEN : NOT_TAKEN);
-					bt->speculative[pc->contents] = speculative;
+					// Add new entry
+					bt->add(pc->contents, (t ? TAKEN : NOT_TAKEN), speculative);
+					// bt->predicted[pc->contents] = (t ? TAKEN : NOT_TAKEN);
+					// bt->speculative[pc->contents] = speculative;
 					speculative = true;
 				} else {
-					bt->predicted[pc->contents] = STALLED;
+					// bt->predicted[pc->contents] = STALLED;
+					bt->add(pc->contents, STALLED, speculative);
 					stalled = true;
 				}
-				bt->actual[pc->contents] = UNKNOWN;
+				// bt->actual[pc->contents] = UNKNOWN;
 			break;
 
 			case OP_HLT:
 				if (debug) {
 					std::cout << "Found a halt at location " << std::to_string(pc->contents) << std::endl;
 				}
-				bt->predicted[pc->contents] = HALTED;
-				bt->speculative[pc->contents] = speculative;
-				bt->actual[pc->contents] = UNKNOWN;
+				bt->add(pc->contents, HALTED, speculative);
+				// bt->predicted[pc->contents] = HALTED;
+				// bt->speculative[pc->contents] = speculative;
+				// bt->actual[pc->contents] = UNKNOWN;
 				halted = true;
 			break;
 		}

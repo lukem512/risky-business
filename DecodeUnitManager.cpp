@@ -44,20 +44,6 @@ std::string DecodeUnitManager::toString() {
 void DecodeUnitManager::tick() {
 	// Instructions should be issued to EU oldest-first;
 	// as with the Fetch Units.
-
-	// Round-robin.
-	for (int i = 0; i < dus.size(); i++) {
-		if (dus[lastIssued].decoded) {
-			if (debug) {
-				std::cout << "[DU #" << lastIssued << "] trying to issue decoded instruction." << std::endl;
-			}
-			if (!dus[lastIssued].passToExecutionUnit()) {
-				break;
-			}
-		}
-		lastIssued = (lastIssued + 1) % dus.size();
-	}
-
 	// Use a queue for simulation
 	while (!waiting.empty()){
 		auto i = waiting.front();

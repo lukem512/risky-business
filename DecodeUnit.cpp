@@ -52,10 +52,11 @@ bool DecodeUnit::passToExecutionUnit() {
 	ExecutionUnit* eu = eum->getAvailableExecutionUnit();
 	if (eu != NULL) {
 		if (debug) {
-			std::cout << "Success! Calling eu->issue" << std::endl;
+			std::cout << "Success! Calling eu->issue with " << optos(opcode) << std::endl;
 		}
 		eu->issue(type, opcode, r1, r2, r3, im1, &pc, speculative);
 		setState(true);
+		return true;
 	}
 	return false;
 }
@@ -73,14 +74,9 @@ void DecodeUnit::tick() {
 	// Is there an instruction waiting?
 	if (decoded) {
 		if (debug) {
-			std::cout << "Trying to pass to EU" << std::endl;
+			std::cout << "Waiting for an EU to become available." << std::endl;
 		}
-		if (!passToExecutionUnit()) {
-			if (debug) {
-				std::cout << "No EU available" << std::endl;
-			}
-			return;
-		}
+		return;
 	}
 
 	// Cast to struct to decode bits

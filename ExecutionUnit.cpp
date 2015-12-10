@@ -367,8 +367,17 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 				std::cout << "Halting execution" << std::endl;
 			}
 			halted = true;
-			bt->actual[pc.contents - 1] = HALTED;
-			bt->pc[pc.contents - 1] = pc.contents;
+
+			for (auto it = bt->entries.begin(); it != bt->entries.end(); ++it) {
+			    if ((*it)->location == pc.contents - 1) {
+			    	if ((*it)->actual == UNKNOWN) {
+			    		(*it)->actual = HALTED;
+			    		(*it)->pc = pc.contents;
+			    	}	
+			    }
+			}
+			// bt->actual[pc.contents - 1] = HALTED;
+			// bt->pc[pc.contents - 1] = pc.contents;
 		break;
 
 		case OP_NOP:
@@ -389,18 +398,32 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 			std::cout << "Updating BT with " << (taken ? "TAKEN" : "NOT_TAKEN") << " (";
 			std::cout << (taken ? TAKEN : NOT_TAKEN) << ") at " << pc.contents - 1 << std::endl;
 		}
-		if (taken) {
-			bt->actual[pc.contents - 1] = TAKEN;
-		} else {
-			bt->actual[pc.contents - 1] = NOT_TAKEN;
+		for (auto it = bt->entries.begin(); it != bt->entries.end(); ++it) {
+		    if ((*it)->location == pc.contents - 1) {
+		    	if ((*it)->actual == UNKNOWN) {
+		    		(*it)->actual = (taken ? TAKEN : NOT_TAKEN);
+		    		(*it)->pc = pc.contents + delta;
+		    		if ((*it)->actual != (*it)->predicted) {
+		    			invalid = true;
+		    		}
+		    		if (debug) {
+						std::cout << "Setting BT.PC[" << (*it)->location << "] to " << (*it)->pc << std::endl;
+		    		}
+		    	}
+		    }
 		}
-		if (bt->actual[pc.contents - 1] != bt->predicted[pc.contents - 1]) {
-			invalid = true;
-		}
-		bt->pc[pc.contents - 1] = pc.contents + delta;
-		if (debug) {
-			std::cout << "Setting BT.PC[" << pc.contents - 1 << "] to " << bt->pc[pc.contents - 1] << std::endl;
-		}
+		// if (taken) {
+		// 	bt->actual[pc.contents - 1] = TAKEN;
+		// } else {
+		// 	bt->actual[pc.contents - 1] = NOT_TAKEN;
+		// }
+		// if (bt->actual[pc.contents - 1] != bt->predicted[pc.contents - 1]) {
+		// 	invalid = true;
+		// }
+		// bt->pc[pc.contents - 1] = pc.contents + delta;
+		// if (debug) {
+			// std::cout << "Setting BT.PC[" << pc.contents - 1 << "] to " << bt->pc[pc.contents - 1] << std::endl;
+		// }
 		pc.contents += delta;
 	}
 
