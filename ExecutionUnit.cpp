@@ -86,6 +86,10 @@ std::string ExecutionUnit::toString() {
 // Operands not needed are ignored, as determined by type
 void ExecutionUnit::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uint8_t r3,
 		int16_t im1, Register* pc, bool speculative) {
+	if (debug) {
+		std::cout << "Being issued with " << (speculative ? "speculative " : "") << "instruction " << optos(opcode) << std::endl;
+	}
+
 	// Instruction type
 	this->type = type;
 	
@@ -100,9 +104,6 @@ void ExecutionUnit::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, 
 	this->speculative = speculative;
 
 	// Value of PC
-	if (debug) {
-		std::cout << "Setting pc to " << pc->contents << std::endl;
-	}
 	this->pc.contents = pc->contents;
 
 	// Set up counter
@@ -376,8 +377,6 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 			    	}	
 			    }
 			}
-			// bt->actual[pc.contents - 1] = HALTED;
-			// bt->pc[pc.contents - 1] = pc.contents;
 		break;
 
 		case OP_NOP:
@@ -394,10 +393,6 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 	}
 
 	if (branched) {
-		if (debug) {
-			std::cout << "Updating BT with " << (taken ? "TAKEN" : "NOT_TAKEN") << " (";
-			std::cout << (taken ? TAKEN : NOT_TAKEN) << ") at " << pc.contents - 1 << std::endl;
-		}
 		for (auto it = bt->entries.begin(); it != bt->entries.end(); ++it) {
 		    if ((*it)->location == pc.contents - 1) {
 		    	if ((*it)->actual == UNKNOWN) {
@@ -406,24 +401,9 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 		    		if ((*it)->actual != (*it)->predicted) {
 		    			invalid = true;
 		    		}
-		    		if (debug) {
-						std::cout << "Setting BT.PC[" << (*it)->location << "] to " << (*it)->pc << std::endl;
-		    		}
 		    	}
 		    }
 		}
-		// if (taken) {
-		// 	bt->actual[pc.contents - 1] = TAKEN;
-		// } else {
-		// 	bt->actual[pc.contents - 1] = NOT_TAKEN;
-		// }
-		// if (bt->actual[pc.contents - 1] != bt->predicted[pc.contents - 1]) {
-		// 	invalid = true;
-		// }
-		// bt->pc[pc.contents - 1] = pc.contents + delta;
-		// if (debug) {
-			// std::cout << "Setting BT.PC[" << pc.contents - 1 << "] to " << bt->pc[pc.contents - 1] << std::endl;
-		// }
 		pc.contents += delta;
 	}
 

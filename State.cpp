@@ -77,7 +77,6 @@ void State::checkPipelineValid() {
 		if (entry->actual == UNKNOWN) {
 			if (debug) {
 				std::cout << "Unknown branch at " << entry->location << std::endl;
-				std::cout << "Predicted " << entry->predicted << std::endl;
 			}
 			speculative = true;
 			continue;
@@ -85,7 +84,6 @@ void State::checkPipelineValid() {
 		if (entry->actual != entry->predicted) {
 			if (debug) {
 				std::cout << "Incorrect prediction at " << entry->location << std::endl;
-				std::cout << "Predicted " << entry->predicted << " vs. " << entry->actual << std::endl;
 			}
 			eum->clearPipeline();
 			dum->clearPipeline();
@@ -97,30 +95,6 @@ void State::checkPipelineValid() {
 			break;
 		}
 	}
-
-	// for (auto it : bt.predicted) {
-	// 	if (bt.actual[it.first] == UNKNOWN) {
-	// 		if (debug) {
-	// 			std::cout << "Unknown branch at " << it.first << std::endl;
-	// 			std::cout << "Predicted " << bt.predicted[it.first] << std::endl;
-	// 		}
-	// 		speculative = true;
-	// 		continue;
-	// 	}
-	// 	if (bt.predicted[it.first] != bt.actual[it.first]) {
-	// 		if (debug) {
-	// 			std::cout << "Incorrect prediction at " << it.first << std::endl;
-	// 			std::cout << "Predicted " << bt.predicted[it.first] << " vs. " << bt.actual[it.first] << std::endl;
-	// 		}
-	// 		eum->clearPipeline();
-	// 		dum->clearPipeline();
-	// 		fum->clearPipeline(bt.pc[it.first]);
-	// 		bt.predicted[it.first] = bt.actual[it.first];
-	// 		speculative = false;
-	// 		clearSpeculative = true;
-	// 		break;
-	// 	}
-	// }
 
 	// Hoisted from foreach due to iterator
 	if (clearSpeculative) {

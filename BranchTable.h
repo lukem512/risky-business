@@ -32,29 +32,24 @@ public:
 
 	BranchTableEntry(uint32_t location, Prediction p, bool speculative) {
 		id = rand() % INT_MAX;
-		this->location = location;
-		this->pc = 0;
-		this->predicted = p;
-		this->actual = UNKNOWN;
-		this->speculative = speculative;
+		copy(location, 0, p, UNKNOWN, speculative);
 	}
 
 	BranchTableEntry(uint32_t location, uint32_t pc, Prediction p, Prediction a, bool speculative) {
 		id = rand() % INT_MAX;
+		copy(location, pc, p, a, speculative);
+	}
+
+	void copy(const BranchTableEntry e) {
+		copy(e.location, e.pc, e.predicted, e.actual, e.speculative);
+	}
+
+	void copy(uint32_t location, uint32_t pc, Prediction p, Prediction a, bool speculative) {
 		this->location = location;
 		this->pc = pc;
 		this->predicted = p;
 		this->actual = a;
 		this->speculative = speculative;
-	}
-
-	void copy(const BranchTableEntry e) {
-		std::cout << "Inside copy" << std::endl;
-		this->location = e.location;
-		this->pc = e.pc;
-		this->predicted = e.predicted;
-		this->actual = e.actual;
-		this->speculative = e.speculative;
 	}
 
 	bool operator==(const BranchTableEntry& rhs) const {
@@ -88,27 +83,6 @@ public:
 		}
 	}
 
-	// Updates the first entry in the table that matches
-	bool update(BranchTableEntry* e) {
-		// for (int i = 0; i < entries.size(); i++) {
-		// 	if (entries[i]id == e.id) {
-		//     	std::cout << "Found entry with ID " << entries[i].id << std::endl;
-		//     	entries[i].copy(e);
-		//     	return true;
-		//     }
-		// }
-		// for (auto it = entries.begin(); it != entries.end(); ) {
-		//     if (it->id == e.id) {
-		//     	std::cout << "Found entry with ID " << it->id << std::endl;
-		//     	it->copy(e);
-		//     	return true;
-		//     } else {
-		//     	++it;
-		//     }
-		// }
-		return false;
-	}
-
 	// Erases the first entry matching e
 	void remove(BranchTableEntry* e) {
 		for (auto it = entries.begin(); it != entries.end(); ) {
@@ -131,19 +105,6 @@ public:
 		    }
 		}
 	}
-
-	// void clearSpeculative() {
-	// 	for (auto it = speculative.cbegin(); it != speculative.cend();) {
-	// 		if (it->second) {
-	// 			predicted.erase(it->first);
-	// 			actual.erase(it->first);
-	// 			// pc won't have the entry
-	// 			speculative.erase(it++);
-	// 		} else {
-	// 			++it;
-	// 		}
-	// 	}
-	// }
 };
 
 #endif

@@ -42,10 +42,6 @@ bool FetchUnitManager::getDebug() {
 void FetchUnitManager::setSpeculative(bool speculative) {
 	this->speculative = speculative;
 
-	if (debug) {
-		std::cout << "Setting speculative flag to " << speculative << std::endl;
-	}
-
 	for (int i = 0; i < fus.size(); i++) {
 		fus[i].speculative = speculative;
 	}
