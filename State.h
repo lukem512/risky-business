@@ -20,7 +20,7 @@
 
 using namespace std;
 
-#define DEFAULT_MEMORY_SIZE 256
+#define DEFAULT_MEMORY_SIZE 512
 #define DEFAULT_REGISTER_COUNT 16
 
 #define DEFAULT_PIPELINE_WIDTH 4
@@ -38,6 +38,7 @@ private:
 	unsigned int waitForFetch, waitForDecode, waitForExecute;
 	int state;
 	bool debug;
+	bool branchPrediction;
 	bool pipeline;
 	bool stalled;
 
@@ -80,11 +81,15 @@ private:
 		// Set debug to false
 		setDebug(false);
 
+		// Set branch prediction to true by default
+		setBranchPrediction(true);
+
 		// Set pipeline to true
 		setPipeline(true);
 	};
 
 	bool tickNoPipeline();
+	void checkPipelineValid();
 
 public:
 	// Memory
@@ -112,6 +117,8 @@ public:
 		uint32_t eus, uint32_t dus, uint32_t fus);
 	void setDebug(bool debug);
 	bool getDebug();
+	void setBranchPrediction(bool branchPrediction);
+	bool getBranchPrediction();
 	void setPipeline(bool pipeline);
 	bool getPipeline();
 	void print();

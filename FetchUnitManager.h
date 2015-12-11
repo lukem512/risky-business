@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <string>
+#include <queue>
 
 #include "FetchUnit.h"
 #include "MemoryLocation.h"
@@ -15,9 +16,12 @@
 class FetchUnitManager {
 private:
 	bool debug;
+	bool branchPrediction;
+	bool speculative;
 	DecodeUnitManager* dum;
 	std::vector<FetchUnit> fus;
 	int lastIssued;
+	std::queue<int> waiting;
 
 public:
 	Register pc;
@@ -25,9 +29,14 @@ public:
 	FetchUnitManager(unsigned int width, DecodeUnitManager* dum);
 	void setDebug(bool debug);
 	bool getDebug();
+	void setBranchPrediction(bool branchPrediction);
+	bool getBranchPrediction();
+	void setSpeculative(bool speculative);
+	bool getSpeculative();
 	std::string toString();
 	FetchUnit* getAvailableFetchUnit();
 	void tick(std::vector<MemoryLocation>* m, bool pipeline, BranchTable* bt);
+	void clearPipeline(uint32_t pc);
 };
 
 #endif

@@ -23,9 +23,13 @@ public:
 	bool fetched;	// Holding fetched instruction
 	bool ready;		// Ready to fetch input
 
+	bool branchPrediction;
+
 	bool stalled;
 	bool halted;
 	bool dependent;
+
+	bool speculative;
 
 	DecodeUnitManager* dum;
 	int delta;
@@ -37,6 +41,7 @@ public:
 	void tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
 		bool pipelining, BranchTable* bt, Register* pc);
 	bool passToDecodeUnit();
+	void clear();
 };
 
 #endif

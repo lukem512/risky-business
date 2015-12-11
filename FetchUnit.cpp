@@ -16,6 +16,7 @@ FetchUnit::FetchUnit(const FetchUnit &copy) {
 	_ir.contents = copy._ir.contents;
 
 	debug = copy.debug;
+	branchPrediction = copy.branchPrediction;
 	fetched = copy.fetched;
 	ready = copy.ready;
 
@@ -29,23 +30,17 @@ FetchUnit::FetchUnit(const FetchUnit &copy) {
 }
 
 FetchUnit::FetchUnit(DecodeUnitManager* dum) {
-	// Initialise the _pc, _ir
-	_pc.contents = 0;
-	_ir.contents = 0;
-	delta = 0;
+	// No debugging by default
+	debug = false;
+
+	// BP, by default
+	branchPrediction = true;
 
 	// Add local reference to DU manager
 	this->dum = dum;
 
 	// Set up flags
-	setState(true);
-
-	stalled = false;
-	halted = false;
-	dependent = false;
-
-	// No debugging by default
-	debug = false;
+	clear();
 }
 
 std::string FetchUnit::toString() {
@@ -66,10 +61,28 @@ void FetchUnit::setState(bool ready) {
 	this->fetched = !ready;
 }
 
+void FetchUnit::clear() {
+	// Initialise local register values
+	_pc.contents = 0;
+	_ir.contents = 0;
+	delta = 0;
+
+	// Clear speculative flag!
+	speculative = false;
+
+	// Clear other flags
+	stalled = false;
+	halted = false;
+	dependent = false;
+
+	// Set state to ready
+	setState(true);
+}
+
 bool FetchUnit::passToDecodeUnit() {
 	DecodeUnit* du = dum->getAvailableDecodeUnit();
 	if (du != NULL) {
-		du->issue(&_ir, &_pc);
+		du->issue(&_ir, &_pc, speculative);
 		setState(true);
 		return true;
 	}
@@ -79,33 +92,37 @@ bool FetchUnit::passToDecodeUnit() {
 bool FetchUnit::checkForStallResolution(BranchTable* bt, Register* pc) {
 	if (stalled) {
 		uint32_t previous = _pc.contents - 1;
-		if (bt->predicted[previous] == STALLED) {
-			if (bt->actual[previous] == UNKNOWN) {
-				// Waiting...
-				if (debug) {
-					std::cout << "Waiting for branch information for location " << hexify(previous) << "." << std::endl;
-				}
-				return false;
-			}
 
-			if (bt->actual[previous] == TAKEN) {
-				instruction_ori_t dataCond = *(instruction_ori_t *) &_ir.contents;
-				pc->contents += dataCond.im1;
-				if (debug) {
-					std::cout << "Branch at location " << previous << " was taken. Updating PC to " << pc->contents << "." << std::endl;
-				}
-			} else {
-				if (debug) {
-					std::cout << "Branch at location " << previous << " was not taken." << std::endl;
-				}
+		BranchTableEntry* e = bt->get(previous);
+
+		if (e->predicted == STALLED) {
+			switch (e->actual) {
+				case UNKNOWN:
+					// Waiting...
+					if (debug) {
+						std::cout << "Waiting for branch information for location " << previous << "." << std::endl;
+					}
+					return false;
+
+				case TAKEN:
+					pc->contents = e->pc;
+					if (debug) {
+						std::cout << "Branch at location " << previous << " was taken. Updating PC to " << pc->contents << "." << std::endl;
+					}
+					break;
+
+				case NOT_TAKEN:
+					if (debug) {
+						std::cout << "Branch at location " << previous << " was not taken." << std::endl;
+					}
+					break;
 			}
 
 			// Clear flag
 			stalled = false;
 
 			// Clear table entry
-			bt->predicted.erase(previous);
-			bt->actual.erase(previous);
+			bt->remove(e);
 		} else {
 			if (debug) {
 				std::cerr << "fu.stalled is true but bt is not stalled." << std::endl;
@@ -149,7 +166,7 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 	uint32_t next =  m->at(pc->contents).contents;
 
 	if (debug) {
-		std::cout << "Fetched instruction " << optos(next) << std::endl;
+		std::cout << "Fetched " << (speculative ? "speculative " : "") << "instruction " << optos(next) << std::endl;
 	}
 
 	// Check for dependencies
@@ -200,19 +217,41 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 			case OP_BGTEZ:
 				if (debug) {
 					std::cout << "Found a conditional branch at location " << std::to_string(pc->contents) << std::endl;
-					std::cout << "Decide whether to jump by " << dataCond.im1 << " or not." << std::endl;
 				}
-				bt->predicted[pc->contents] = STALLED;
-				bt->actual[pc->contents] = UNKNOWN;
-				stalled = true;
+				if (branchPrediction) {
+					bool t;
+
+					// Static prediction
+					// Take branch for backwards-facing
+					// Do not branch for forwards-facing
+					if (dataCond.im1 < 0) {
+						t = true;
+					} else {
+						t = false;
+					}
+
+					// Take the jump!
+					if (t) {
+						delta = dataCond.im1;
+					}
+
+					if (debug) {
+						std::cout << "Branch predictor has decided to " << (t ? "TAKE" : "NOT TAKE") << " the branch." << std::endl;
+					}
+					// Add new entry
+					bt->add(pc->contents, (t ? TAKEN : NOT_TAKEN), speculative);
+					speculative = true;
+				} else {
+					bt->add(pc->contents, STALLED, speculative);
+					stalled = true;
+				}
 			break;
 
 			case OP_HLT:
 				if (debug) {
 					std::cout << "Found a halt at location " << std::to_string(pc->contents) << std::endl;
 				}
-				bt->predicted[pc->contents] = HALTED;
-				bt->actual[pc->contents] = UNKNOWN;
+				bt->add(pc->contents, HALTED, speculative);
 				halted = true;
 			break;
 		}

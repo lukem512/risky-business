@@ -90,10 +90,13 @@ public:
 	bool decoded; 	// Holding decoded instruction
 	bool ready;		// Ready to receive fetched input 
 
+	bool speculative;
+
 	DecodeUnit(ExecutionUnitManager* eum);
-	void issue(Register* ir, Register* pc);
+	void issue(Register* ir, Register* pc, bool speculative);
 	void tick();
 	bool passToExecutionUnit();
+	void clear();
 };
 
 #endif

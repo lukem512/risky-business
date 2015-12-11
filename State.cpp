@@ -17,6 +17,15 @@ State::State(uint32_t memorySize, uint8_t registerCount,
 	init(memorySize, registerCount, eus, dus, fus);
 }
 
+void State::setBranchPrediction(bool branchPrediction) {
+	this->branchPrediction = branchPrediction;
+	fum->setBranchPrediction(branchPrediction);
+}
+
+bool State::getBranchPrediction() {
+	return branchPrediction;
+}
+
 void State::setDebug(bool debug) {
 	this->debug = debug;
 	fum->setDebug(debug);
@@ -69,6 +78,42 @@ float State::getInstructionsPerTick() {
 	return (eum->getTotalInstructionsExecuted() / (float) getTicks());
 }
 
+void State::checkPipelineValid() {
+	bool speculative = false;
+	bool clearSpeculative = false;
+
+	for (auto entry : bt.entries) {
+		if (entry->actual == UNKNOWN) {
+			if (debug) {
+				std::cout << "Unknown branch at " << entry->location << std::endl;
+			}
+			speculative = true;
+			continue;
+		}
+		if (entry->actual != entry->predicted) {
+			if (debug) {
+				std::cout << "Incorrect prediction at " << entry->location << std::endl;
+			}
+			eum->clearPipeline();
+			dum->clearPipeline();
+			fum->clearPipeline(entry->pc);
+			// bt.update(entry);
+			entry->predicted = entry->actual;
+			speculative = false;
+			clearSpeculative = true;
+			break;
+		}
+	}
+
+	// Hoisted from foreach due to iterator
+	if (clearSpeculative) {
+		bt.clearSpeculative();
+	}
+
+	// Update speculative flag
+	fum->setSpeculative(speculative);
+}
+
 bool State::tick() {
 
 	bool halted = false;
@@ -82,19 +127,26 @@ bool State::tick() {
 		eum->tick(&registerFile, &memory, &bt);
 		halted = eum->halted;
 
-		if (getDebug()) {
-			std::cout << std::endl;
+		if (!halted) {
+			// Check pipeline is valid
+			if (getBranchPrediction()) {
+				checkPipelineValid();
+			}
+
+			if (getDebug()) {
+				std::cout << std::endl;
+			}
+
+			// Decode
+			dum->tick();
+
+			if (getDebug()) {
+				std::cout << std::endl;
+			}
+
+			// Fetch
+			fum->tick(&memory, true, &bt);
 		}
-
-		// Decode
-		dum->tick();
-
-		if (getDebug()) {
-			std::cout << std::endl;
-		}
-
-		// Fetch
-		fum->tick(&memory, true, &bt);
 	} else {
 		switch(state) {
 			case STATE_FETCH:
