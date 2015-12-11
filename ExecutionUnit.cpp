@@ -405,6 +405,9 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 		    	}
 		    }
 		}
+		if (debug) {
+			std::cout << "Updating BHT at location " << pc.contents << " with " << taken << std::endl;
+		}
 		bht->update(pc.contents, taken);
 		pc.contents += delta;
 	}

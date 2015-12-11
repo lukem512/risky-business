@@ -1,0 +1,39 @@
+% Dynamic branch prediction test
+%
+% 00000002
+% 00000002
+% 00000002
+% 00000002
+% 00000002
+% 00000002
+% 00000002
+% 00000002
+%
+LDC r0 0
+LDC r1 1
+LDC r2 2
+LDC r3 3
+LDC r4 8
+LDC r5 0
+NOP
+NOP
+loop:
+CMP r10 r0 r4
+BGTEZ r10 end
+BZ r5 next
+PRNT r1
+PRNT r1
+PRNT r1
+PRNT r1
+PRNT r1
+PRNT r1
+PRNT r1
+PRNT r1
+PRNT r1
+PRNT r1
+next:
+PRNT r2
+ADD r0 r0 r1
+B loop
+end:
+HLT

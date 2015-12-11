@@ -219,7 +219,7 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 					std::cout << "Found a conditional branch at location " << std::to_string(pc->contents) << std::endl;
 				}
 				if (branchPrediction) {
-					BranchHistoryTable::Counter c = bht->get(pc->contents);
+					BranchHistoryTable::Counter c = bht->get(pc->contents + 1);
 					bool t;
 
 					bool dynamicBranchPrediction = true;
@@ -228,7 +228,7 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 					}
 
 					if (debug) {
-						std::cout << "BranchHistoryTable says " << c << std::endl;
+						std::cout << "BranchHistoryTable at location " << pc->contents + 1 << " says " << c << std::endl;
 					}
 
 					switch (c) {
