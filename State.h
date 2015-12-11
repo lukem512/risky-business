@@ -20,7 +20,7 @@
 
 using namespace std;
 
-#define DEFAULT_MEMORY_SIZE 512
+#define DEFAULT_MEMORY_SIZE 60000
 #define DEFAULT_REGISTER_COUNT 16
 
 #define DEFAULT_PIPELINE_WIDTH 4
