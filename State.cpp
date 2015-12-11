@@ -19,7 +19,7 @@ State::State(uint32_t memorySize, uint8_t registerCount,
 
 void State::setBranchPrediction(bool branchPrediction) {
 	this->branchPrediction = branchPrediction;
-	// fum->setBranchPrediction(branchPrediction);
+	fum->setBranchPrediction(branchPrediction);
 }
 
 bool State::getBranchPrediction() {

@@ -60,19 +60,6 @@ int main(int argc, char** argv){
 		return 1;
 	}
 
-	// Use pipeline?
-	if (option_exists(argv, argv+argc, "-no-pipeline")) {
-		std::cout << "Setting pipeline flag to false." << std::endl;
-		s.setPipeline(false);
-	}
-
-	// Use branch prediction?
-	if (option_exists(argv, argv+argc, "-no-branch-prediction")) {
-		std::cout << "Setting branch prediction flag to false." << std::endl;
-		s.setBranchPrediction(false);
-	}
-
-
 	// Pipeline width
 	uint32_t eus = DEFAULT_EU_WIDTH;
 	if (option_exists(argv, argv+argc, "-eus")) {
@@ -112,6 +99,17 @@ int main(int argc, char** argv){
 	s.setDus(dus);
 	s.setFus(fus);
 
+	// Use pipeline?
+	if (option_exists(argv, argv+argc, "-no-pipeline")) {
+		std::cout << "Setting pipeline flag to false." << std::endl;
+		s.setPipeline(false);
+	}
+
+	// Use branch prediction?
+	if (option_exists(argv, argv+argc, "-no-branch-prediction")) {
+		std::cout << "Setting branch prediction flag to false." << std::endl;
+		s.setBranchPrediction(false);
+	}
 
 	// Use debug?
 	if (option_exists(argv, argv+argc, "-d")) {

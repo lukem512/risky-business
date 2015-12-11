@@ -15,9 +15,10 @@ TODO List
 [x] -eus [2|3] -dus 6 -fus 6 -f compiled/benchmarks/[fib|bubble].bin gives wonky results
 [x] -eus [1|2|3] -dus 6 -fus 6 -f compiled/benchmarks/sop.bin gives wonky results
 [x] -eus 3 -fus 6 -dus 7 -f compiled/benchmarks/sop.bin stalls
-[x] -eus n -fus n -dus <n gives wonky result
+[x] -eus n -fus n -dus < n gives wonky result
 [x] Parameterize branch prediction flag
-[ ] Execution breaks when run without branch prediction
+[x] Execution breaks when run without branch prediction
+[ ] -eus > n -dus > n -fus n -no-branch-prediction gives incorrect results
 [ ] Dynamic branch prediction
 [ ] Multiple instruction lengths
 [ ] Out-of-Order execution
