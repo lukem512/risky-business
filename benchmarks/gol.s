@@ -318,7 +318,15 @@ STR r7 r6
 %%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%
+% Tick!
+% The scrubber example only needs 10 iterations to stabilise
+% tick = 0
+LDC r11 0
+% maxticks = 15
+LDC r12 15
 tick:
+CMP r4 r11 r12
+BGTEZ r4 end
 % x = 0
 LDC r4 0
 % max = width * height
@@ -330,28 +338,78 @@ LDC r7 20000
 loop:
 % while (x < max)
 CMP r8 r4 r5
-BGTEZ r8 end
+BGTEZ r8 break
 % Offset to cell
 ADD r8 r0 r4
-%% TODO - determine number of neighbours
-%%
-%%  [x-1][y-1] = -(width+1)
-%%  [x][y-1] = -width
-%%  [x+1][y-1] = -(width-1)
-%%
-%%  [x-1][y] = -1
-%%  [x+1][y] = 1
-%%
-%%  [x-1][y+1] = width-1
-%%  [x][y+1] = width
-%%  [x+1][y+1] = width+1
-%%
+%%%%%%%%%%%%%%%%
+%
+%%%%%%%%%%%%%%%%
+% Determine number of neighbours
+% TODO - this checks out-of-bounds
+%
+%  [x-1][y-1] = -(width+1)
+%  [x][y-1] = -width
+%  [x+1][y-1] = -(width-1)
+%
+%  [x-1][y] = -1
+%  [x+1][y] = 1
+%
+%  [x-1][y+1] = width-1
+%  [x][y+1] = width
+%  [x+1][y+1] = width+1
+%
 LDC r9 0
-%%
-%% Available registers: r10, r11, r12, r13
-%%
+% width + 1 (using the Live flag)
+ADD r10 r0 r14
+% r13 = offset
+% [x-1][y-1] = -width - 1
+SUB r13 r8 r10
+% if (M[r13] == 1) n++
+LDR r10 r13
+ADD r9 r9 r13
+% Increment location (again, using the Live flag)
+% [x][y-1] = -width
+ADD r13 r13 r14
+LDR r10 r13
+ADD r9 r9 r13
+% Increment location
+% [x+1][y-1] = -width + 1
+ADD r13 r13 r14
+LDR r10 r13
+ADD r9 r9 r13
+% offset - 1
+% [x-1][y] = -1
+SUB r13 r8 r14
+LDR r10 r13
+ADD r9 r9 r13
+% offset + 1
+% [x+1][y] = 1
+ADD r13 r8 r14
+LDR r10 r13
+ADD r9 r9 r13
+% width - 1
+SUB r10 r0 r14
+% r13 = offset
+% [x-1][y+1] = width-1
+ADD r13 r8 r10
+% if (M[r13] == 1) n++
+LDR r10 r13
+ADD r9 r9 r13
+% Increment location
+% [x][y+1] = width
+ADD r13 r13 r14
+LDR r10 r13
+ADD r9 r9 r13
+% Increment location
+% [x+1][y+1] = width+1
+ADD r13 r13 r14
+LDR r10 r13
+ADD r9 r9 r13
+%%%%%%%%%%%%%%%%
+%
+%%%%%%%%%%%%%%%%
 % Get liveness of cell
-LDR r10 8
+LDR r10 r8
 % Offset to new state cell
 ADD r11 r7 r4
 % Store old liveness
@@ -383,6 +441,10 @@ BZ r10 live
 B loop
 live:
 B loop
+break:
+LDC r10 1
+ADD r11 r11 r10
+B tick
 %%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%
