@@ -9,7 +9,8 @@
 #include "Register.h"
 #include "MemoryLocation.h"
 #include "DecodeUnitManager.h"
-#include "BranchTable.h"
+#include "BranchPredictionTable.h"
+#include "BranchHistoryTable.h"
 
 class FetchUnit {
 private:
@@ -37,9 +38,10 @@ public:
 	FetchUnit(const FetchUnit &copy);
 	FetchUnit(DecodeUnitManager* dum);
 	std::string toString();
-	bool checkForStallResolution(BranchTable* bt, Register* pc);
+	bool checkForStallResolution(BranchPredictionTable* bt, Register* pc);
 	void tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
-		bool pipelining, BranchTable* bt, Register* pc);
+		bool pipelining, BranchPredictionTable* bpt, BranchHistoryTable* bht,
+		Register* pc);
 	bool passToDecodeUnit();
 	void clear();
 };

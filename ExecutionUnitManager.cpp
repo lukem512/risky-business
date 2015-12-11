@@ -46,7 +46,7 @@ std::string ExecutionUnitManager::toString() {
 }
 
 void ExecutionUnitManager::tick(std::vector<Register>* r, std::vector<MemoryLocation>* m,
-	BranchTable* bt) {
+	BranchPredictionTable* bpt, BranchHistoryTable* bht) {
 	for (int i = 0; i < eus.size(); i++) {
 
 		if (debug) {
@@ -54,7 +54,7 @@ void ExecutionUnitManager::tick(std::vector<Register>* r, std::vector<MemoryLoca
 		}
 
 		// Tick!
-		eus[i].tick(r, m, bt);
+		eus[i].tick(r, m, bpt, bht);
 
 		// Encountered a halt?
 		if (eus[i].halted) {

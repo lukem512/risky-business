@@ -16,7 +16,7 @@
 #include "FetchUnitManager.h"
 #include "DecodeUnitManager.h"
 #include "ExecutionUnitManager.h"
-#include "BranchTable.h"
+#include "BranchPredictionTable.h"
 
 using namespace std;
 
@@ -42,7 +42,8 @@ private:
 	bool pipeline;
 	bool stalled;
 
-	BranchTable bt;
+	BranchPredictionTable bpt;
+	BranchHistoryTable bht;
 
 	FetchUnitManager* fum;
 	DecodeUnitManager* dum;

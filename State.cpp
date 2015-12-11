@@ -82,7 +82,7 @@ void State::checkPipelineValid() {
 	bool speculative = false;
 	bool clearSpeculative = false;
 
-	for (auto entry : bt.entries) {
+	for (auto entry : bpt.entries) {
 		if (entry->actual == UNKNOWN) {
 			if (debug) {
 				std::cout << "Unknown branch at " << entry->location << std::endl;
@@ -97,7 +97,6 @@ void State::checkPipelineValid() {
 			eum->clearPipeline();
 			dum->clearPipeline();
 			fum->clearPipeline(entry->pc);
-			// bt.update(entry);
 			entry->predicted = entry->actual;
 			speculative = false;
 			clearSpeculative = true;
@@ -107,7 +106,7 @@ void State::checkPipelineValid() {
 
 	// Hoisted from foreach due to iterator
 	if (clearSpeculative) {
-		bt.clearSpeculative();
+		bpt.clearSpeculative();
 	}
 
 	// Update speculative flag
@@ -124,7 +123,7 @@ bool State::tick() {
 
 	if (getPipeline()) {
 		// Execute
-		eum->tick(&registerFile, &memory, &bt);
+		eum->tick(&registerFile, &memory, &bpt, &bht);
 		halted = eum->halted;
 
 		if (!halted) {
@@ -145,12 +144,12 @@ bool State::tick() {
 			}
 
 			// Fetch
-			fum->tick(&memory, true, &bt);
+			fum->tick(&memory, true, &bpt, &bht);
 		}
 	} else {
 		switch(state) {
 			case STATE_FETCH:
-				fum->tick(&memory, true, &bt);
+				fum->tick(&memory, true, &bpt, &bht);
 				state = STATE_DECODE;
 			break;
 
@@ -160,7 +159,7 @@ bool State::tick() {
 			break;
 
 			case STATE_EXECUTE:
-				eum->tick(&registerFile, &memory, &bt);
+				eum->tick(&registerFile, &memory, &bpt, &bht);
 				halted = eum->halted;
 				state = STATE_FETCH;
 			break;

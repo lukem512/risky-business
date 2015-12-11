@@ -120,7 +120,8 @@ bool ExecutionUnit::willCompleteThisTick() {
 }
 
 // Returns true when state should be halted
-void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* m, BranchTable* bt) {
+void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* m,
+ BranchPredictionTable* bpt, BranchHistoryTable* bht) {
 
 	// Waiting for input?
 	if (ready) {
@@ -179,7 +180,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 
 		case OP_SUB:
 			if (debug) {
-				std::cout << "Subtracting " << r2val_s << " and " << r3val_s << std::endl;
+				std::cout << "Subptracting " << r2val_s << " and " << r3val_s << std::endl;
 			}
 			r->at(r1).contents = (uint32_t) (r2val_s - r3val_s);
 		break;
@@ -369,7 +370,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 			}
 			halted = true;
 
-			for (auto it = bt->entries.begin(); it != bt->entries.end(); ++it) {
+			for (auto it = bpt->entries.begin(); it != bpt->entries.end(); ++it) {
 			    if ((*it)->location == pc.contents - 1) {
 			    	if ((*it)->actual == UNKNOWN) {
 			    		(*it)->actual = HALTED;
@@ -393,7 +394,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 	}
 
 	if (branched) {
-		for (auto it = bt->entries.begin(); it != bt->entries.end(); ++it) {
+		for (auto it = bpt->entries.begin(); it != bpt->entries.end(); ++it) {
 		    if ((*it)->location == pc.contents - 1) {
 		    	if ((*it)->actual == UNKNOWN) {
 		    		(*it)->actual = (taken ? TAKEN : NOT_TAKEN);
@@ -404,6 +405,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 		    	}
 		    }
 		}
+		bht->update(pc.contents, taken);
 		pc.contents += delta;
 	}
 

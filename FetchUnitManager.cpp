@@ -81,7 +81,8 @@ std::string FetchUnitManager::toString() {
 	return ss.str();
 }
 
-void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, BranchTable* bt) {
+void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline,
+	BranchPredictionTable* bpt, BranchHistoryTable* bht) {
 	
 	// Instructions should be issued to DU oldest-first;
 	// this is to prevent stagnation in the pipeline.
@@ -102,7 +103,7 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 	// Resolve any stalls in pipeline
 	for (int i = 0; i < fus.size(); i++) {
 		if (fus[i].stalled) {
-			if (fus[i].checkForStallResolution(bt, &pc)) {
+			if (fus[i].checkForStallResolution(bpt, &pc)) {
 				if (debug) {
 					std::cout << "[FU #" << i << "] stall resolved!" << std::endl;
 				}
@@ -140,7 +141,7 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 
 		// Call tick!
 		fus[i].speculative = getSpeculative();
-		fus[i].tick(m, &dependents, pipeline, bt, &pc);
+		fus[i].tick(m, &dependents, pipeline, bpt, bht, &pc);
 
 		// Add to waiting queue
 		if (fus[i].fetched) {

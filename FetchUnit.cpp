@@ -89,11 +89,11 @@ bool FetchUnit::passToDecodeUnit() {
 	return false;
 }
 
-bool FetchUnit::checkForStallResolution(BranchTable* bt, Register* pc) {
+bool FetchUnit::checkForStallResolution(BranchPredictionTable* bpt, Register* pc) {
 	if (stalled) {
 		uint32_t previous = _pc.contents - 1;
 
-		BranchTableEntry* e = bt->get(previous);
+		BranchPredictionTableEntry* e = bpt->get(previous);
 
 		if (e->predicted == STALLED) {
 			switch (e->actual) {
@@ -122,10 +122,10 @@ bool FetchUnit::checkForStallResolution(BranchTable* bt, Register* pc) {
 			stalled = false;
 
 			// Clear table entry
-			bt->remove(e);
+			bpt->remove(e);
 		} else {
 			if (debug) {
-				std::cerr << "fu.stalled is true but bt is not stalled." << std::endl;
+				std::cerr << "fu.stalled is true but bpt is not stalled." << std::endl;
 			}
 			return false;
 		}
@@ -135,7 +135,7 @@ bool FetchUnit::checkForStallResolution(BranchTable* bt, Register* pc) {
 
 // General-purpose
 void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus,
-	bool pipeline, BranchTable* bt, Register* pc) {
+	bool pipeline, BranchPredictionTable* bpt, BranchHistoryTable* bht, Register* pc) {
 
 	if (stalled) {
 		if (debug) {
@@ -219,15 +219,41 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 					std::cout << "Found a conditional branch at location " << std::to_string(pc->contents) << std::endl;
 				}
 				if (branchPrediction) {
+					BranchHistoryTable::Counter c = bht->get(pc->contents);
 					bool t;
 
-					// Static prediction
-					// Take branch for backwards-facing
-					// Do not branch for forwards-facing
-					if (dataCond.im1 < 0) {
-						t = true;
-					} else {
-						t = false;
+					bool dynamicBranchPrediction = true;
+					if (!dynamicBranchPrediction) {
+						c = BranchHistoryTable::UNKNOWN;
+					}
+
+					if (debug) {
+						std::cout << "BranchHistoryTable says " << c << std::endl;
+					}
+
+					switch (c) {
+						// Dynamic prediction
+						// 2-bit saturating counter
+						case BranchHistoryTable::STRONGLY_TAKEN:
+						case BranchHistoryTable::TAKEN:
+							t = true;
+							break;
+
+						case BranchHistoryTable::STRONGLY_NOT_TAKEN:
+						case BranchHistoryTable::NOT_TAKEN:
+							t = false;
+							break;
+
+						// Static prediction
+						// Take branch for backwards-facing
+						// Do not branch for forwards-facing
+						case BranchHistoryTable::UNKNOWN:
+							if (dataCond.im1 < 0) {
+								t = true;
+							} else {
+								t = false;
+							}
+							break;
 					}
 
 					// Take the jump!
@@ -239,10 +265,10 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 						std::cout << "Branch predictor has decided to " << (t ? "TAKE" : "NOT TAKE") << " the branch." << std::endl;
 					}
 					// Add new entry
-					bt->add(pc->contents, (t ? TAKEN : NOT_TAKEN), speculative);
+					bpt->add(pc->contents, (t ? TAKEN : NOT_TAKEN), speculative);
 					speculative = true;
 				} else {
-					bt->add(pc->contents, STALLED, speculative);
+					bpt->add(pc->contents, STALLED, speculative);
 					stalled = true;
 				}
 			break;
@@ -251,7 +277,7 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 				if (debug) {
 					std::cout << "Found a halt at location " << std::to_string(pc->contents) << std::endl;
 				}
-				bt->add(pc->contents, HALTED, speculative);
+				bpt->add(pc->contents, HALTED, speculative);
 				halted = true;
 			break;
 		}

@@ -11,7 +11,8 @@
 #include "FetchUnit.h"
 #include "MemoryLocation.h"
 #include "DecodeUnitManager.h"
-#include "BranchTable.h"
+#include "BranchPredictionTable.h"
+#include "BranchHistoryTable.h"
 
 class FetchUnitManager {
 private:
@@ -35,7 +36,8 @@ public:
 	bool getSpeculative();
 	std::string toString();
 	FetchUnit* getAvailableFetchUnit();
-	void tick(std::vector<MemoryLocation>* m, bool pipeline, BranchTable* bt);
+	void tick(std::vector<MemoryLocation>* m, bool pipeline,
+		BranchPredictionTable* bpt, BranchHistoryTable* bht);
 	void clearPipeline(uint32_t pc);
 };
 

@@ -8,7 +8,8 @@
 
 #include "Register.h"
 #include "MemoryLocation.h"
-#include "BranchTable.h"
+#include "BranchPredictionTable.h"
+#include "BranchHistoryTable.h"
 
 #define EU_ISSUE_ORRR 1
 #define EU_ISSUE_ORRI 2
@@ -48,7 +49,7 @@ public:
 	void issue(uint8_t type, uint8_t opcode, uint8_t r1,
 	  uint8_t r2, uint8_t r3, int16_t im1, Register* pc, bool speculative);
 	void tick(std::vector<Register>* r,
-	  std::vector<MemoryLocation>* m, BranchTable* bt);
+	  std::vector<MemoryLocation>* m, BranchPredictionTable* bpt, BranchHistoryTable* bht);
 	void clear();
 };
 

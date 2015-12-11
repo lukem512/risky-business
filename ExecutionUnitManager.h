@@ -8,7 +8,8 @@
 #include <string>
 
 #include "ExecutionUnit.h"
-#include "BranchTable.h"
+#include "BranchPredictionTable.h"
+#include "BranchHistoryTable.h"
 
 #define DEFAULT_EU_COUNT 1
 
@@ -33,7 +34,7 @@ public:
 	std::string toString();
 	float getTotalInstructionsExecuted();
 	void tick(std::vector<Register>* r, std::vector<MemoryLocation>* m,
-		BranchTable* bt);
+		BranchPredictionTable* bpt, BranchHistoryTable* bht);
 	ExecutionUnit* getAvailableExecutionUnit();
 	void clearPipeline();
 };
