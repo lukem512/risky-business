@@ -398,7 +398,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 		    	if ((*it)->actual == UNKNOWN) {
 		    		(*it)->actual = (taken ? TAKEN : NOT_TAKEN);
 		    		(*it)->pc = pc.contents + delta;
-		    		if ((*it)->actual != (*it)->predicted) {
+		    		if ((*it)->actual != (*it)->predicted && (*it)->predicted != STALLED) {
 		    			invalid = true;
 		    		}
 		    	}

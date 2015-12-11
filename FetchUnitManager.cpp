@@ -106,6 +106,9 @@ void FetchUnitManager::tick(std::vector<MemoryLocation>* m, bool pipeline, Branc
 				if (debug) {
 					std::cout << "[FU #" << i << "] stall resolved!" << std::endl;
 				}
+			} else {
+				// We have stalled...
+				return;
 			}
 			break;
 		}
