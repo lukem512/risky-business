@@ -27,7 +27,7 @@ FetchUnitManager::FetchUnitManager(unsigned int width, DecodeUnitManager* dum) {
 	setDebug(false);
 
 	// Set branch prediction to true, by default
-	setBranchPrediction(true);
+	setDynamicBranchPrediction(true);
 }
 
 void FetchUnitManager::setDebug(bool debug) {
@@ -53,6 +53,24 @@ void FetchUnitManager::setBranchPrediction(bool branchPrediction) {
 
 bool FetchUnitManager::getBranchPrediction() {
 	return branchPrediction;
+}
+
+void FetchUnitManager::setDynamicBranchPrediction(bool dynamicBranchPrediction) {
+	// Set branch prediction to be the same
+	// We cannot be dynamically predicting if we're not predicting!
+	setBranchPrediction(dynamicBranchPrediction);
+
+	// Now set dynamic branch prediction flag
+	this->dynamicBranchPrediction = dynamicBranchPrediction;
+
+	// and propagate to Fetch Units
+	for (int i = 0; i < fus.size(); i++) {
+		fus[i].dynamicBranchPrediction = dynamicBranchPrediction;
+	}
+}
+
+bool FetchUnitManager::getDynamicBranchPrediction() {
+	return dynamicBranchPrediction;
 }
 
 void FetchUnitManager::setSpeculative(bool speculative) {

@@ -26,6 +26,18 @@ bool State::getBranchPrediction() {
 	return branchPrediction;
 }
 
+void State::setDynamicBranchPrediction(bool dynamicBranchPrediction) {
+	// If enabled, enable branch prediction
+	// and visa versa
+	setBranchPrediction(dynamicBranchPrediction);
+	this->dynamicBranchPrediction = dynamicBranchPrediction;
+	fum->setDynamicBranchPrediction(dynamicBranchPrediction);
+}
+
+bool State::getDynamicBranchPrediction() {
+	return dynamicBranchPrediction;
+}
+
 void State::setDebug(bool debug) {
 	this->debug = debug;
 	fum->setDebug(debug);

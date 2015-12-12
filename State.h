@@ -39,6 +39,7 @@ private:
 	int state;
 	bool debug;
 	bool branchPrediction;
+	bool dynamicBranchPrediction;
 	bool pipeline;
 	bool stalled;
 
@@ -83,7 +84,7 @@ private:
 		setDebug(false);
 
 		// Set branch prediction to true by default
-		setBranchPrediction(true);
+		setDynamicBranchPrediction(true);
 
 		// Set pipeline to true
 		setPipeline(true);
@@ -120,6 +121,8 @@ public:
 	bool getDebug();
 	void setBranchPrediction(bool branchPrediction);
 	bool getBranchPrediction();
+	void setDynamicBranchPrediction(bool dynamicBranchPrediction);
+	bool getDynamicBranchPrediction();
 	void setPipeline(bool pipeline);
 	bool getPipeline();
 	void print();

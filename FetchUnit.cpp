@@ -16,9 +16,11 @@ FetchUnit::FetchUnit(const FetchUnit &copy) {
 	_ir.contents = copy._ir.contents;
 
 	debug = copy.debug;
-	branchPrediction = copy.branchPrediction;
 	fetched = copy.fetched;
 	ready = copy.ready;
+
+	branchPrediction = copy.branchPrediction;
+	dynamicBranchPrediction = copy.dynamicBranchPrediction;
 
 	stalled = copy.stalled;
 	halted = copy.halted;
@@ -35,6 +37,7 @@ FetchUnit::FetchUnit(DecodeUnitManager* dum) {
 
 	// BP, by default
 	branchPrediction = true;
+	dynamicBranchPrediction = true;
 
 	// Add local reference to DU manager
 	this->dum = dum;
@@ -222,7 +225,6 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 					BranchHistoryTable::Counter c = bht->get(pc->contents + 1);
 					bool t;
 
-					bool dynamicBranchPrediction = true;
 					if (!dynamicBranchPrediction) {
 						c = BranchHistoryTable::UNKNOWN;
 					}

@@ -36,6 +36,7 @@ int main(int argc, char** argv){
 		std::cout << "\t-max-ticks n - Cap execution to n clock cycles" << std::endl;
 		std::cout << "\t-no-pipeline - Turn off pipelined execution" << std::endl;
 		std::cout << "\t-no-branch-prediction - Turn off branch prediction" << std::endl;
+		std::cout << "\t-no-dynamic-branch-prediction - Turn off dynamic branch prediction" << std::endl;
 		std::cout << "\t-eus n - Specify the number of Execution Units" << std::endl;
 		std::cout << "\t-dus n - Specify the number of Decode Units" << std::endl;
 		std::cout << "\t-fus n - Specify the number of Fetch Units" << std::endl;
@@ -108,6 +109,12 @@ int main(int argc, char** argv){
 	// Use branch prediction?
 	if (option_exists(argv, argv+argc, "-no-branch-prediction")) {
 		std::cout << "Setting branch prediction flag to false." << std::endl;
+		s.setBranchPrediction(false);
+	}
+
+	// Use dynamic branch prediction?
+	if (option_exists(argv, argv+argc, "-no-dynamic-branch-prediction")) {
+		std::cout << "Setting dynamic branch prediction flag to false." << std::endl;
 		s.setBranchPrediction(false);
 	}
 

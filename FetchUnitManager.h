@@ -18,6 +18,7 @@ class FetchUnitManager {
 private:
 	bool debug;
 	bool branchPrediction;
+	bool dynamicBranchPrediction;
 	bool speculative;
 	DecodeUnitManager* dum;
 	std::vector<FetchUnit> fus;
@@ -32,6 +33,8 @@ public:
 	bool getDebug();
 	void setBranchPrediction(bool branchPrediction);
 	bool getBranchPrediction();
+	void setDynamicBranchPrediction(bool dynamicBranchPrediction);
+	bool getDynamicBranchPrediction();
 	void setSpeculative(bool speculative);
 	bool getSpeculative();
 	std::string toString();

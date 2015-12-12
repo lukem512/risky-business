@@ -25,6 +25,7 @@ public:
 	bool ready;		// Ready to fetch input
 
 	bool branchPrediction;
+	bool dynamicBranchPrediction;
 
 	bool stalled;
 	bool halted;
