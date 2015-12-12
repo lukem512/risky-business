@@ -4,8 +4,11 @@
 // Scoreboarding Out-of-Order Algorithm
 // Ref: https://en.wikipedia.org/wiki/Scoreboarding
 
+#include "Scoreboard.h"
+#include "opcodes.h"
+
 bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uint8_t r3,
-		int16_t im1, Register* pc, bool speculative) {
+		int16_t im, Register* pc, bool speculative) {
 
 	// Get an available execution unit
 	ExecutionUnit* eu = eum->getAvailableExecutionUnit();
@@ -16,7 +19,7 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 	}
 
 	// Is the destination register free?
-	if (Results[r1] != NULL) {
+	if (Result[r1] != NULL) {
 		return false;
 	}
 
@@ -80,8 +83,11 @@ bool Scoreboard::read(ExecutionUnit* eu) {
     return true;
 }
 
-bool Scoreboard::execute(ExecutionUnit* eu) {
-	eu->tick();
+bool Scoreboard::execute(ExecutionUnit* eu, std::vector<Register>* r,
+	std::vector<MemoryLocation>* m, BranchPredictionTable* bpt,
+	BranchHistoryTable* bht) {
+
+	eu->tick(r, m, bpt, bht);
 	return (eu->ready && !eu->working);
 }
 
@@ -109,16 +115,17 @@ bool Scoreboard::write(ExecutionUnit* eu) {
 	// OK, do it!
     if (writeback) {
 		// wait until (\forallf {(Fj[f]≠Fi[eu] OR Rj[f]=No) AND (Fk[f]≠Fi[eu] OR Rk[f]=No)})
-		for (int i = 0; i < eus.size(); i++) {
-			// Does eus[i] have Fj?
-			if (Op[eus[i]] == OP_ST ||
-				Type[eus[i]] == EU_ISSUE_ORR ||
-				Type[eus[i]] == EU_ISSUE_ORRR) {
-				if (Fj[eus[i]] != Fi[eu] || !Rj[eus[i]]) {
-					// Does eus[i] have Fk?
-					if (Op[eus[i]] == OP_STR ||
-						Type[eus[i]] == EU_ISSUE_ORRR) {
-						if (Fk[eus[i]] != Fi[eu] || !Rk[eus[i]]) {
+		for (int i = 0; i < eum->eus.size(); i++) {
+			ExecutionUnit* peu = &eum->eus[i];
+			// Does eum->eus[i] have Fj?
+			if (Op[peu] == OP_ST ||
+				Type[peu] == EU_ISSUE_ORR ||
+				Type[peu] == EU_ISSUE_ORRR) {
+				if (Fj[peu] != Fi[eu] || !Rj[peu]) {
+					// Does eum->eus[i] have Fk?
+					if (Op[peu] == OP_STR ||
+						Type[peu] == EU_ISSUE_ORRR) {
+						if (Fk[peu] != Fi[eu] || !Rk[peu]) {
 							continue;
 						}
 					} else {
@@ -132,12 +139,13 @@ bool Scoreboard::write(ExecutionUnit* eu) {
 		}
 	}
 
-    for (int i = 0; i < eus.size(); i++) {
-    	if (Qj[eus[i]] == eu) {
-    		Rj[eus[i]] = true;
+    for (int i = 0; i < eum->eus.size(); i++) {
+    	ExecutionUnit* peu = &eum->eus[i];
+    	if (Qj[peu] == eu) {
+    		Rj[peu] = true;
     	}
-    	if (Qk[eus[i]] == eu) {
-    		Rk[eus[i]] = true;
+    	if (Qk[peu] == eu) {
+    		Rk[peu] = true;
     	} 
     }
 

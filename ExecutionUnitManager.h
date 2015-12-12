@@ -16,7 +16,6 @@
 class ExecutionUnitManager {
 private:
 	bool debug;
-	std::vector<ExecutionUnit> eus;
 
 	void init(unsigned int width = DEFAULT_EU_COUNT) {
 		debug = false;
@@ -25,6 +24,7 @@ private:
 	};
 
 public:
+	std::vector<ExecutionUnit> eus;
 	bool halted;
 
 	ExecutionUnitManager();
