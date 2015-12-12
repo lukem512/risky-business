@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <random>
 
 #include "ExecutionUnit.h"
 #include "opcodes.h"
