@@ -31,6 +31,8 @@ private:
 	bool willCompleteThisTick();
 
 public:
+	int id;
+
 	bool debug; 		// Debugging output
 	bool working; 		// Executing an instruction
 	bool ready;			// Ready to receive decoded input
@@ -51,6 +53,10 @@ public:
 	void tick(std::vector<Register>* r,
 	  std::vector<MemoryLocation>* m, BranchPredictionTable* bpt, BranchHistoryTable* bht);
 	void clear();
+
+	bool operator==(const ExecutionUnit& rhs) const {
+		return (rhs.id == this->id);
+	}
 };
 
 #endif

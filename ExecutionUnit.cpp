@@ -13,6 +13,9 @@ using namespace std;
 
 ExecutionUnit::ExecutionUnit() {
 
+	// Generate unique ID
+	id = rand() % INT_MAX;
+
 	// No debugging by default
 	debug = false;
 
