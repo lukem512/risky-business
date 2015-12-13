@@ -19,6 +19,17 @@ DecodeUnit::DecodeUnit(ExecutionUnitManager* eum) {
 	clear();
 }
 
+DecodeUnit::DecodeUnit(Scoreboard* score) {
+	// No debugging by default
+	debug = false;
+
+	// Add local reference to Scoreboard
+	this->score = score;
+
+	// Clear the pipe!
+	clear();
+}
+
 void DecodeUnit::issue(Register* ir, Register* pc, bool speculative) {
 	if (debug) {
 		std::cout << "Being issued with " << (speculative ? "speculative " : "") << "instruction " << optos(ir->contents) << std::endl;
@@ -52,6 +63,14 @@ bool DecodeUnit::passToExecutionUnit() {
 	ExecutionUnit* eu = eum->getAvailableExecutionUnit();
 	if (eu != NULL) {
 		eu->issue(type, opcode, r1, r2, r3, im1, &pc, speculative);
+		setState(true);
+		return true;
+	}
+	return false;
+}
+
+bool DecodeUnit::passToScoreboard() {
+	if (score->issue(type, opcode, r1, r2, r3, im1, &pc, speculative)) {
 		setState(true);
 		return true;
 	}
@@ -149,8 +168,5 @@ void DecodeUnit::tick() {
 	} else {
 		// Update flags
 		setState(false);
-
-		// ...and try to pass to EU
-		passToExecutionUnit();
 	}
 }

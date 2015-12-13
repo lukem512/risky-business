@@ -8,17 +8,45 @@
 #include "DecodeUnitManager.h"
 
 DecodeUnitManager::DecodeUnitManager(unsigned int width, ExecutionUnitManager* eum) {
-	// Set debugging to false, by default
-	debug = false;
-
 	// Store a local reference to the EU manager
 	this->eum = eum;
 
 	// Nothing has been issued yet...
 	lastIssued = 0;
 
+	// Set out-of-order flag to true
+	setOutOfOrder(true);
+
 	// Set up the Decode Units
 	dus.assign(width, DecodeUnit(eum));
+
+	// Set debugging to false, by default
+	setDebug(false);
+}
+
+DecodeUnitManager::DecodeUnitManager(unsigned int width, Scoreboard* score) {
+	// Store a local reference to the Scoreboard
+	this->score = score;
+
+	// Nothing has been issued yet...
+	lastIssued = 0;
+
+	// Set out-of-order flag to true
+	setOutOfOrder(true);
+
+	// Set up the Decode Units
+	dus.assign(width, DecodeUnit(score));
+
+	// Set debugging to false, by default
+	setDebug(false);
+}
+
+void DecodeUnitManager::setOutOfOrder(bool outOfOrder) {
+	this->outOfOrder = outOfOrder;
+}
+
+bool DecodeUnitManager::getOutOfOrder() {
+	return outOfOrder;
 }
 
 void DecodeUnitManager::setDebug(bool debug) {
@@ -50,8 +78,14 @@ void DecodeUnitManager::tick() {
 		if (debug) {
 			std::cout << "[DU #" << i << "] trying to issue decoded instruction." << std::endl;
 		}
-		if (!dus[i].passToExecutionUnit()) {
-			break;
+		if (outOfOrder) {
+			if (!dus[i].passToScoreboard()) {
+				break;
+			}
+		} else {
+			if (!dus[i].passToExecutionUnit()) {
+				break;
+			}
 		}
 		waiting.pop();
 	}

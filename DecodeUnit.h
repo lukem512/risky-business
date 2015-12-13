@@ -9,6 +9,7 @@
 #include "Register.h"
 #include "ExecutionUnit.h"
 #include "ExecutionUnitManager.h"
+#include "Scoreboard.h"
 #include "opcodes.h"
 
 // Instruction and unknown operands
@@ -74,6 +75,7 @@ typedef struct {
 class DecodeUnit {
 private:
 	ExecutionUnitManager* eum;
+	Scoreboard* score;
 
 	Register ir;		// Instruction register, passed from FU
 	Register pc;		// Program counter, passed from FU
@@ -93,9 +95,11 @@ public:
 	bool speculative;
 
 	DecodeUnit(ExecutionUnitManager* eum);
+	DecodeUnit(Scoreboard* score);
 	void issue(Register* ir, Register* pc, bool speculative);
 	void tick();
 	bool passToExecutionUnit();
+	bool passToScoreboard();
 	void clear();
 };
 

@@ -38,6 +38,7 @@ private:
 	unsigned int waitForFetch, waitForDecode, waitForExecute;
 	int state;
 	bool debug;
+	bool outOfOrder;
 	bool branchPrediction;
 	bool dynamicBranchPrediction;
 	bool pipeline;
@@ -45,6 +46,8 @@ private:
 
 	BranchPredictionTable bpt;
 	BranchHistoryTable bht;
+
+	Scoreboard* score;
 
 	FetchUnitManager* fum;
 	DecodeUnitManager* dum;
@@ -80,6 +83,9 @@ private:
 		waitForDecode = 1;
 		waitForExecute = 2;
 
+		// Set Out of Order to true!
+		setOutOfOrder(true);
+
 		// Set debug to false
 		setDebug(false);
 
@@ -104,10 +110,11 @@ public:
 	// Setter functions for pipeline width
 	void setEus(uint32_t eus) {
 		eum = new ExecutionUnitManager(eus);
+		score = new Scoreboard(eum);
 	};
 
 	void setDus(uint32_t dus) {
-		dum = new DecodeUnitManager(dus, eum);
+		dum = new DecodeUnitManager(dus, score);
 	};
 
 	void setFus(uint32_t fus) {
@@ -119,6 +126,8 @@ public:
 		uint32_t eus, uint32_t dus, uint32_t fus);
 	void setDebug(bool debug);
 	bool getDebug();
+	void setOutOfOrder(bool outOfOrder);
+	bool getOutOfOrder();
 	void setBranchPrediction(bool branchPrediction);
 	bool getBranchPrediction();
 	void setDynamicBranchPrediction(bool dynamicBranchPrediction);

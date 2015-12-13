@@ -40,6 +40,7 @@ bool State::getDynamicBranchPrediction() {
 
 void State::setDebug(bool debug) {
 	this->debug = debug;
+	score->debug = debug;
 	fum->setDebug(debug);
 	dum->setDebug(debug);
 	eum->setDebug(debug);
@@ -47,6 +48,15 @@ void State::setDebug(bool debug) {
 
 bool State::getDebug() {
 	return debug;
+}
+
+void State::setOutOfOrder(bool outOfOrder) {
+	this->outOfOrder = outOfOrder;
+	dum->setOutOfOrder(outOfOrder);
+}
+
+bool State::getOutOfOrder() {
+	return outOfOrder;
 }
 
 void State::setPipeline(bool pipeline) {
@@ -135,8 +145,12 @@ bool State::tick() {
 
 	if (getPipeline()) {
 		// Execute
-		eum->tick(&registerFile, &memory, &bpt, &bht);
-		halted = eum->halted;
+		if (getOutOfOrder()) {
+			halted = score->tick(&registerFile, &memory, &bpt, &bht);
+		} else {
+			eum->tick(&registerFile, &memory, &bpt, &bht);
+			halted = eum->halted;
+		}
 
 		if (!halted) {
 			// Check pipeline is valid
