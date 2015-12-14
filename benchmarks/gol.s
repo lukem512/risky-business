@@ -3,7 +3,7 @@
 % Output is performed using a memory mapping.
 % Memory locations from 30000 to 40000 will
 % be mapped to a video output, when enabled.
-% This gives 100 x 200 output.
+% This gives 100 x 100 output.
 %%%%%%%%%%%%%%%%
 % Width
 LDC r0 100
@@ -346,69 +346,142 @@ ADD r8 r4 r2
 %
 %%%%%%%%%%%%%%%%
 % Determine number of neighbours
-% TODO - this should check for out-of-bounds
 %
-%  [x-1][y-1] = -(width+1)
-%  [x][y-1] = -width
-%  [x+1][y-1] = -(width-1)
+%  1. [x-1][y-1] = -(width+1)
+%  2. [x][y-1] = -width
+%  3. [x+1][y-1] = -(width-1)
 %
-%  [x-1][y] = -1
-%  [x+1][y] = 1
+%  4. [x-1][y] = -1
+%  5. [x+1][y] = 1
 %
-%  [x-1][y+1] = width-1
-%  [x][y+1] = width
-%  [x+1][y+1] = width+1
+%  6. [x-1][y+1] = width-1
+%  7. [x][y+1] = width
+%  8. [x+1][y+1] = width+1
 %
+% neighbours = 0
 LDC r9 0
+one:
 % width + 1 (using the Live flag)
 ADD r10 r0 r14
 % r13 = offset
 % [x-1][y-1] = -width - 1
 SUB r13 r8 r10
+% Check if within cell area
+% cellmin = r2
+CMP r10 r13 r2
+BLTZ r10 two
+% cellmax = r2 + (r0 * r1) = r2 + r5
+ADD r10 r2 r5
+CMP r10 r13 r10
+BGTEZ r10 two
 % if (M[r13] == 1) n++
 LDR r10 r13
-ADD r9 r9 r13
+ADD r9 r9 r10
+two:
 % Increment location (again, using the Live flag)
 % [x][y-1] = -width
 ADD r13 r13 r14
+% Check if within cell area
+% cellmin = r2
+CMP r10 r13 r2
+BLTZ r10 three
+% cellmax = r2 + (r0 * r1) = r2 + r5
+ADD r10 r2 r5
+CMP r10 r13 r10
+BGTEZ r10 three
 LDR r10 r13
-ADD r9 r9 r13
+ADD r9 r9 r10
+three:
 % Increment location
 % [x+1][y-1] = -width + 1
 ADD r13 r13 r14
+% Check if within cell area
+% cellmin = r2
+CMP r10 r13 r2
+BLTZ r10 four
+% cellmax = r2 + (r0 * r1) = r2 + r5
+ADD r10 r2 r5
+CMP r10 r13 r10
+BGTEZ r10 four
 LDR r10 r13
-ADD r9 r9 r13
+ADD r9 r9 r10
+four:
 % offset - 1
 % [x-1][y] = -1
 SUB r13 r8 r14
+% Check if within cell area
+% cellmin = r2
+CMP r10 r13 r2
+BLTZ r10 five
+% cellmax = r2 + (r0 * r1) = r2 + r5
+ADD r10 r2 r5
+CMP r10 r13 r10
+BGTEZ r10 five
 LDR r10 r13
-ADD r9 r9 r13
+ADD r9 r9 r10
+five:
 % offset + 1
 % [x+1][y] = 1
 ADD r13 r8 r14
+% Check if within cell area
+% cellmin = r2
+CMP r10 r13 r2
+BLTZ r10 six
+% cellmax = r2 + (r0 * r1) = r2 + r5
+ADD r10 r2 r5
+CMP r10 r13 r10
+BGTEZ r10 six
 LDR r10 r13
-ADD r9 r9 r13
+ADD r9 r9 r10
+six:
 % width - 1
 SUB r10 r0 r14
 % r13 = offset
 % [x-1][y+1] = width-1
 ADD r13 r8 r10
 % if (M[r13] == 1) n++
+% Check if within cell area
+% cellmin = r2
+CMP r10 r13 r2
+BLTZ r10 seven
+% cellmax = r2 + (r0 * r1) = r2 + r5
+ADD r10 r2 r5
+CMP r10 r13 r10
+BGTEZ r10 seven
 LDR r10 r13
-ADD r9 r9 r13
+ADD r9 r9 r10
+seven:
 % Increment location
 % [x][y+1] = width
 ADD r13 r13 r14
+% Check if within cell area
+% cellmin = r2
+CMP r10 r13 r2
+BLTZ r10 eight
+% cellmax = r2 + (r0 * r1) = r2 + r5
+ADD r10 r2 r5
+CMP r10 r13 r10
+BGTEZ r10 eight
 LDR r10 r13
-ADD r9 r9 r13
+ADD r9 r9 r10
+eight:
 % Increment location
 % [x+1][y+1] = width+1
 ADD r13 r13 r14
+% Check if within cell area
+% cellmin = r2
+CMP r10 r13 r2
+BLTZ r10 liveness
+% cellmax = r2 + (r0 * r1) = r2 + r5
+ADD r10 r2 r5
+CMP r10 r13 r10
+BGTEZ r10 liveness
 LDR r10 r13
-ADD r9 r9 r13
+ADD r9 r9 r10
 %%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%
+liveness:
 % Get liveness of cell
 LDR r10 r8
 % Offset to new state cell
