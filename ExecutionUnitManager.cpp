@@ -27,6 +27,12 @@ bool ExecutionUnitManager::getDebug() {
 	return debug;
 }
 
+void ExecutionUnitManager::setSpeculative(bool speculative) {
+	for (int i = 0; i < eus.size(); i++) {
+		eus[i].speculative = speculative;
+	}
+}
+
 float ExecutionUnitManager::getTotalInstructionsExecuted() {
 	float n = 0;
 

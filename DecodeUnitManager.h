@@ -27,6 +27,7 @@ public:
 	bool getDebug();
 	void setOutOfOrder(bool outOfOrder);
 	bool getOutOfOrder();
+	void setSpeculative(bool speculative);
 	std::string toString();
 	DecodeUnit* getAvailableDecodeUnit();
 	void tick();

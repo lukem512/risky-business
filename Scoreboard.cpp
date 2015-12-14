@@ -37,7 +37,17 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 		return false;
 	}
 
+	// Does this modify the PC contents? Is that free?
 	if (hasFpc(opcode) && ResultPc != NULL) {
+		if (debug) {
+			std::cout << "[SCORE] no." << std::endl;
+		}
+		return false;
+	}
+
+	// Does this modify memory? Is that location free?
+	// TODO - this locks entire memory.
+	if (hasMi(opcode) && ResultM != NULL) {
 		if (debug) {
 			std::cout << "[SCORE] no." << std::endl;
 		}
@@ -79,14 +89,25 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 			ResultPc = eu;
 			break;
 
-		case OP_ST:
 		case OP_PRNT:
 			Fj[eu] = r1;
 			Qj[eu] = Result[r1];
 			Rj[eu] = Qj[eu] == NULL;
 			break;
 
+		case OP_ST:
+			Mi[eu] = true; // = im1
+			ResultM = eu;
+
+			Fj[eu] = r1;
+			Qj[eu] = Result[r1];
+			Rj[eu] = Qj[eu] == NULL;
+			break;
+
 		case OP_STR:
+			Mi[eu] = true; // = r2
+			ResultM = eu;
+
 			Fj[eu] = r1;
 			Fk[eu] = r2;
 			Qj[eu] = Result[r1];
@@ -100,6 +121,19 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 			break;
 
 		case OP_LD:
+			Mj[eu] = true; // im1;
+
+			Fi[eu] = r1;
+			Result[r1] = eu;
+			break;
+
+		case OP_LDR:
+			Mj[eu] = true; // r2;
+			
+			Fi[eu] = r1;
+			Result[r1] = eu;
+			break;
+
 		case OP_LDC:
 			Fi[eu] = r1;
 			Result[r1] = eu;
@@ -156,11 +190,18 @@ bool Scoreboard::read(ExecutionUnit* eu) {
 
 		case OP_NOP:
 		case OP_HLT:
-		case OP_LD:
 		case OP_LDC:
 		case OP_B:
 			Rj[eu] = true;
 			Rk[eu] = true;
+			break;
+
+		case OP_LD:
+		case OP_LDR:
+			if (ResultM) {
+				return false;
+			}
+			Mj[eu] = false;
 			break;
 
 		case OP_STR:
@@ -189,11 +230,6 @@ bool Scoreboard::execute(ExecutionUnit* eu, std::vector<Register>* r,
 	}
 
 	eu->tick(r, m, bpt, bht);
-
-	if (debug) {
-		std::cout << "[SCORE] Ready flag is " << eu->ready;
-		std::cout << " and working flag is " << eu->working << std::endl;
-	}
 
 	bool finished = (eu->ready && !eu->working);
 
@@ -233,6 +269,11 @@ bool Scoreboard::write(ExecutionUnit* eu) {
 
 	// Relinquish the FU
 	eu->ready = true;
+
+	// Have we finished with memory?
+	if (Mi[eu]) {
+		ResultM = NULL;
+	}
 
 	// Have we finished with PC?
 	if (Fpc[eu]) {
@@ -296,8 +337,7 @@ bool Scoreboard::tick(std::vector<Register>* r,
 }
 
 bool Scoreboard::hasFpc(ExecutionUnit* eu) {
-	// return hasFpc(Op[eu]);
-	return Fpc[eu];
+	return hasFpc(Op[eu]);
 }
 
 bool Scoreboard::hasFpc(uint8_t opcode) {
@@ -391,19 +431,52 @@ bool Scoreboard::FkValid(ExecutionUnit* eu, ExecutionUnit* other) {
 	return false;
 }
 
+bool Scoreboard::hasMi(ExecutionUnit* eu) {
+	return hasMi(Op[eu]);
+}
+
+bool Scoreboard::hasMi(uint8_t opcode) {
+	switch(opcode) {
+		case OP_ST:
+		case OP_STR:
+			return true;
+
+		default:
+			return true;
+	}
+}
+
+bool Scoreboard::hasMj(ExecutionUnit* eu) {
+	switch(Op[eu]) {
+		case OP_LD:
+		case OP_LDR:
+		case OP_LDC:
+			return true;
+
+		default:
+			return true;
+	}
+}
+
 void Scoreboard::clear(ExecutionUnit* eu) {
 	S[eu] = ISSUE;
 
 	Rj[eu] = true;
 	Rk[eu] = true;
 
-	Fpc[eu] = false;
+	Mj[eu] = false;
 
 	Op[eu] = OP_UNKNOWN;
     Type[eu] = EU_ISSUE_UNKNOWN;
 
 	if (Fpc[eu]) {
 		ResultPc = NULL;
+		Fpc[eu] = false;
+	}
+
+	if (Mi[eu]) {
+		ResultM = NULL;
+		Mi[eu] = false;
 	}
 
 	Result[Fi[eu]] = NULL;

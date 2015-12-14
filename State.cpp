@@ -135,6 +135,8 @@ void State::checkPipelineValid() {
 	}
 
 	// Update speculative flag
+	eum->setSpeculative(speculative);
+	dum->setSpeculative(speculative);
 	fum->setSpeculative(speculative);
 }
 

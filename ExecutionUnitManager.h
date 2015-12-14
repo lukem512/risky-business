@@ -31,6 +31,7 @@ public:
 	ExecutionUnitManager(unsigned int width);
 	void setDebug(bool debug);
 	bool getDebug();
+	void setSpeculative(bool speculative);
 	std::string toString();
 	float getTotalInstructionsExecuted();
 	void tick(std::vector<Register>* r, std::vector<MemoryLocation>* m,

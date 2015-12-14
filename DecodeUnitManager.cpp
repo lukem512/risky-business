@@ -61,6 +61,12 @@ bool DecodeUnitManager::getDebug() {
 	return debug;
 }
 
+void DecodeUnitManager::setSpeculative(bool speculative) {
+	for (int i = 0; i < dus.size(); i++) {
+		dus[i].speculative = speculative;
+	}
+}
+
 std::string DecodeUnitManager::toString() {
 	std::ostringstream ss;
 

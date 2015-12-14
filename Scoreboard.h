@@ -28,6 +28,12 @@ private:
 	std::map<ExecutionUnit*, bool> Rj, Rk;
 	std::map<uint8_t, ExecutionUnit*> Result;
 
+	// std::map<ExecutionUnit*, uint32_t> Mj;
+	std::map<ExecutionUnit*, bool> Mj;
+	// std::map<uint32_t, ExecutionUnit*> ResultM;
+	std::map<ExecutionUnit*, bool> Mi;
+	ExecutionUnit* ResultM;
+
 	std::map<ExecutionUnit*, bool> Fpc;
 	ExecutionUnit* ResultPc;
 
@@ -41,6 +47,9 @@ private:
 	bool hasFk(ExecutionUnit* eu);
 	bool FjValid(ExecutionUnit* eu, ExecutionUnit* other);
 	bool FkValid(ExecutionUnit* eu, ExecutionUnit* other);
+	bool hasMi(ExecutionUnit* eu);
+	bool hasMi(uint8_t opcode);
+	bool hasMj(ExecutionUnit* eu);
 	void clear(ExecutionUnit* eu);
 	void releaseRegisterAllocation(ExecutionUnit* eu);
 
@@ -53,6 +62,7 @@ public:
 
 		// Important! This must be NULL.
 		ResultPc = NULL;
+		ResultM = NULL;
 
 		// Set debug to false by default
 		debug = false;
