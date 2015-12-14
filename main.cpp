@@ -7,6 +7,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <stdio.h>
+
 #include "State.h"
 #include "option.h"
 
@@ -183,6 +185,27 @@ int main(int argc, char** argv){
 			break;
 		}
 	}
+
+	// Create image of mapped memory region!
+	#ifdef __OUTPUT_IMAGE
+		FILE *of = fopen("output.txt", "w");
+		if (of == NULL)
+		{
+		    std::cout << "Error opening file!" << std::endl;
+		    return 1;
+		}
+		
+		int start = 10000;
+		int end = 20000;
+		int width = 100;
+		for (int i = start; i < end; i++) {
+			fprintf(of, "%d ", s.memory.at(i).contents);
+			if (i != start && ((i+1) % width) == 0) {
+				fprintf(of, "\n");
+			}
+		}
+		fclose(of);
+	#endif
 
 	if (s.getDebug() || dumpMem) {
 		s.print();
