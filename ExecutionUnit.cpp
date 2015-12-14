@@ -90,6 +90,7 @@ std::string ExecutionUnit::toString() {
 // Operands not needed are ignored, as determined by type
 void ExecutionUnit::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uint8_t r3,
 		int16_t im1, Register* pc, bool speculative) {
+	
 	if (debug) {
 		std::cout << "Being issued with " << (speculative ? "speculative " : "") << "instruction " << optos(opcode) << std::endl;
 	}

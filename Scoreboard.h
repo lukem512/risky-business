@@ -6,6 +6,8 @@
 
 #include <map>
 
+#include <iostream>
+
 #include "ExecutionUnitManager.h"
 #include "ExecutionUnit.h"
 
@@ -44,6 +46,7 @@ private:
 
 public:
 	bool debug;
+	bool halted;
 
 	Scoreboard(ExecutionUnitManager* eum) {
 		this->eum = eum;
@@ -53,6 +56,9 @@ public:
 
 		// Set debug to false by default
 		debug = false;
+
+		// Set halted to false
+		halted = false;
 	}
 
 	bool issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uint8_t r3,

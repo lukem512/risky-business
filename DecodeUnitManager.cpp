@@ -78,7 +78,7 @@ void DecodeUnitManager::tick() {
 		if (debug) {
 			std::cout << "[DU #" << i << "] trying to issue decoded instruction." << std::endl;
 		}
-		if (outOfOrder) {
+		if (getOutOfOrder()) {
 			if (!dus[i].passToScoreboard()) {
 				break;
 			}

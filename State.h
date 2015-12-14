@@ -110,11 +110,18 @@ public:
 	// Setter functions for pipeline width
 	void setEus(uint32_t eus) {
 		eum = new ExecutionUnitManager(eus);
-		score = new Scoreboard(eum);
+		if (getOutOfOrder()) {
+			score = new Scoreboard(eum);
+		}
 	};
 
 	void setDus(uint32_t dus) {
-		dum = new DecodeUnitManager(dus, score);
+		if (getOutOfOrder()) {
+			dum = new DecodeUnitManager(dus, score);
+		} else {
+			dum = new DecodeUnitManager(dus, eum);
+		}
+		dum->setOutOfOrder(outOfOrder);
 	};
 
 	void setFus(uint32_t fus) {

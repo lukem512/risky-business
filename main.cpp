@@ -34,6 +34,7 @@ int main(int argc, char** argv){
 		std::cout << "\t-d - Turn on debugging" << std::endl;
 		std::cout << "\t-q - Hide the logo" << std::endl;
 		std::cout << "\t-max-ticks n - Cap execution to n clock cycles" << std::endl;
+		std::cout << "\t-no-out-of-order - Turn off Out-of-Order execution" << std::endl;
 		std::cout << "\t-no-pipeline - Turn off pipelined execution" << std::endl;
 		std::cout << "\t-no-branch-prediction - Turn off branch prediction" << std::endl;
 		std::cout << "\t-no-dynamic-branch-prediction - Turn off dynamic branch prediction" << std::endl;
@@ -93,6 +94,12 @@ int main(int argc, char** argv){
 			std::cerr << "No FU width specified." << std::endl;
 			return 1;
 		}
+	}
+
+	// Use OoO?
+	if (option_exists(argv, argv+argc, "-no-out-of-order")) {
+		std::cout << "Setting out of order flag to false." << std::endl;
+		s.setOutOfOrder(false);
 	}
 	
 	// Set up configuration

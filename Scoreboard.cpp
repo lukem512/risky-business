@@ -31,10 +31,16 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 
 	// Is the destination register free?
 	if (hasFi(opcode) && Result[r1] != NULL) {
+		if (debug) {
+			std::cout << "[SCORE] no." << std::endl;
+		}
 		return false;
 	}
 
 	if (hasFpc(opcode) && ResultPc != NULL) {
+		if (debug) {
+			std::cout << "[SCORE] no." << std::endl;
+		}
 		return false;
 	}
 
@@ -264,8 +270,7 @@ bool Scoreboard::tick(std::vector<Register>* r,
 
 					// Return, we're halted
 					if (peu->halted) {
-						// TODO: HLT needs to be delayed if we're OoO
-						return false;
+						halted = true;
 					}
 				}
 				break;
@@ -273,6 +278,10 @@ bool Scoreboard::tick(std::vector<Register>* r,
 			case WRITE:
 				if (write(peu)) {
 					S[peu] = ISSUE;
+				}
+
+				if (halted) {
+					return true;
 				}
 				break;
 
