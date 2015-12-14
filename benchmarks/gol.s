@@ -327,6 +327,7 @@ LDC r12 15
 tick:
 CMP r4 r11 r12
 BGTEZ r4 end
+PRNT r11
 % x = 0
 LDC r4 0
 % max = width * height
@@ -340,12 +341,12 @@ loop:
 CMP r8 r4 r5
 BGTEZ r8 break
 % Offset to cell
-ADD r8 r0 r4
+ADD r8 r4 r2
 %%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%
 % Determine number of neighbours
-% TODO - this checks out-of-bounds
+% TODO - this should check for out-of-bounds
 %
 %  [x-1][y-1] = -(width+1)
 %  [x][y-1] = -width
@@ -411,9 +412,9 @@ ADD r9 r9 r13
 % Get liveness of cell
 LDR r10 r8
 % Offset to new state cell
-ADD r11 r7 r4
+ADD r13 r7 r4
 % Store old liveness
-STR r11 r10
+STR r13 r10
 % Increment iterator
 ADD r4 r4 r6
 % Is it alive?
@@ -431,7 +432,7 @@ BGTZ r10 die
 B loop
 die:
 % Set to dead
-STR r11 r15
+STR r13 r15
 B loop
 dead:
 % if equal to three => alive
@@ -440,10 +441,33 @@ CMP r10 r9 r10
 BZ r10 live
 B loop
 live:
+STR r13 r14
 B loop
+%%%%%%%%%%%%%%%%
+%
+%%%%%%%%%%%%%%%%
 break:
-LDC r10 1
-ADD r11 r11 r10
+% Replace current values with new values
+% x = 0
+LDC r4 0
+% max = width * height
+MUL r10 r0 r1
+replace:
+% while (x < max)
+CMP r13 r4 r10
+BGTEZ r13 backtoloop
+% Memory address of old cell
+ADD r13 r2 r4
+% Memory address of new cell
+ADD r9 r7 r4
+% Replace old with new
+STR r13 r9
+% Inc x
+ADD r4 r4 r14
+B replace
+%
+backtoloop:
+ADD r11 r11 r14
 B tick
 %%%%%%%%%%%%%%%%
 %
