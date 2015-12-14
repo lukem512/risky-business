@@ -26,20 +26,30 @@ private:
 	std::map<ExecutionUnit*, bool> Rj, Rk;
 	std::map<uint8_t, ExecutionUnit*> Result;
 
+	std::map<ExecutionUnit*, bool> Fpc;
+	ExecutionUnit* ResultPc;
+
 	ExecutionUnitManager* eum;
 
-	bool hasFi(ExecutionUnit* eu);
+	bool hasFpc(uint8_t opcode);
+	bool hasFpc(ExecutionUnit* eu);
 	bool hasFi(uint8_t opcode);
+	bool hasFi(ExecutionUnit* eu);
 	bool hasFj(ExecutionUnit* eu);
 	bool hasFk(ExecutionUnit* eu);
 	bool FjValid(ExecutionUnit* eu, ExecutionUnit* other);
 	bool FkValid(ExecutionUnit* eu, ExecutionUnit* other);
+	void clear(ExecutionUnit* eu);
+	void releaseRegisterAllocation(ExecutionUnit* eu);
 
 public:
 	bool debug;
 
 	Scoreboard(ExecutionUnitManager* eum) {
 		this->eum = eum;
+
+		// Important! This must be NULL.
+		ResultPc = NULL;
 
 		// Set debug to false by default
 		debug = false;
@@ -55,6 +65,7 @@ public:
 	bool tick(std::vector<Register>* r,
 		std::vector<MemoryLocation>* m, BranchPredictionTable* bpt,
 		BranchHistoryTable* bht);
+	void clearPipeline();
 };
 
 #endif

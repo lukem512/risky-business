@@ -19,6 +19,7 @@ TODO List
 [x] Parameterize branch prediction flag
 [x] Execution breaks when run without branch prediction
 [x] -eus > n -dus > n -fus n -no-branch-prediction gives incorrect results
-[ ] Dynamic branch prediction
+[x] Dynamic branch prediction
+[ ] Add PC to Scoreboard
 [ ] Multiple instruction lengths
 [ ] Out-of-Order execution

@@ -183,15 +183,15 @@ int main(int argc, char** argv){
 		}
 	}
 
+	if (s.getDebug()) {
+		s.print();
+	}
+
 	std::cout << std::endl;
 	std::cout << "Finished execution successfully." << std::endl;
 	std::cout << "Average instructions per cycle: " << s.getInstructionsPerTick();
 	std::cout << " (" << s.getTicks() + 1 << " cycles)" << std::endl;
 	std::cout << std::endl;
-
-	if (s.getDebug()) {
-		s.print();
-	}
 
 	return 0;
 }

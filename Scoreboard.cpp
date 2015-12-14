@@ -34,6 +34,10 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 		return false;
 	}
 
+	if (hasFpc(opcode) && ResultPc != NULL) {
+		return false;
+	}
+
 	if (debug) {
 		std::cout << "[SCORE] yes." << std::endl;
 	}
@@ -47,6 +51,8 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
     Rj[eu] = true;
     Rk[eu] = true;
 
+    Fpc[eu] = false;
+
 	switch(opcode) {
 		case OP_BZ:
 		case OP_BNZ:
@@ -54,6 +60,19 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 		case OP_BLTEZ:
 		case OP_BGTZ:
 		case OP_BGTEZ:
+			Fpc[eu] = true;
+			ResultPc = eu;
+
+			Fj[eu] = r1;
+			Qj[eu] = Result[r1];
+			Rj[eu] = Qj[eu] == NULL;
+			break;
+
+		case OP_B:
+			Fpc[eu] = true;
+			ResultPc = eu;
+			break;
+
 		case OP_ST:
 		case OP_PRNT:
 			Fj[eu] = r1;
@@ -71,7 +90,6 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 			break;
 
 		case OP_NOP:
-		case OP_B:
 		case OP_HLT:
 			break;
 
@@ -115,14 +133,14 @@ bool Scoreboard::read(ExecutionUnit* eu) {
 	}
 
 	switch(Op[eu]) {
+		case OP_ST:
+		case OP_PRNT:
 		case OP_BZ:
 		case OP_BNZ:
 		case OP_BLTZ:
 		case OP_BLTEZ:
 		case OP_BGTZ:
 		case OP_BGTEZ:
-		case OP_ST:
-		case OP_PRNT:
 			if (!Rj[eu]) {
 				return false;
 			}
@@ -131,10 +149,10 @@ bool Scoreboard::read(ExecutionUnit* eu) {
 			break;
 
 		case OP_NOP:
-		case OP_B:
 		case OP_HLT:
 		case OP_LD:
 		case OP_LDC:
+		case OP_B:
 			Rj[eu] = true;
 			Rk[eu] = true;
 			break;
@@ -148,48 +166,6 @@ bool Scoreboard::read(ExecutionUnit* eu) {
 			Rk[eu] = false;
 			break;
 	}
-
-	// Wait for input registers
-	// Then set them to unavailable
-   //  switch (Type[eu]) {
-   //  	case EU_ISSUE_O:
-   //  	case EU_ISSUE_OR:
-   //  		Rj[eu] = true;
-   //  		Rk[eu] = true;
-   //  		break;
-
-   //  	case EU_ISSUE_ORI:
-   //  		// CHECK ALL COND BRANCHES
-   //  		// CHECK OP_ST
-   //  		if (Op[eu] == OP_LD ||
-   //  			Op[eu] == OP_LDC) {
-   //  			break;
-   //  		}
-
-   //  	break;
-
-   //  	case EU_ISSUE_ORR:
-			// if (!Rj[eu]) {
-			// 	return false;
-			// }
-			// Rj[eu] = false;
-			// Rk[eu] = true;
-			// if (Op[eu] == OP_STR) {
-   //  			if (!Rk[eu]) {
-			// 		return false;
-			// 	}
-			// 	Rk[eu] = false;
-   //  		}
-   //  		break;
-
-   //  	case EU_ISSUE_ORRR:
-	  //   	if (!Rj[eu] && !Rk[eu]) {
-			// 	return false;
-			// }
-   //  		Rj[eu] = false;
-   //  		Rk[eu] = false;
-	  //   	break;
-   //  }
 
     if (debug) {
 		std::cout << "[SCORE] They\'re ready!" << std::endl;
@@ -242,19 +218,8 @@ bool Scoreboard::write(ExecutionUnit* eu) {
 		}
 	}
 
-    for (int i = 0; i < eum->eus.size(); i++) {
-    	ExecutionUnit* peu = &eum->eus[i];
-    	if (hasFj(peu)) {
-	    	if (Qj[peu] == eu) {
-	    		Rj[peu] = true;
-	    	}
-    	}
-    	if (hasFk(peu)) {
-	    	if (Qk[peu] == eu) {
-	    		Rk[peu] = true;
-	    	} 
-    	}
-    }
+	// Release any held register dependencies
+	releaseRegisterAllocation(eu);
 
     if (debug) {
 		std::cout << "[SCORE] Written successfully!" << std::endl;
@@ -262,6 +227,11 @@ bool Scoreboard::write(ExecutionUnit* eu) {
 
 	// Relinquish the FU
 	eu->ready = true;
+
+	// Have we finished with PC?
+	if (Fpc[eu]) {
+		ResultPc = NULL;
+	}
 
     // NULL means no FU generates the register's result
     Result[Fi[eu]] = NULL;
@@ -287,8 +257,9 @@ bool Scoreboard::tick(std::vector<Register>* r,
 				if (execute(peu, r, m, bpt, bht)) {
 					S[peu] = WRITE;
 
-					if (debug) {
-						std::cout << "Execute returned true! " << S[peu] << std::endl;
+					// Invalid pipeline!
+					if (peu->invalid) {
+						return false;
 					}
 
 					// Return, we're halted
@@ -315,6 +286,27 @@ bool Scoreboard::tick(std::vector<Register>* r,
 	return false;
 }
 
+bool Scoreboard::hasFpc(ExecutionUnit* eu) {
+	// return hasFpc(Op[eu]);
+	return Fpc[eu];
+}
+
+bool Scoreboard::hasFpc(uint8_t opcode) {
+	switch(opcode) {
+		case OP_BZ:
+		case OP_BNZ:
+		case OP_BLTZ:
+		case OP_BLTEZ:
+		case OP_BGTZ:	
+		case OP_BGTEZ:
+		case OP_B:
+			return true;
+
+		default:
+			return false;
+	}
+}
+
 bool Scoreboard::hasFi(ExecutionUnit* eu) {
 	return hasFi(Op[eu]);
 }
@@ -327,12 +319,12 @@ bool Scoreboard::hasFi(uint8_t opcode) {
 		case OP_BLTEZ:
 		case OP_BGTZ:
 		case OP_BGTEZ:
+		case OP_B:
 		case OP_ST:
 		case OP_PRNT:
 		case OP_STR:
 		case OP_NOP:
 		case OP_HLT:
-		case OP_B:
 			return false;
 
 		default:
@@ -388,4 +380,49 @@ bool Scoreboard::FkValid(ExecutionUnit* eu, ExecutionUnit* other) {
 		return true;
 	}
 	return false;
+}
+
+void Scoreboard::clear(ExecutionUnit* eu) {
+	S[eu] = ISSUE;
+
+	Rj[eu] = true;
+	Rk[eu] = true;
+
+	Fpc[eu] = false;
+
+	Op[eu] = OP_UNKNOWN;
+    Type[eu] = EU_ISSUE_UNKNOWN;
+
+	if (Fpc[eu]) {
+		ResultPc = NULL;
+	}
+
+	Result[Fi[eu]] = NULL;
+}
+
+void Scoreboard::clearPipeline() {
+	for (int i = 0; i < eum->eus.size(); i++) {
+		ExecutionUnit* peu = &eum->eus[i];
+		if (peu->speculative) {
+			clear(peu);
+			releaseRegisterAllocation(peu);
+		}
+	}
+}
+
+// Releases the register allocation for Execution Unit
+void Scoreboard::releaseRegisterAllocation(ExecutionUnit* eu) {
+	for (int i = 0; i < eum->eus.size(); i++) {
+    	ExecutionUnit* peu = &eum->eus[i];
+    	if (hasFj(peu)) {
+	    	if (Qj[peu] == eu) {
+	    		Rj[peu] = true;
+	    	}
+    	}
+    	if (hasFk(peu)) {
+	    	if (Qk[peu] == eu) {
+	    		Rk[peu] = true;
+	    	} 
+    	}
+    }
 }

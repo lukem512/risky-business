@@ -117,6 +117,7 @@ void State::checkPipelineValid() {
 				std::cout << "Incorrect prediction at " << entry->location << std::endl;
 			}
 			eum->clearPipeline();
+			score->clearPipeline();
 			dum->clearPipeline();
 			fum->clearPipeline(entry->pc);
 			entry->predicted = entry->actual;
