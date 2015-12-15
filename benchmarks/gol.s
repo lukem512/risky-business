@@ -344,7 +344,7 @@ ADD r7 r4 r7
 ADD r6 r2 r6
 ADD r7 r6 r7
 LDC r6 1
-STR r7
+STR r7 r6
 %%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%
@@ -352,8 +352,8 @@ STR r7
 % The scrubber example only needs 10 iterations to stabilise
 % tick = 0
 LDC r11 0
-% maxticks = 0
-LDC r12 0
+% maxticks = 1
+LDC r12 1
 tick:
 CMP r4 r11 r12
 BGTEZ r4 end
@@ -370,6 +370,7 @@ loop:
 % while (x < max)
 CMP r8 r4 r5
 BGTEZ r8 break
+PRNT r4
 % Offset to cell
 ADD r8 r4 r2
 %%%%%%%%%%%%%%%%
@@ -564,6 +565,7 @@ ADD r13 r2 r4
 % Memory address of new cell
 ADD r9 r7 r4
 % Replace old with new
+LDR r9 r9
 STR r13 r9
 % Inc x
 ADD r4 r4 r14
