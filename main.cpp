@@ -7,6 +7,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <stdio.h>
+
 #include "State.h"
 #include "option.h"
 
@@ -33,6 +35,7 @@ int main(int argc, char** argv){
 		std::cout << "\t-h - Show this menu" << std::endl;
 		std::cout << "\t-d - Turn on debugging" << std::endl;
 		std::cout << "\t-q - Hide the logo" << std::endl;
+		std::cout << "\t-dump-mem - Show memory dump at the end of execution" << std::endl;
 		std::cout << "\t-max-ticks n - Cap execution to n clock cycles" << std::endl;
 		std::cout << "\t-no-pipeline - Turn off pipelined execution" << std::endl;
 		std::cout << "\t-no-branch-prediction - Turn off branch prediction" << std::endl;
@@ -124,6 +127,13 @@ int main(int argc, char** argv){
 		s.setDebug(true);
 	}
 
+	// Dump memory?
+	bool dumpMem = false;
+	if (option_exists(argv, argv+argc, "-dump-mem")) {
+		std::cout << "Setting dump memory flag to true." << std::endl;
+		dumpMem = true;
+	}
+
 	// Print configuration?
 	if (s.getDebug()) {
 		std::cout << "Setting number of EUs to " << eus << "." << std::endl;
@@ -183,15 +193,38 @@ int main(int argc, char** argv){
 		}
 	}
 
+	// Create image of mapped memory region!
+	#define __OUTPUT_IMAGE
+	#ifdef __OUTPUT_IMAGE
+		FILE *of = fopen("output.txt", "w");
+		if (of == NULL)
+		{
+		    std::cout << "Error opening file!" << std::endl;
+		    return 1;
+		}
+		
+		const int start = 10000;
+		const int width = 100;
+		const int height = 100;
+		int end = start + (width * height);
+		for (int i = start; i < end; i++) {
+			fprintf(of, "%d ", s.memory.at(i).contents);
+			if (i != start && ((i+1) % width) == 0) {
+				fprintf(of, "\n");
+			}
+		}
+		fclose(of);
+	#endif
+
+	if (s.getDebug() || dumpMem) {
+		s.print();
+	}
+
 	std::cout << std::endl;
 	std::cout << "Finished execution successfully." << std::endl;
 	std::cout << "Average instructions per cycle: " << s.getInstructionsPerTick();
 	std::cout << " (" << s.getTicks() + 1 << " cycles)" << std::endl;
 	std::cout << std::endl;
-
-	if (s.getDebug()) {
-		s.print();
-	}
 
 	return 0;
 }
