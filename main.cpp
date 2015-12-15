@@ -187,6 +187,7 @@ int main(int argc, char** argv){
 	}
 
 	// Create image of mapped memory region!
+	#define __OUTPUT_IMAGE
 	#ifdef __OUTPUT_IMAGE
 		FILE *of = fopen("output.txt", "w");
 		if (of == NULL)
@@ -195,9 +196,10 @@ int main(int argc, char** argv){
 		    return 1;
 		}
 		
-		int start = 10000;
-		int end = 20000;
-		int width = 100;
+		const int start = 10000;
+		const int width = 100;
+		const int height = 100;
+		int end = start + (width * height);
 		for (int i = start; i < end; i++) {
 			fprintf(of, "%d ", s.memory.at(i).contents);
 			if (i != start && ((i+1) % width) == 0) {

@@ -13,7 +13,7 @@ for line in lines:
 	except NameError:
 		width = len(pixels)
 	for pixel in pixels:
-		if pixel == '1':
+		if pixel == '0':
 			data.append(black)
 		else:
 			data.append(white)

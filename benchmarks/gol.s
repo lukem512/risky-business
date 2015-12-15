@@ -45,13 +45,14 @@ LDC r4 30
 % by = 30
 LDC r5 30
 % cell[bx+n][by+m] = (r0 * (by + m)) + bx + x
-%% 
+%%
 LDC r7 0
 ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 4
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -60,7 +61,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 2
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -69,7 +71,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 3
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -78,7 +81,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 4
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -87,7 +91,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 1
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -96,7 +101,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 1
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -105,7 +111,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 4
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -114,7 +121,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 5
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -123,7 +131,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 6
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -132,7 +141,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 0
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -141,7 +151,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 1
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -150,7 +161,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 3
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -159,7 +171,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 7
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -168,7 +181,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 3
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -177,7 +191,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 7
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -186,7 +201,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 3
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -195,7 +211,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 7
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -204,7 +221,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 3
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -213,7 +231,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 7
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -222,7 +241,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 9
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -231,7 +251,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 10
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -240,7 +261,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 4
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -249,7 +271,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 5
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -258,7 +281,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 6
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -267,7 +291,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 9
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -276,7 +301,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 9
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -285,7 +311,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 6
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -294,7 +321,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 7
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -303,7 +331,8 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 8
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
 STR r7 r6
 %%
@@ -312,9 +341,10 @@ ADD r6 r5 r7
 MUL r6 r0 r6
 LDC r7 6
 ADD r7 r4 r7
-ADD r7 r2 r6
+ADD r6 r2 r6
+ADD r7 r6 r7
 LDC r6 1
-STR r7 r6
+STR r7
 %%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%
@@ -322,8 +352,8 @@ STR r7 r6
 % The scrubber example only needs 10 iterations to stabilise
 % tick = 0
 LDC r11 0
-% maxticks = 15
-LDC r12 15
+% maxticks = 0
+LDC r12 0
 tick:
 CMP r4 r11 r12
 BGTEZ r4 end

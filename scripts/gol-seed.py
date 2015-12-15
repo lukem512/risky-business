@@ -13,7 +13,8 @@ for line in lines:
 	print "LDC r7 " + tokens[0]
 	# r4 = bx
 	print "ADD r7 r4 r7"
-	print "ADD r7 r2 r6"
+	print "ADD r6 r2 r6"
+	print "ADD r7 r6 r7"
 	print "LDC r6 " + tokens[2]
 	print "STR r7 r6"
 	print "%%"
