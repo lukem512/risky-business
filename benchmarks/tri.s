@@ -27,7 +27,7 @@ LDC r1 15
 LDC r2 1
 % div = 2
 LDC r3 2
-% while (i < 10)
+% while (i < n)
 loop:
 CMP r6 r0 r1
 BGTEZ r6 end

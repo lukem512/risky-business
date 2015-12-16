@@ -25,7 +25,7 @@ LDC r0 0
 LDC r1 15
 % incr = 1
 LDC r2 1
-% while (i < 10)
+% while (i < n)
 loop:
 CMP r6 r0 r1
 BGTEZ r6 end
