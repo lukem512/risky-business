@@ -118,7 +118,8 @@ int main(int argc, char** argv){
 	// Use dynamic branch prediction?
 	if (option_exists(argv, argv+argc, "-no-dynamic-branch-prediction")) {
 		std::cout << "Setting dynamic branch prediction flag to false." << std::endl;
-		s.setBranchPrediction(false);
+		s.setDynamicBranchPrediction(false);
+		s.setBranchPrediction(true);
 	}
 
 	// Use debug?

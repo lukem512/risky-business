@@ -58,7 +58,9 @@ bool FetchUnitManager::getBranchPrediction() {
 void FetchUnitManager::setDynamicBranchPrediction(bool dynamicBranchPrediction) {
 	// Set branch prediction to be the same
 	// We cannot be dynamically predicting if we're not predicting!
-	setBranchPrediction(dynamicBranchPrediction);
+	if (dynamicBranchPrediction) {
+		setBranchPrediction(dynamicBranchPrediction);
+	}
 
 	// Now set dynamic branch prediction flag
 	this->dynamicBranchPrediction = dynamicBranchPrediction;
