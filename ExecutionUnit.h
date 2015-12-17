@@ -27,6 +27,8 @@ private:
 	int16_t im1; 		// Immediate operand
 	uint8_t type;		// Type of instruction, determines operands
 
+	unsigned int numberOfBranches;
+
 	void setState(bool ready);
 	bool willCompleteThisTick();
 
@@ -51,6 +53,7 @@ public:
 	void tick(std::vector<Register>* r,
 	  std::vector<MemoryLocation>* m, BranchPredictionTable* bpt, BranchHistoryTable* bht);
 	void clear();
+	unsigned int getNumberOfBranches();
 };
 
 #endif

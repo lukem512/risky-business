@@ -42,6 +42,7 @@ public:
 	void tick(std::vector<MemoryLocation>* m, bool pipeline,
 		BranchPredictionTable* bpt, BranchHistoryTable* bht);
 	void clearPipeline(uint32_t pc);
+	unsigned int getNumberOfBranches();
 };
 
 #endif

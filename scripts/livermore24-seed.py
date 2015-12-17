@@ -2,7 +2,7 @@
 
 # Input should contain a random number per line
 lines = [line.rstrip('\n') for line in open('random.txt')]
-base = 1000
+base = 100
 n = 0
 numbers = []
 m = 0

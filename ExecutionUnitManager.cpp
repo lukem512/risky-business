@@ -96,3 +96,10 @@ void ExecutionUnitManager::clearPipeline() {
 	}
 }
 
+unsigned int ExecutionUnitManager::getNumberOfBranches() {
+	unsigned int n = 0;
+	for (int i = 0; i < eus.size(); i++) {
+		n += eus[i].getNumberOfBranches();
+	}
+	return n;
+}

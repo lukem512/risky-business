@@ -194,7 +194,6 @@ int main(int argc, char** argv){
 	}
 
 	// Create image of mapped memory region!
-	#define __OUTPUT_IMAGE
 	#ifdef __OUTPUT_IMAGE
 		FILE *of = fopen("output.txt", "w");
 		if (of == NULL)
@@ -224,6 +223,8 @@ int main(int argc, char** argv){
 	std::cout << "Finished execution successfully." << std::endl;
 	std::cout << "Average instructions per cycle: " << s.getInstructionsPerTick();
 	std::cout << " (" << s.getTicks() + 1 << " cycles)" << std::endl;
+	std::cout << "Predicted " << s.getPredictedBranches();
+	std::cout << " branches with an accuracy of " << s.getBranchAccuracy() << "%." << std::endl;
 	std::cout << std::endl;
 
 	return 0;

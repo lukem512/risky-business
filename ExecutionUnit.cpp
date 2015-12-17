@@ -20,6 +20,9 @@ ExecutionUnit::ExecutionUnit() {
 
 	// Reset instruction counter
 	n = 0;
+
+	// Reset branch counter
+	numberOfBranches = 0;
 }
 
 void ExecutionUnit::setState(bool ready) {
@@ -410,6 +413,7 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 		}
 		bht->update(pc.contents, taken);
 		pc.contents += delta;
+		numberOfBranches++;
 	}
 
 	// Set state to ready
@@ -417,4 +421,8 @@ void ExecutionUnit::tick(std::vector<Register>* r, std::vector<MemoryLocation>* 
 
 	// Update instruction counter
 	n++;
+}
+
+unsigned int ExecutionUnit::getNumberOfBranches() {
+	return numberOfBranches;
 }

@@ -42,6 +42,9 @@ FetchUnit::FetchUnit(DecodeUnitManager* dum) {
 	// Add local reference to DU manager
 	this->dum = dum;
 
+	// Reset branch counter
+	numberOfBranches = 0;
+
 	// Set up flags
 	clear();
 }
@@ -269,6 +272,7 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 					// Add new entry
 					bpt->add(pc->contents, (t ? TAKEN : NOT_TAKEN), speculative);
 					speculative = true;
+					numberOfBranches++;
 				} else {
 					bpt->add(pc->contents, STALLED, speculative);
 					stalled = true;
@@ -294,4 +298,8 @@ void FetchUnit::tick(std::vector<MemoryLocation>* m, std::vector<FetchUnit>* fus
 	// ...and increment the copy for the FUM
 	pc->contents = pc->contents + delta;
 	delta = 0;
+}
+
+unsigned int FetchUnit::getNumberOfBranches() {
+	return numberOfBranches;
 }

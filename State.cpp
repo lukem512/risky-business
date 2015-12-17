@@ -90,6 +90,24 @@ float State::getInstructionsPerTick() {
 	return (eum->getTotalInstructionsExecuted() / (float) getTicks());
 }
 
+unsigned int State::getPredictedBranches() {
+	return fum->getNumberOfBranches();
+}
+
+unsigned int State::getActualBranches() {
+	return eum->getNumberOfBranches();
+}
+
+float State::getBranchAccuracy() {
+	// std::cout << "invalidBranches is " << invalidBranches << std::endl;
+	// std::cout << "getActualBranches() is " << getActualBranches() << std::endl;
+	// std::cout << "acc. is " << (float) 100 - ((float) invalidBranches / ((float) getActualBranches() / 100.0)) << std::endl;
+	if (invalidBranches == 0) {
+		return 100.0;
+	}
+	return (float) 100 - ((float) invalidBranches / ((float) getActualBranches() / 100.0));
+}
+
 void State::checkPipelineValid() {
 	bool speculative = false;
 	bool clearSpeculative = false;
@@ -112,6 +130,7 @@ void State::checkPipelineValid() {
 			entry->predicted = entry->actual;
 			speculative = false;
 			clearSpeculative = true;
+			invalidBranches++;
 			break;
 		}
 	}

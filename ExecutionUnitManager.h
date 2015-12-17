@@ -37,6 +37,7 @@ public:
 		BranchPredictionTable* bpt, BranchHistoryTable* bht);
 	ExecutionUnit* getAvailableExecutionUnit();
 	void clearPipeline();
+	unsigned int getNumberOfBranches();
 };
 
 #endif

@@ -14,6 +14,8 @@
 
 class FetchUnit {
 private:
+	unsigned int numberOfBranches;
+
 	void setState(bool ready);
 
 public:
@@ -45,6 +47,7 @@ public:
 		Register* pc);
 	bool passToDecodeUnit();
 	void clear();
+	unsigned int getNumberOfBranches();
 };
 
 #endif

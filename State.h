@@ -34,7 +34,7 @@ using namespace std;
 
 class State {
 private:
-	unsigned int ticks;
+	unsigned int ticks, invalidBranches;
 	unsigned int waitForFetch, waitForDecode, waitForExecute;
 	int state;
 	bool debug;
@@ -73,6 +73,9 @@ private:
 
 		// Clear ticks
 		ticks = 0;
+
+		// Clear invalid branches
+		invalidBranches = 0;
 
 		// Not stalled
 		stalled = false;
@@ -127,6 +130,9 @@ public:
 	bool getPipeline();
 	void print();
 	float getInstructionsPerTick();
+	unsigned int getPredictedBranches();
+	unsigned int getActualBranches();
+	float getBranchAccuracy();
 	unsigned int getTicks();
 	bool tick();
 };

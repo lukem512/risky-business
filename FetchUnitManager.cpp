@@ -225,3 +225,11 @@ void FetchUnitManager::clearPipeline(uint32_t pc) {
 	// Reset the speculative flags
 	setSpeculative(false);
 }
+
+unsigned int FetchUnitManager::getNumberOfBranches() {
+	unsigned int n = 0;
+	for (int i = 0; i < fus.size(); i++) {
+		n += fus[i].getNumberOfBranches();
+	}
+	return n;
+}
