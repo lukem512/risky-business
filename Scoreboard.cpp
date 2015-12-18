@@ -58,6 +58,14 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 		return false;
 	}
 
+	// Does this read memory? If so, stall (TODO)
+	if (hasMj(opcode) && ResultM != NULL) {
+		if (debug) {
+			std::cout << "[SCORE] no." << std::endl;
+		}
+		return false;
+	}
+
 	if (debug) {
 		std::cout << "[SCORE] yes." << std::endl;
 	}
@@ -126,6 +134,7 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 
 		case OP_LD:
 			Mj[eu] = true; // im1;
+			// RMj[eu] = QMj[eu] == NULL
 
 			Fi[eu] = r1;
 			Result[r1] = eu;
@@ -133,6 +142,8 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 
 		case OP_LDR:
 			Mj[eu] = true; // r2;
+			// QMj[eu] = ResultM[Mj[eu]];
+			// RMj[eu] = QMj[eu] == NULL;
 			
 			Fi[eu] = r1;
 			Result[r1] = eu;
@@ -185,6 +196,9 @@ bool Scoreboard::read(ExecutionUnit* eu) {
 		case OP_BLTEZ:
 		case OP_BGTZ:
 		case OP_BGTEZ:
+			if (debug) {
+				std::cout << "Waiting for Fj (" << rtos(Fj[eu]) << ")." << std::endl;
+			}
 			if (!Rj[eu]) {
 				return false;
 			}
@@ -205,11 +219,17 @@ bool Scoreboard::read(ExecutionUnit* eu) {
 			if (ResultM) {
 				return false;
 			}
-			Mj[eu] = false;
+			// if (!RMj[eu]) {
+			//     RMj[eu] = false;
+			// }
 			break;
 
 		case OP_STR:
 		default:
+			if (debug) {
+				std::cout << "Waiting for Fj (" << rtos(Fj[eu]) << ") and Fk (";
+				std::cout << rtos(Fk[eu]) << ")." << std::endl;
+			}
 			if (!Rj[eu] || !Rk[eu]) {
 				return false;
 			}
@@ -255,8 +275,13 @@ bool Scoreboard::write(ExecutionUnit* eu) {
 
 	// OK, do it!
     if (hasFi(eu)) {
+    	if (debug) {
+			std::cout << "[SCORE] Writing Fi (" << rtos(Fi[eu]) << ")." << std::endl;
+		}
 		for (int i = 0; i < eum->eus.size(); i++) {
 			ExecutionUnit* peu = &eum->eus[i];
+			if (peu == eu)
+				continue;
 			if (hasFj(peu) && !FjValid(eu, peu))
 				return false;
 			if (hasFk(peu) && !FkValid(eu, peu))
@@ -279,6 +304,11 @@ bool Scoreboard::write(ExecutionUnit* eu) {
 		ResultM = NULL;
 	}
 
+	// TODO
+	if (Mj[eu]) {
+		ResultM = NULL;
+	}
+
 	// Have we finished with PC?
 	if (Fpc[eu]) {
 		ResultPc = NULL;
@@ -292,48 +322,47 @@ bool Scoreboard::write(ExecutionUnit* eu) {
 bool Scoreboard::tick(std::vector<Register>* r,
 	std::vector<MemoryLocation>* m, BranchPredictionTable* bpt,
 	BranchHistoryTable* bht) {
+
 	bool empty = true;
+
 	for (int i = 0; i < eum->eus.size(); i++) {
 		ExecutionUnit* peu = &eum->eus[i];
-		switch (S[peu]) {
-			case ISSUE:
-			break;
-
-			case READ:
-				if (read(peu)) {
-					S[peu] = EXECUTE;
-				}
+		if (S[peu] == WRITE) {
+			if (write(peu)) {
+				S[peu] = ISSUE;
+			} else {
 				empty = false;
-				break;
+			}
+		}
+	}
 
-			case EXECUTE:
-				if (execute(peu, r, m, bpt, bht)) {
-					S[peu] = WRITE;
+	for (int i = 0; i < eum->eus.size(); i++) {
+		ExecutionUnit* peu = &eum->eus[i];
+		if (S[peu] == EXECUTE) {
+			if (execute(peu, r, m, bpt, bht)) {
+				S[peu] = WRITE;
 
-					// Invalid pipeline!
-					if (peu->invalid) {
-						return false;
-					}
-
-					// Return, we're halted
-					if (peu->halted) {
-						halted = true;
-					}
+				// Invalid pipeline!
+				if (peu->invalid) {
+					return false;
 				}
-				empty = false;
-				break;
 
-			case WRITE:
-				if (write(peu)) {
-					S[peu] = ISSUE;
-				} else {
-					empty = false;
+				// Return, we're halted
+				if (peu->halted) {
+					halted = true;
 				}
-				break;
+			}
+			empty = false;
+		}
+	}
 
-			default:
-				std::cerr << "Unknown Scoreboard state reached." << std::endl;
-			break;
+	for (int i = 0; i < eum->eus.size(); i++) {
+		ExecutionUnit* peu = &eum->eus[i];
+		if (S[peu] == READ) {
+			if (read(peu)) {
+				S[peu] = EXECUTE;
+			}
+			empty = false;
 		}
 	}
 
@@ -427,6 +456,10 @@ bool Scoreboard::hasFk(ExecutionUnit* eu) {
 }
 
 bool Scoreboard::FjValid(ExecutionUnit* eu, ExecutionUnit* other) {
+	if (debug) {
+		std::cout << "[FjValid] Check " << optos(Op[eu]) << " vs. " << optos(Op[other]);
+		std::cout << ": Fj is " << rtos(Fj[other]) << " and Rj is " << Rj[other] << std::endl;
+	}
 	if (Fj[other] != Fi[eu] || !Rj[other]) {
 		return true;
 	}
@@ -456,10 +489,13 @@ bool Scoreboard::hasMi(uint8_t opcode) {
 }
 
 bool Scoreboard::hasMj(ExecutionUnit* eu) {
-	switch(Op[eu]) {
+	return hasMj(Op[eu]);
+}
+
+bool Scoreboard::hasMj(uint8_t opcode) {
+	switch(opcode) {
 		case OP_LD:
 		case OP_LDR:
-		case OP_LDC:
 			return true;
 
 		default:

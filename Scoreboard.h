@@ -50,6 +50,7 @@ private:
 	bool hasMi(ExecutionUnit* eu);
 	bool hasMi(uint8_t opcode);
 	bool hasMj(ExecutionUnit* eu);
+	bool hasMj(uint8_t opcode);
 	void clear(ExecutionUnit* eu);
 	void releaseRegisterAllocation(ExecutionUnit* eu);
 
