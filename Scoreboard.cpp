@@ -154,6 +154,10 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 			Result[r1] = eu;
 			break;
 
+		case OP_UNKNOWN:
+			std::cerr << "Unknown operation issued." << std::endl;
+			break; 
+
 		default:
 			// Destination
 			Fi[eu] = r1;
@@ -292,6 +296,9 @@ bool Scoreboard::write(ExecutionUnit* eu) {
 	// Release any held register dependencies
 	releaseRegisterAllocation(eu);
 
+	// Reset the stored instruction
+	Op[eu] = OP_UNKNOWN;
+
     if (debug) {
 		std::cout << "[SCORE] Written successfully!" << std::endl;
 	}
@@ -412,6 +419,7 @@ bool Scoreboard::hasFi(uint8_t opcode) {
 		case OP_STR:
 		case OP_NOP:
 		case OP_HLT:
+		case OP_UNKNOWN:
 			return false;
 
 		default:
@@ -426,6 +434,7 @@ bool Scoreboard::hasFj(ExecutionUnit* eu) {
 		case OP_B:
 		case OP_LD:
 		case OP_LDC:
+		case OP_UNKNOWN:
 			return false;
 
 		default:
@@ -448,6 +457,7 @@ bool Scoreboard::hasFk(ExecutionUnit* eu) {
 		case OP_B:
 		case OP_LD:
 		case OP_LDC:
+		case OP_UNKNOWN:
 			return false;
 
 		default:
@@ -543,11 +553,13 @@ void Scoreboard::releaseRegisterAllocation(ExecutionUnit* eu) {
     	ExecutionUnit* peu = &eum->eus[i];
     	if (hasFj(peu)) {
 	    	if (Qj[peu] == eu) {
+	    		Fj[peu] = 0;
 	    		Rj[peu] = true;
 	    	}
     	}
     	if (hasFk(peu)) {
 	    	if (Qk[peu] == eu) {
+	    		Fk[peu] = 0;
 	    		Rk[peu] = true;
 	    	} 
     	}
