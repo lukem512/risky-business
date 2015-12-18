@@ -17,6 +17,10 @@ bool Scoreboard::issue(uint8_t type, uint8_t opcode, uint8_t r1, uint8_t r2, uin
 		std::cout << "[SCORE] Trying to issue " << optos(opcode) << std::endl;
 	}
 
+	if (halted) {
+		return false;
+	}
+
 	// Get an available execution unit
 	ExecutionUnit* eu = eum->getAvailableExecutionUnit();
 
@@ -288,6 +292,7 @@ bool Scoreboard::write(ExecutionUnit* eu) {
 bool Scoreboard::tick(std::vector<Register>* r,
 	std::vector<MemoryLocation>* m, BranchPredictionTable* bpt,
 	BranchHistoryTable* bht) {
+	bool empty = true;
 	for (int i = 0; i < eum->eus.size(); i++) {
 		ExecutionUnit* peu = &eum->eus[i];
 		switch (S[peu]) {
@@ -298,6 +303,7 @@ bool Scoreboard::tick(std::vector<Register>* r,
 				if (read(peu)) {
 					S[peu] = EXECUTE;
 				}
+				empty = false;
 				break;
 
 			case EXECUTE:
@@ -314,15 +320,14 @@ bool Scoreboard::tick(std::vector<Register>* r,
 						halted = true;
 					}
 				}
+				empty = false;
 				break;
 
 			case WRITE:
 				if (write(peu)) {
 					S[peu] = ISSUE;
-				}
-
-				if (halted) {
-					return true;
+				} else {
+					empty = false;
 				}
 				break;
 
@@ -330,6 +335,10 @@ bool Scoreboard::tick(std::vector<Register>* r,
 				std::cerr << "Unknown Scoreboard state reached." << std::endl;
 			break;
 		}
+	}
+
+	if (halted && empty) {
+		return true;
 	}
 
 	// We're not halted!
