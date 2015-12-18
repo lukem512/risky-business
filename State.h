@@ -67,6 +67,9 @@ private:
 		setEus(eus);
 		setDus(dus);
 		setFus(fus);
+		
+		// Add Scoreboard
+		score = new Scoreboard(eum);
 
 		// Begin in the fetch part of the cycle
 		state = STATE_FETCH;
